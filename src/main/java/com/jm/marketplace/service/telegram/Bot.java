@@ -16,8 +16,11 @@ import org.springframework.context.annotation.PropertySource;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
+import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageText;
 import org.telegram.telegrambots.meta.api.objects.Update;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardRow;
 
 import javax.annotation.PostConstruct;
@@ -35,6 +38,9 @@ public class Bot extends TelegramLongPollingBot {
 
     @Value("${bot.button.add_advertisement}")
     private String addAdvertisement;
+
+    @Value("${bot.button.list_advertisement_pagination}")
+    private String listAdvertisementPagination;
 
     @Value("${bot.name}")
     private String botUsername;
@@ -55,6 +61,8 @@ public class Bot extends TelegramLongPollingBot {
     private GoodsTypeService goodsTypeService;
 
     private UserService userService;
+
+    public static final int ADVERTISEMENTS_IN_PAGE = 2;
 
     @Autowired
     public void setUserService(UserService userService) {
@@ -98,120 +106,57 @@ public class Bot extends TelegramLongPollingBot {
     public void onUpdateReceived(Update update) {
         try {
 
-            Long currentChatId = update.getMessage().getChatId();
-            String currentMessageText = update.getMessage().getText();
+            SendMessage sendMessage = null;
+            Long currentChatId = null;
+            String currentMessageText = null;
+            String userName = null;
 
-            SendMessage sendMessage = new SendMessage();
-            sendMessage.setChatId(currentChatId.toString());
-            setButtons(sendMessage);
+            // если пользователь отправил сообщение боту
+            if (update.getCallbackQuery() == null) {
 
-            if (currentMessageText.equals("Добавить товар")) {
-                currentGoodAddStatus.put(currentChatId, 0);
-                usersNewAdvertisement.put(currentChatId, new AdvertisementDto());
-            }
+                userName = update.getMessage().getFrom().getUserName();
+                currentChatId = update.getMessage().getChatId();
+                currentMessageText = update.getMessage().getText();
 
-            if (currentGoodAddStatus.containsKey(currentChatId)) {
+                refreshVariables(currentChatId, currentMessageText);
 
-                int currentGoodAddStatusId = currentGoodAddStatus.get(currentChatId);
+                sendMessage = new SendMessage();
+                sendMessage.setChatId(currentChatId.toString());
+                setButtons(sendMessage);
 
-                StringBuilder stringBuilder = new StringBuilder();
+                if (currentGoodAddStatus.containsKey(currentChatId)) {
+                    sendMessage.setText(addNewAdvertisement(currentChatId, currentMessageText));
+                } else if (currentMessageText.equals("Список товаров постранично")) {
+                    sendMessage.setReplyMarkup(getInlineButtonsPagination());
+                    sendMessage.setText(getAdvertisementForCurrentPage(1));
+                } else {
+                    setMessage(sendMessage);
+                }
 
-                if (currentGoodAddStatusId == 0) {
+                execute(sendMessage);
 
-                    stringBuilder.append("Выберите категорию (отправьте цифру)").append("\n");
+                // если пользователь нажал кнопку привязанную к сообщению
+            } else {
 
-                    List<GoodsCategoryDto> goodsCategoryDtos = goodsCategoryService.findAll();
+                userName = update.getCallbackQuery().getFrom().getUserName();
+                currentChatId = update.getCallbackQuery().getMessage().getChatId();
 
-                    for (int i = 0; i < goodsCategoryDtos.size(); i++) {
-                        stringBuilder.append((i + 1)).append(". ").append(goodsCategoryDtos.get(i).getName()).append("\n");
-                    }
+                if (update.getCallbackQuery().getData().contains("apb_")) {
 
-                    currentGoodAddStatus.put(currentChatId, currentGoodAddStatusId + 1);
+                    int currentPage = Integer.parseInt(update.getCallbackQuery().getData().substring(4));
 
-                } else if (currentGoodAddStatusId == 1) {
-
-                    AdvertisementDto advertisementDto = usersNewAdvertisement.get(currentChatId);
-                    advertisementDto.setUser(userService.findById(1L));
-                    advertisementDto.setGoodsCategory(goodsCategoryService.findById(Long.parseLong(currentMessageText)));
-                    usersNewAdvertisement.put(currentChatId, advertisementDto);
-
-                    List<GoodsSubcategoryDto> goodsSubcategoryDtos = goodsSubcategoryService.findByGoodsCategoryId(Long.parseLong(currentMessageText));
-
-                    stringBuilder.append("Выберите подкатегорию (отправьте цифру)").append("\n");
-
-                    for (int i = 0; i < goodsSubcategoryDtos.size(); i++) {
-                        stringBuilder.append((i + 1)).append(". ").append(goodsSubcategoryDtos.get(i).getName()).append("\n");
-                    }
-
-                    currentGoodAddStatus.put(currentChatId, currentGoodAddStatusId + 1);
-
-                } else if (currentGoodAddStatusId == 2) {
-
-                    AdvertisementDto advertisementDto = usersNewAdvertisement.get(currentChatId);
-                    advertisementDto.setGoodsSubcategory(goodsSubcategoryService.findById(Long.parseLong(currentMessageText)));
-                    usersNewAdvertisement.put(currentChatId, advertisementDto);
-
-                    List<GoodsTypeDto> goodsTypeDtos = goodsTypeService.findByGoodsSubcategoryId(Long.parseLong(currentMessageText));
-
-                    stringBuilder.append("Выберите тип товара (отправьте цифру)").append("\n");
-
-                    for (int i = 0; i < goodsTypeDtos.size(); i++) {
-                        stringBuilder.append((i + 1)).append(". ").append(goodsTypeDtos.get(i).getName()).append("\n");
-                    }
-
-                    currentGoodAddStatus.put(currentChatId, currentGoodAddStatusId + 1);
-
-                } else if (currentGoodAddStatusId == 3) {
-
-                    AdvertisementDto advertisementDto = usersNewAdvertisement.get(currentChatId);
-                    advertisementDto.setGoodsType(goodsTypeService.findById(Long.parseLong(currentMessageText)));
-                    usersNewAdvertisement.put(currentChatId, advertisementDto);
-
-                    stringBuilder.append("Введите название товара").append("\n");
-
-                    currentGoodAddStatus.put(currentChatId, currentGoodAddStatusId + 1);
-
-                } else if (currentGoodAddStatusId == 4) {
-
-                    AdvertisementDto advertisementDto = usersNewAdvertisement.get(currentChatId);
-                    advertisementDto.setName(currentMessageText);
-
-                    stringBuilder.append("Введите описание товара").append("\n");
-
-                    currentGoodAddStatus.put(currentChatId, currentGoodAddStatusId + 1);
-
-                } else if (currentGoodAddStatusId == 5) {
-
-                    AdvertisementDto advertisementDto = usersNewAdvertisement.get(currentChatId);
-                    advertisementDto.setDescription(currentMessageText);
-                    usersNewAdvertisement.put(currentChatId, advertisementDto);
-
-                    stringBuilder.append("Введите цену товара").append("\n");
-
-                    currentGoodAddStatus.put(currentChatId, currentGoodAddStatusId + 1);
-
-                } else if (currentGoodAddStatusId == 6) {
-
-                    AdvertisementDto advertisementDto = usersNewAdvertisement.get(currentChatId);
-                    advertisementDto.setPrice(Integer.parseInt(currentMessageText));
-
-                    advertisementService.saveOrUpdate(advertisementDto); //  в данный момент при добавлении в базу дает ошибку
-
-                    stringBuilder.append("Объявление добавлено!").append("\n");
-
-                    currentGoodAddStatus.remove(currentChatId);
-                    usersNewAdvertisement.remove(currentChatId);
+                    EditMessageText editMessageText = new EditMessageText();
+                    editMessageText.setMessageId(update.getCallbackQuery().getMessage().getMessageId());
+                    editMessageText.setText(getAdvertisementForCurrentPage(currentPage));
+                    editMessageText.setReplyMarkup(getInlineButtonsPagination());
+                    editMessageText.setChatId(currentChatId.toString());
+                    execute(editMessageText);
 
                 }
 
-                sendMessage.setText(stringBuilder.toString());
-
-            } else {
-                setMessage(sendMessage);
             }
 
-            execute(sendMessage);
-            log.info("Send telegram message, username: {}", update.getMessage().getFrom().getUserName());
+            log.info("Send telegram message, username: {}", userName);
         } catch (Exception e) {
             log.warn("Error with send telegram message");
             e.printStackTrace();
@@ -239,6 +184,7 @@ public class Bot extends TelegramLongPollingBot {
         KeyboardRow keyboardFirstRow = new KeyboardRow();
         keyboardFirstRow.add(listAdvertisement);
         keyboardFirstRow.add(addAdvertisement);
+        keyboardFirstRow.add(listAdvertisementPagination);
         keyboard.clear();
         keyboard.add(keyboardFirstRow);
         sendMessage.setReplyMarkup(replyKeyboardMarkup);
@@ -250,4 +196,170 @@ public class Bot extends TelegramLongPollingBot {
         replyKeyboardMarkup.setOneTimeKeyboard(false);
         replyKeyboardMarkup.setKeyboard(keyboard);
     }
+
+    private String getAdvertisementForCurrentPage(int currentPage) {
+
+        List<AdvertisementDto> advertisementDtos = advertisementService.findAll();
+
+        StringBuilder sb = new StringBuilder();
+
+        int startPosition = 0;
+
+        if (currentPage > 1) {
+            startPosition = (currentPage - 1) * ADVERTISEMENTS_IN_PAGE;
+        }
+
+        int count = 1;
+        for (int i = startPosition; i < advertisementDtos.size(); i++) {
+            AdvertisementDto advertisementDto = advertisementDtos.get(i);
+            sb.append(i + 1).append("\n");
+            sb.append(advertisementDto.getName()).append("\n");
+            sb.append(advertisementDto.getPrice()).append("\n");
+            sb.append(advertisementDto.getDescription()).append("\n");
+            sb.append("-------------------");
+            sb.append("\n");
+            if (count == ADVERTISEMENTS_IN_PAGE) {
+                break;
+            }
+            count++;
+        }
+
+        return sb.toString();
+
+    }
+
+    private InlineKeyboardMarkup getInlineButtonsPagination() {
+
+        List<AdvertisementDto> advertisementDtos = advertisementService.findAll();
+
+        int pagesCount = (int) Math.ceil(advertisementDtos.size() / (double) ADVERTISEMENTS_IN_PAGE);
+
+        List<InlineKeyboardButton> keyboardButtonsRow1 = new ArrayList<>();
+
+        for (int i = 1; i <= pagesCount; i++) {
+            InlineKeyboardButton inlineKeyboardButton = new InlineKeyboardButton();
+            inlineKeyboardButton.setText(String.valueOf(i));
+            inlineKeyboardButton.setCallbackData("apb_" + (i));
+            keyboardButtonsRow1.add(inlineKeyboardButton);
+
+        }
+
+        List<List<InlineKeyboardButton>> rowList = new ArrayList<>();
+        rowList.add(keyboardButtonsRow1);
+
+        InlineKeyboardMarkup inlineKeyboardMarkup = new InlineKeyboardMarkup();
+        inlineKeyboardMarkup.setKeyboard(rowList);
+
+        return inlineKeyboardMarkup;
+    }
+
+    public void refreshVariables(Long currentChatId, String currentMessageText) {
+
+        if (currentMessageText.equals("Добавить товар")) {
+            currentGoodAddStatus.put(currentChatId, 0);
+            usersNewAdvertisement.put(currentChatId, new AdvertisementDto());
+        } else if (currentMessageText.equals(listAdvertisement) || currentMessageText.equals(listAdvertisementPagination) ) {
+            if (currentGoodAddStatus.containsKey(currentChatId)) {
+                currentGoodAddStatus.remove(currentChatId);
+                usersNewAdvertisement.remove(currentChatId);
+            }
+        }
+    }
+
+    public String addNewAdvertisement(Long currentChatId, String currentMessageText) {
+
+        int currentGoodAddStatusId = currentGoodAddStatus.get(currentChatId);
+
+        StringBuilder stringBuilder = new StringBuilder();
+
+        if (currentGoodAddStatusId == 0) {
+
+            stringBuilder.append("Выберите категорию (отправьте цифру)").append("\n");
+
+            List<GoodsCategoryDto> goodsCategoryDtos = goodsCategoryService.findAll();
+
+            for (int i = 0; i < goodsCategoryDtos.size(); i++) {
+                stringBuilder.append((i + 1)).append(". ").append(goodsCategoryDtos.get(i).getName()).append("\n");
+            }
+
+            currentGoodAddStatus.put(currentChatId, currentGoodAddStatusId + 1);
+
+        } else if (currentGoodAddStatusId == 1) {
+
+            AdvertisementDto advertisementDto = usersNewAdvertisement.get(currentChatId);
+            advertisementDto.setUser(userService.findById(1L));
+            advertisementDto.setGoodsCategory(goodsCategoryService.findById(Long.parseLong(currentMessageText)));
+            usersNewAdvertisement.put(currentChatId, advertisementDto);
+
+            List<GoodsSubcategoryDto> goodsSubcategoryDtos = goodsSubcategoryService.findByGoodsCategoryId(Long.parseLong(currentMessageText));
+
+            stringBuilder.append("Выберите подкатегорию (отправьте цифру)").append("\n");
+
+            for (int i = 0; i < goodsSubcategoryDtos.size(); i++) {
+                stringBuilder.append((i + 1)).append(". ").append(goodsSubcategoryDtos.get(i).getName()).append("\n");
+            }
+
+            currentGoodAddStatus.put(currentChatId, currentGoodAddStatusId + 1);
+
+        } else if (currentGoodAddStatusId == 2) {
+
+            AdvertisementDto advertisementDto = usersNewAdvertisement.get(currentChatId);
+            advertisementDto.setGoodsSubcategory(goodsSubcategoryService.findById(Long.parseLong(currentMessageText)));
+            usersNewAdvertisement.put(currentChatId, advertisementDto);
+
+            List<GoodsTypeDto> goodsTypeDtos = goodsTypeService.findByGoodsSubcategoryId(Long.parseLong(currentMessageText));
+
+            stringBuilder.append("Выберите тип товара (отправьте цифру)").append("\n");
+
+            for (int i = 0; i < goodsTypeDtos.size(); i++) {
+                stringBuilder.append((i + 1)).append(". ").append(goodsTypeDtos.get(i).getName()).append("\n");
+            }
+
+            currentGoodAddStatus.put(currentChatId, currentGoodAddStatusId + 1);
+
+        } else if (currentGoodAddStatusId == 3) {
+
+            AdvertisementDto advertisementDto = usersNewAdvertisement.get(currentChatId);
+            advertisementDto.setGoodsType(goodsTypeService.findById(Long.parseLong(currentMessageText)));
+            usersNewAdvertisement.put(currentChatId, advertisementDto);
+
+            stringBuilder.append("Введите название товара").append("\n");
+
+            currentGoodAddStatus.put(currentChatId, currentGoodAddStatusId + 1);
+
+        } else if (currentGoodAddStatusId == 4) {
+
+            AdvertisementDto advertisementDto = usersNewAdvertisement.get(currentChatId);
+            advertisementDto.setName(currentMessageText);
+
+            stringBuilder.append("Введите описание товара").append("\n");
+
+            currentGoodAddStatus.put(currentChatId, currentGoodAddStatusId + 1);
+
+        } else if (currentGoodAddStatusId == 5) {
+
+            AdvertisementDto advertisementDto = usersNewAdvertisement.get(currentChatId);
+            advertisementDto.setDescription(currentMessageText);
+            usersNewAdvertisement.put(currentChatId, advertisementDto);
+
+            stringBuilder.append("Введите цену товара").append("\n");
+
+            currentGoodAddStatus.put(currentChatId, currentGoodAddStatusId + 1);
+
+        } else if (currentGoodAddStatusId == 6) {
+
+            AdvertisementDto advertisementDto = usersNewAdvertisement.get(currentChatId);
+            advertisementDto.setPrice(Integer.parseInt(currentMessageText));
+
+            advertisementService.saveOrUpdate(advertisementDto); //  в данный момент при добавлении в базу дает ошибку
+
+            stringBuilder.append("Объявление добавлено!").append("\n");
+
+            currentGoodAddStatus.remove(currentChatId);
+            usersNewAdvertisement.remove(currentChatId);
+
+        }
+        return stringBuilder.toString();
+    }
+
 }

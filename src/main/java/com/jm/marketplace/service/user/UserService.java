@@ -23,7 +23,7 @@ public interface UserService extends UserDetailsService {
 
     boolean checkByEmail(String email);
 
-    User findByPhone(String phone);
+    UserDto findByPhone(String phone);
 
     void updateUser(UserDto userDto);
 }

@@ -36,8 +36,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .antMatchers("/static/**").permitAll()
                 .antMatchers("/api/**").permitAll()
                 //страница для добавления товара
-                .antMatchers("/add", "/user/**").access("hasAnyRole('USER')")
-                .antMatchers("/admin/**").access("hasAnyRole('ADMIN')")
+                .antMatchers("admin/**").access("hasRole('ADMIN')").anyRequest().hasAnyRole("ADMIN", "USER")
                 .and().formLogin().permitAll();
 
         // без этого не работали методы post/put/delete рест контроллера

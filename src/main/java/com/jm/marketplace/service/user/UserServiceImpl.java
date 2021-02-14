@@ -8,6 +8,7 @@ import com.jm.marketplace.exception.RoleNotFoundException;
 import com.jm.marketplace.exception.UserEmailExistsException;
 import com.jm.marketplace.exception.UserNotFoundException;
 import com.jm.marketplace.exception.UserPhoneExistsException;
+import com.jm.marketplace.model.City;
 import com.jm.marketplace.model.Role;
 import com.jm.marketplace.model.User;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -85,7 +86,7 @@ public class UserServiceImpl implements UserService {
     @Transactional(readOnly = true)
     @Override
     public UserDto findByEmail(String email) {
-        return mapperFacade.map(userDao.findByEmail(email).orElseThrow(() -> new UserEmailExistsException("Пользователь с такой почтой не найден")), UserDto.class);
+        return mapperFacade.map(userDao.findByEmail(email).orElseThrow(() -> new UserEmailExistsException("Пользователь с такой почтой не найден")), UserDto.class, "password");
     }
 
     @Transactional(readOnly = true)
@@ -96,8 +97,8 @@ public class UserServiceImpl implements UserService {
 
     @Transactional(readOnly = true)
     @Override
-    public User findByPhone(String phone) {
-        return userDao.findByPhone(phone).orElseThrow(() -> new UserPhoneExistsException("Пользователь с таким номером телефона не найден"));
+    public UserDto findByPhone(String phone) {
+        return mapperFacade.map(userDao.findByPhone(phone).orElseThrow(() -> new UserPhoneExistsException("Пользователь с таким номером телефона не найден")), UserDto.class);
     }
 
     @Override
@@ -128,16 +129,16 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional
     public void updateUser(UserDto userDto) {
-        UserDto user = findByEmail(userDto.getEmail());
+        User user = userDao.findByEmail(userDto.getEmail()).orElseThrow(() -> new UserEmailExistsException("Пользователь с такой почтой не найден"));
         user.setFirstName(userDto.getFirstName());
         user.setLastName(userDto.getLastName());
         user.setDate(userDto.getDate());
         user.setPhone(userDto.getPhone());
-        if (!userDto.getPassword().isEmpty()) {
+        if (userDto.getPassword() != null && !userDto.getPassword().isBlank()) {
             user.setPassword(passwordEncoder.encode(userDto.getPassword()));
         } if (userDto.getCity() != null) {
-            user.setCity(userDto.getCity());
+            user.setCity(mapperFacade.map(userDto.getCity(), City.class));
         }
-        userDao.save(mapperFacade.map(user, User.class));
+        userDao.save(user);
     }
 }

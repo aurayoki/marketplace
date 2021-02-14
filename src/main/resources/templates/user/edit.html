@@ -63,7 +63,7 @@
                             </div>
                             <div class="col-auto">
                                 <label for="city">Город проживания</label>
-                                <select class="form-control mb-2" id="city" th:field="*{city}" multiple size="4">
+                                <select class="form-control mb-2" id="city" th:field="*{city}" size="4">
                                     <option class="border"
                                             th:each="city : *{city}"
                                             th:text="${city.name}"

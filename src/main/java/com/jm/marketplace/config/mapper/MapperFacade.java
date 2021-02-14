@@ -28,8 +28,18 @@ public interface MapperFacade {
     /**
      * Метод копирует значения из одного объекта в другой
      *
-     * @param sourceObject     объект источник данных
+     * @param sourceObject      объект источник данных
      * @param destinationObject объект приемник данных
      */
     <S, D> void map(S sourceObject, D destinationObject);
+
+    /**
+     * Метод преобразовывает один тип объекта к указанному типу
+     *
+     * @param sourceObject     объект который нужно привести к нужному типу
+     * @param classDestination тип к которому нужно привести
+     * @param excludeFields    имена полей которые нужно исключить из маппинга (значение null)
+     * @return Объект нужного типа
+     */
+    <S, D> D map(S sourceObject, Class<D> classDestination, String... excludeFields);
 }

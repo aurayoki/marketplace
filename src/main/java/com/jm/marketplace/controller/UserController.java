@@ -41,7 +41,7 @@ public class UserController {
 
     @PostMapping(value = "/edit/save")
     public String saveUserEdit(@ModelAttribute UserDto userDto) {
-        userService.updateUser(userDto);
+        userService.saveUser(userDto);
         return "user/edit";
     }
 }

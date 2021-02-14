@@ -15,6 +15,7 @@
                 <h1 class="text-center">Страница редактирования пользователя</h1>
                 <form th:method="POST" th:action="@{/user/edit/save}" th:object="${userDto}" class="needs-validation" novalidate>
                     <div class="form-row mt-3">
+                        <input hidden th:field="*{id}">
                         <div class="col-6">
                             <div class="col-auto text-center mt-4">
                                 <img src="/img/image-none.png" class="align-self-center w-25 h-25">
@@ -91,7 +92,7 @@
                             <br>
                             <div class="row justify-content-md-center">
                                 <div class="col-auto">
-                                    <button type="submit" class="btn btn-success">Зарегистрироваться</button>
+                                    <button type="submit" class="btn btn-success">Сохранить</button>
                                 </div>
                             </div>
                         </div>

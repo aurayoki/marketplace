@@ -53,6 +53,8 @@ public class UserServiceImpl implements UserService {
         User user = mapperFacade.map(userDto, User.class);
         if (user.getId() == null) {
             processNewUser(user);
+        } else {
+            updateUser(user);
         }
         userDao.save(user);
     }
@@ -126,19 +128,17 @@ public class UserServiceImpl implements UserService {
         }
     }
 
-    @Override
-    @Transactional
-    public void updateUser(UserDto userDto) {
-        User user = userDao.findByEmail(userDto.getEmail()).orElseThrow(() -> new UserEmailExistsException("Пользователь с такой почтой не найден"));
-        user.setFirstName(userDto.getFirstName());
-        user.setLastName(userDto.getLastName());
-        user.setDate(userDto.getDate());
-        user.setPhone(userDto.getPhone());
-        if (userDto.getPassword() != null && !userDto.getPassword().isBlank()) {
-            user.setPassword(passwordEncoder.encode(userDto.getPassword()));
-        } if (userDto.getCity() != null) {
-            user.setCity(mapperFacade.map(userDto.getCity(), City.class));
+    public void updateUser(User user) {
+        User userFromDB = userDao.findByEmail(user.getEmail()).orElseThrow(() -> new UserEmailExistsException("Пользователь с такой почтой не найден"));
+        userFromDB.setFirstName(user.getFirstName());
+        userFromDB.setLastName(user.getLastName());
+        userFromDB.setDate(user.getDate());
+        userFromDB.setPhone(user.getPhone());
+        if (user.getPassword() != null && !user.getPassword().isBlank()) {
+            userFromDB.setPassword(passwordEncoder.encode(user.getPassword()));
+        } if (user.getCity() != null) {
+            userFromDB.setCity(mapperFacade.map(user.getCity(), City.class));
         }
-        userDao.save(user);
+        userDao.save(userFromDB);
     }
 }

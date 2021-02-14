@@ -25,5 +25,4 @@ public interface UserService extends UserDetailsService {
 
     UserDto findByPhone(String phone);
 
-    void updateUser(UserDto userDto);
 }

@@ -70,8 +70,6 @@ class AdvertisementServiceImplTest {
         advertisementDto.setName("Test");
         advertisementService.saveOrUpdate(advertisementDto);
 
-        // TODO: 13.02.2021 Проверить на PasswordEncoder и проверить на остальную добавленную логику после добавления SpringSecurity
-
         verify(advertisementDao, times(1))
                 .save(any(Advertisement.class));
     }

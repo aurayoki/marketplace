@@ -54,7 +54,7 @@ public class UserServiceImpl implements UserService {
         if (user.getId() == null) {
             processNewUser(user);
         } else {
-            updateUser(user);
+            user = updateUser(user);
         }
         userDao.save(user);
     }
@@ -82,7 +82,7 @@ public class UserServiceImpl implements UserService {
     @Transactional
     @Override
     public void deleteById(Long id) {
-      userDao.deleteById(id);
+        userDao.deleteById(id);
     }
 
     @Transactional(readOnly = true)
@@ -128,7 +128,7 @@ public class UserServiceImpl implements UserService {
         }
     }
 
-    public void updateUser(User user) {
+    public User updateUser(User user) {
         User userFromDB = userDao.findByEmail(user.getEmail()).orElseThrow(() -> new UserEmailExistsException("Пользователь с такой почтой не найден"));
         userFromDB.setFirstName(user.getFirstName());
         userFromDB.setLastName(user.getLastName());
@@ -136,9 +136,10 @@ public class UserServiceImpl implements UserService {
         userFromDB.setPhone(user.getPhone());
         if (user.getPassword() != null && !user.getPassword().isBlank()) {
             userFromDB.setPassword(passwordEncoder.encode(user.getPassword()));
-        } if (user.getCity() != null) {
+        }
+        if (user.getCity() != null) {
             userFromDB.setCity(mapperFacade.map(user.getCity(), City.class));
         }
-        userDao.save(userFromDB);
+        return userFromDB;
     }
 }

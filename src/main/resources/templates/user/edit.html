@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="fragments/headers::head('User edit')"></head>
+<body>
+
+<nav th:replace="fragments/headers::navbar"></nav>
+
+<div class="container-fluid mt-4">
+    <div class="container">
+        <div class="row">
+            <div class="col-3">
+                <div th:replace="fragments/headers::leftMenuUser"></div>
+            </div>
+            <div class="col-9 border">
+                <h1 class="text-center">Страница редактирования пользователя</h1>
+                <form th:method="POST" th:action="@{/user/edit/save}" th:object="${userDto}" class="needs-validation" novalidate>
+                    <div class="form-row mt-3">
+                        <div class="col-6">
+                            <div class="col-auto text-center mt-4">
+                                <img src="/img/image-none.png" class="align-self-center w-25 h-25">
+                                <div class="custom-file mt-4">
+                                    <input type="file" class="custom-file-input" id="customFile">
+                                    <label class="custom-file-label" for="customFile">Выберите фотографию</label>
+                                    <small id="file" class="form-text text-danger">
+                                        Загрузка изображения пока не работает
+                                    </small>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="col-auto">
+                                <label for="firstName">Имя</label>
+                                <input type="text" class="form-control mb-2" id="firstName"
+                                       th:field="*{firstName}" required>
+                                <div class="invalid-feedback">
+                                    Пожалуйста введите имя.
+                                </div>
+                            </div>
+                            <div class="col-auto">
+                                <label for="lastname">Фамилия</label>
+                                <input type="text" class="form-control mb-2" id="lastname"
+                                       th:field="*{lastName}" required>
+                                <div class="invalid-feedback">
+                                    Пожалуйста введите Фамилию.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-12">
+                            <div class="col-auto">
+                                <label for="password">Пароль</label>
+                                <input type="password" class="form-control mb-2" id="password" th:field="*{password}">
+                                <small id="passwordHelpBlock" class="form-text text-muted">
+                                    Пароль должен быть от 5-20 символов.
+                                </small>
+                            </div>
+                            <div class="col-auto">
+                                <label for="email">Email</label>
+                                <input readonly type="email" class="form-control mb-2" id="email"
+                                       th:field="*{email}">
+                            </div>
+                            <div class="col-auto">
+                                <label for="city">Город проживания</label>
+                                <select class="form-control mb-2" id="city" th:field="*{city}" multiple size="4">
+                                    <option class="border"
+                                            th:each="city : *{city}"
+                                            th:text="${city.name}"
+                                            th:value="${city.id}">
+                                    </option>
+                                    <option th:each="city : ${cities}"
+                                            th:text="${city.name}"
+                                            th:value="${city.id}">
+                                    </option>
+                                </select>
+                            </div>
+                            <div class="col-auto">
+                                <label for="dateR">Введите дату рождения</label>
+                                <input type="date" id="dateR" class="form-control" th:field="*{date}" required>
+                                <div class="invalid-feedback">
+                                    Укажите дату рождения.
+                                </div>
+                            </div>
+                            <div class="col-auto">
+                                <label for="phone">Номер телефона</label>
+                                <input type="tel" id="phone" class="form-control" th:field="*{phone}" required>
+                                <div class="invalid-feedback">
+                                    Введите номер телефона.
+                                </div>
+                            </div>
+                            <br>
+                            <div class="row justify-content-md-center">
+                                <div class="col-auto">
+                                    <button type="submit" class="btn btn-success">Зарегистрироваться</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Проверка валидации в форме редактирования пользователя
+    (function() {
+        'use strict';
+        window.addEventListener('load', function() {
+            // Fetch all the forms we want to apply custom Bootstrap validation styles to
+            var forms = document.getElementsByClassName('needs-validation');
+            // Loop over them and prevent submission
+            var validation = Array.prototype.filter.call(forms, function(form) {
+                form.addEventListener('submit', function(event) {
+                    if (form.checkValidity() === false) {
+                        event.preventDefault();
+                        event.stopPropagation();
+                    }
+                    form.classList.add('was-validated');
+                }, false);
+            });
+        }, false);
+    })();
+</script>
+
+</body>
+</html>

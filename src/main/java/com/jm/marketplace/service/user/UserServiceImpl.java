@@ -8,6 +8,7 @@ import com.jm.marketplace.exception.RoleNotFoundException;
 import com.jm.marketplace.exception.UserEmailExistsException;
 import com.jm.marketplace.exception.UserNotFoundException;
 import com.jm.marketplace.exception.UserPhoneExistsException;
+import com.jm.marketplace.model.City;
 import com.jm.marketplace.model.Role;
 import com.jm.marketplace.model.User;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,6 +17,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -23,6 +25,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDate;
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -82,8 +85,8 @@ public class UserServiceImpl implements UserService {
 
     @Transactional(readOnly = true)
     @Override
-    public User findByEmail(String email) {
-        return userDao.findByEmail(email).orElseThrow(() -> new UserEmailExistsException("Пользователь с такой почтой не найден"));
+    public UserDto findByEmail(String email) {
+        return mapperFacade.map(userDao.findByEmail(email).orElseThrow(() -> new UserEmailExistsException("Пользователь с такой почтой не найден")), UserDto.class, "password");
     }
 
     @Transactional(readOnly = true)
@@ -94,18 +97,14 @@ public class UserServiceImpl implements UserService {
 
     @Transactional(readOnly = true)
     @Override
-    public User findByPhone(String phone) {
-        return userDao.findByPhone(phone).orElseThrow(() -> new UserPhoneExistsException("Пользователь с таким номером телефона не найден"));
+    public UserDto findByPhone(String phone) {
+        return mapperFacade.map(userDao.findByPhone(phone).orElseThrow(() -> new UserPhoneExistsException("Пользователь с таким номером телефона не найден")), UserDto.class);
     }
 
     @Override
     @Transactional(readOnly = true)
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
-        User user = findByEmail(email);
-        if (user == null) {
-            throw new UsernameNotFoundException(String.format("Email '%s' not found", email));
-        }
-
+        User user = userDao.findByEmail(email).orElseThrow(() -> new UsernameNotFoundException(String.format("Email '%s' not found", email)));
         return new org.springframework.security.core.userdetails.User(user.getEmail(), user.getPassword(), mapRolesToAuthorities(user.getRoles()));
     }
 
@@ -125,5 +124,21 @@ public class UserServiceImpl implements UserService {
         if (user.getPassword() != null && !user.getPassword().isBlank()) {
             user.setPassword(passwordEncoder.encode(user.getPassword()));
         }
+    }
+
+    @Override
+    @Transactional
+    public void updateUser(UserDto userDto) {
+        User user = userDao.findByEmail(userDto.getEmail()).orElseThrow(() -> new UserEmailExistsException("Пользователь с такой почтой не найден"));
+        user.setFirstName(userDto.getFirstName());
+        user.setLastName(userDto.getLastName());
+        user.setDate(userDto.getDate());
+        user.setPhone(userDto.getPhone());
+        if (userDto.getPassword() != null && !userDto.getPassword().isBlank()) {
+            user.setPassword(passwordEncoder.encode(userDto.getPassword()));
+        } if (userDto.getCity() != null) {
+            user.setCity(mapperFacade.map(userDto.getCity(), City.class));
+        }
+        userDao.save(user);
     }
 }

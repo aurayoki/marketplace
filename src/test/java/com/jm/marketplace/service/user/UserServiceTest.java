@@ -44,9 +44,9 @@ public class UserServiceTest {
     @Test
     void findByEmailShouldGetByEmail() {
         given(userDaoMock.findByEmail(userTest.getEmail())).willReturn(Optional.of(userTest));
-        User user = userService.findByEmail(userTest.getEmail());
+        UserDto userDto = userService.findByEmail(userTest.getEmail());
 
-        assertThat(user.getEmail()).isEqualTo(userTest.getEmail());
+        assertThat(userDto.getEmail()).isEqualTo(userTest.getEmail());
 
         verify(userDaoMock, times(1)).findByEmail(userTest.getEmail());
     }
@@ -97,9 +97,9 @@ public class UserServiceTest {
     @Test
     void findByPhoneShouldGetByPhone() {
         given(userDaoMock.findByPhone(userTest.getPhone())).willReturn(Optional.of(userTest));
-        User user = userService.findByPhone(userTest.getPhone());
+        UserDto userDto = userService.findByPhone(userTest.getPhone());
 
-        assertThat(user.getPhone()).isEqualTo(userTest.getPhone());
+        assertThat(userDto.getPhone()).isEqualTo(userTest.getPhone());
 
         verify(userDaoMock, times(1)).findByPhone(userTest.getPhone());
     }
@@ -122,9 +122,9 @@ public class UserServiceTest {
     @Test
     void checkByEmail() {
         given(userDaoMock.findByEmail(userTest.getEmail())).willReturn(Optional.of(userTest));
-        User user = userService.findByEmail(userTest.getEmail());
+        UserDto userDto = userService.findByEmail(userTest.getEmail());
 
-        assertTrue(userService.checkByEmail(user.getEmail()));
+        assertTrue(userService.checkByEmail(userDto.getEmail()));
 
         verify(userDaoMock, times(2)).findByEmail(userTest.getEmail());
     }

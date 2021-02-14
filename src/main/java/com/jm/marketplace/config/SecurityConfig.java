@@ -36,7 +36,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .antMatchers("/static/**").permitAll()
                 .antMatchers("/api/**").permitAll()
                 //страница для добавления товара
-                .antMatchers("/add").access("hasAnyRole('USER')")
+                .antMatchers("/add", "/user/**").access("hasAnyRole('USER')")
                 .antMatchers("/admin/**").access("hasAnyRole('ADMIN')")
                 .and().formLogin().permitAll();
 

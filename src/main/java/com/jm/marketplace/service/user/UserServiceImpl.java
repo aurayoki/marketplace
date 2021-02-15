@@ -4,13 +4,11 @@ import com.jm.marketplace.config.mapper.MapperFacade;
 import com.jm.marketplace.dao.RoleDao;
 import com.jm.marketplace.dao.UserDao;
 import com.jm.marketplace.dto.UserDto;
-import com.jm.marketplace.exception.RoleNotFoundException;
-import com.jm.marketplace.exception.UserEmailExistsException;
-import com.jm.marketplace.exception.UserNotFoundException;
-import com.jm.marketplace.exception.UserPhoneExistsException;
+import com.jm.marketplace.exception.*;
 import com.jm.marketplace.model.City;
 import com.jm.marketplace.model.Role;
 import com.jm.marketplace.model.User;
+import com.jm.marketplace.util.mail.MailService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.GrantedAuthority;
@@ -23,10 +21,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
-import java.util.Collection;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -38,13 +33,16 @@ public class UserServiceImpl implements UserService {
     private final MapperFacade mapperFacade;
     @Value("${role.name.user}")
     private String userRole;
+    private MailService mailService;
 
     @Autowired
-    public UserServiceImpl(UserDao userDao, RoleDao roleDao, PasswordEncoder passwordEncoder, MapperFacade mapperFacade) {
+    public UserServiceImpl(UserDao userDao, RoleDao roleDao, PasswordEncoder passwordEncoder,
+                           MapperFacade mapperFacade, MailService mailService) {
         this.userDao = userDao;
         this.roleDao = roleDao;
         this.passwordEncoder = passwordEncoder;
         this.mapperFacade = mapperFacade;
+        this.mailService = mailService;
     }
 
     @Override
@@ -104,6 +102,18 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    public void activateUser(UserDto userDto) {
+        userDto.setActive(true);
+        saveUser(userDto);
+    }
+
+    @Override
+    public UserDto findByUniqueCode(String uniqueCode) {
+        User user = userDao.findUserByUniqueCode(uniqueCode).orElseThrow(() -> new UserUniqueCodeNotFoundException(String.format("UniqueCode '%s' not found", uniqueCode)));
+        return mapperFacade.map(user, UserDto.class);
+    }
+
+    @Override
     @Transactional(readOnly = true)
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
         User user = userDao.findByEmail(email).orElseThrow(() -> new UsernameNotFoundException(String.format("Email '%s' not found", email)));
@@ -126,6 +136,16 @@ public class UserServiceImpl implements UserService {
         if (user.getPassword() != null && !user.getPassword().isBlank()) {
             user.setPassword(passwordEncoder.encode(user.getPassword()));
         }
+        user.setUniqueCode(UUID.randomUUID().toString());
+        mailService.send(user, "Подтверждение электронной почты", getVerificationURL(user.getUniqueCode()));
+    }
+
+    private String getVerificationURL(String uniqueCode) {
+        StringBuilder stringBuilder = new StringBuilder();
+        stringBuilder.append("Для подтверждения почты перейдите по ссылке: ")
+                .append("http://localhost:8080/email/confirm/")
+                .append(uniqueCode);
+        return stringBuilder.toString();
     }
 
     public User updateUser(User user) {
@@ -134,6 +154,7 @@ public class UserServiceImpl implements UserService {
         userFromDB.setLastName(user.getLastName());
         userFromDB.setDate(user.getDate());
         userFromDB.setPhone(user.getPhone());
+        userFromDB.setActive(user.getActive());
         if (user.getPassword() != null && !user.getPassword().isBlank()) {
             userFromDB.setPassword(passwordEncoder.encode(user.getPassword()));
         }

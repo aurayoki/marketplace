@@ -36,6 +36,13 @@ public class MainController {
     @PostMapping(value = "/create-user")
     public String create(@ModelAttribute("userDto") UserDto userDto) {
         userService.saveUser(userDto);
-        return "redirect:/";
+        return "/email/confirm/verification";
+    }
+
+    @GetMapping(value = "/email/confirm/{code}")
+    public String create(@PathVariable(value = "code") String code) {
+        UserDto userDto = userService.findByUniqueCode(code);
+        userService.activateUser(userDto);
+        return "/email/confirm/index";
     }
 }

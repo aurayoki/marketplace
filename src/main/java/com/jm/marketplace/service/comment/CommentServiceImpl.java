@@ -56,8 +56,10 @@ public class CommentServiceImpl implements CommentService {
     @Override
     public CommentDto findById(Long id) {
         log.info("Получение коммента по ID. Метод: findById");
-        Comment comment = commentDao.findById(id).orElseThrow(() ->
-                new CommentNotFoundException(String.format("Comment not found by id: %s", id)));
+        Comment comment = commentDao.findById(id).orElseThrow(() -> {
+            log.info("Ошибка при получении коммента по ID. Метод: findById");
+            return new CommentNotFoundException(String.format("Comment not found by id: %s", id));
+        });
         return mapperFacade.map(comment, CommentDto.class);
     }
 

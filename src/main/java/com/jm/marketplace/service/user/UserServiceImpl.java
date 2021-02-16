@@ -134,6 +134,7 @@ public class UserServiceImpl implements UserService {
         userFromDB.setLastName(user.getLastName());
         userFromDB.setDate(user.getDate());
         userFromDB.setPhone(user.getPhone());
+        userFromDB.setUserImg(user.getUserImg());
         if (user.getPassword() != null && !user.getPassword().isBlank()) {
             userFromDB.setPassword(passwordEncoder.encode(user.getPassword()));
         }

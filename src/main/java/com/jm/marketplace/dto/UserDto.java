@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.validation.constraints.NotNull;
 import java.time.LocalDate;
@@ -29,6 +30,7 @@ public class UserDto {
     private String userImg;
     private Set<RoleDto> roles;
     private Set<AdvertisementDto> advertisements;
+    private MultipartFile multipartFile;
 
     public String getRolesString() {
         StringBuilder stringBuilder = new StringBuilder();

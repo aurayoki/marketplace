@@ -11,7 +11,7 @@
     <div class="container">
         <div class="row">
             <div class="col-3 bg-dark">
-
+                <div th:replace="fragments/recoverPassword::modalRecoveryPassword"></div>
             </div>
             <div class="col-9" id="goodsTable">
                 <ul class="list-unstyled" th:each="goods : ${allGoods.getContent()}">

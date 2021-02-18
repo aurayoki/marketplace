@@ -6,6 +6,8 @@ import com.jm.marketplace.password.reset.model.PasswordResetToken;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Optional;
+
 @Service("PasswordResetTokenService")
 public class PasswordResetTokenServiceImpl implements PasswordResetTokenService {
 
@@ -23,7 +25,7 @@ public class PasswordResetTokenServiceImpl implements PasswordResetTokenService 
     }
 
     @Override
-    public PasswordResetToken getVerificationToken(String token) {
+    public Optional<PasswordResetToken> getVerificationToken(String token) {
         return passwordResetTokenRepository.findPasswordResetTokenByToken(token);
     }
 

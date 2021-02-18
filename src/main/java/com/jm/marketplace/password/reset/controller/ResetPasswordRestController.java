@@ -1,7 +1,6 @@
 package com.jm.marketplace.password.reset.controller;
 
 import com.jm.marketplace.dao.UserDao;
-import com.jm.marketplace.dto.UserDto;
 import com.jm.marketplace.exception.UserEmailExistsException;
 import com.jm.marketplace.model.User;
 import com.jm.marketplace.password.reset.service.PasswordResetTokenService;
@@ -37,17 +36,17 @@ public class ResetPasswordRestController {
         this.passwordResetTokenService = passwordResetTokenService;
     }
 
-    @PostMapping(value = "/recovery/email")
+    @PostMapping(value = "/api/recovery/email")
     public User resetLink(@RequestBody JSONObject json, HttpServletRequest request) {
         String email = json.getString("type");
-        Optional<User> optionalUser= userDao.findByEmail(email);
+        Optional<User> optionalUser = userDao.findByEmail(email);
         if (optionalUser.isEmpty()) {
             throw new UserEmailExistsException();
         }
         User user = optionalUser.get();
         String token = UUID.randomUUID().toString();
         passwordResetTokenService.createPasswordResetTokenForUser(email, token);
-        String appUrl = String.join("",request.getRequestURL(),"/reset?token=", token);
+        String appUrl = String.join("", request.getRequestURL(), "/reset?token=", token);
         mailService.send(user, "Восстановление пароля", "Ссылка для восстановления пароля, \n".concat(appUrl));
         return user;
     }

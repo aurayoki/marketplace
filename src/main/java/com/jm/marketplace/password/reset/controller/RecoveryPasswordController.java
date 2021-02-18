@@ -7,6 +7,8 @@ import com.jm.marketplace.password.reset.model.PasswordResetToken;
 import com.jm.marketplace.password.reset.service.PasswordResetTokenService;
 import com.jm.marketplace.service.user.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -15,6 +17,7 @@ import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.util.Calendar;
+import java.util.Optional;
 
 @Controller
 public class RecoveryPasswordController {
@@ -27,38 +30,42 @@ public class RecoveryPasswordController {
 
     private static String addToken;
 
+    private PasswordEncoder passwordEncoder;
+
     @Autowired
-    public RecoveryPasswordController(UserDao userDao, PasswordResetTokenService passwordResetTokenService, UserService userService) {
+    public RecoveryPasswordController(UserDao userDao, PasswordResetTokenService passwordResetTokenService,
+                                      UserService userService, PasswordEncoder passwordEncoder) {
         this.userDao = userDao;
         this.passwordResetTokenService = passwordResetTokenService;
         this.userService = userService;
+        this.passwordEncoder = passwordEncoder;
     }
 
-    @GetMapping("/recovery/email/reset")
+    @GetMapping("/api/recovery/email/reset")
     public ModelAndView showChangePasswordPage(@RequestParam(required = false) String token) {
         Calendar calendar = Calendar.getInstance();
-        PasswordResetToken passwordResetToken = passwordResetTokenService.getVerificationToken(token);
-        if (passwordResetToken != null && !passwordResetToken.getExpiryDate().before(calendar.getTime())) {
+        Optional<PasswordResetToken> passwordResetToken = passwordResetTokenService.getVerificationToken(token);
+        if (passwordResetToken.isPresent() && !passwordResetToken.get().getExpiryDate().before(calendar.getTime())) {
             addToken = token;
             return new ModelAndView("fragments/recoverPasswordLink");
         } else {
-            return new ModelAndView("index");
+            return new ModelAndView("redirect:/");
         }
     }
 
-    @PostMapping("/recovery/email/reset")
+    @PostMapping("/api/recovery/email/reset")
     public ModelAndView changePassword(@RequestParam String password, final RedirectAttributes redirectAttributes) {
-        PasswordResetToken passwordResetToken = passwordResetTokenService.getVerificationToken(addToken);
-        String email = passwordResetToken.getEmail();
-        if (password.length() > 7&&userDao.findByEmail(email).isPresent()) {
+        Optional<PasswordResetToken> passwordResetToken = passwordResetTokenService.getVerificationToken(addToken);
+        String email = passwordResetToken.get().getEmail();
+        if (password.length() > 7 && userDao.findByEmail(email).isPresent()) {
             User user = userDao.findByEmail(email).get();
-            user.setPassword(password);
+            user.setPassword(passwordEncoder.encode(password));
             redirectAttributes.addFlashAttribute("message", "Пароль был изменен");
             userDao.save(user);
             passwordResetTokenService.deletePasswordResetToken(email);
         } else {
             redirectAttributes.addFlashAttribute("message", "Пароль должен содержать более 7 символов");
         }
-        return new ModelAndView("index");
+        return new ModelAndView("redirect:/");
     }
 }

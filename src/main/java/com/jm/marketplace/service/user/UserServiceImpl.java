@@ -21,7 +21,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
-import java.util.*;
+import java.util.Collection;
+import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -29,7 +31,7 @@ public class UserServiceImpl implements UserService {
 
     private final UserDao userDao;
     private final RoleDao roleDao;
-    private final PasswordEncoder passwordEncoder;
+    private PasswordEncoder passwordEncoder;
     private final MapperFacade mapperFacade;
     @Value("${role.name.user}")
     private String userRole;

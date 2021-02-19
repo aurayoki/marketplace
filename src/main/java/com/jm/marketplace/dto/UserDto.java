@@ -31,6 +31,8 @@ public class UserDto {
     private Set<RoleDto> roles;
     private Set<AdvertisementDto> advertisements;
     private MultipartFile multipartFile;
+    private Boolean active;
+    private String uniqueCode;
 
     public String getRolesString() {
         StringBuilder stringBuilder = new StringBuilder();

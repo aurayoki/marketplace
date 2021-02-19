@@ -54,6 +54,7 @@ public class MailServiceImpl implements MailService {
         SimpleMailMessage mailMessage = new SimpleMailMessage();
         mailMessage.setText(message);
         mailMessage.setSubject(subject);
+        mailMessage.setFrom("test01marketplace@gmail.com");
         mailMessage.setTo(user.getEmail());
         return mailMessage;
     }

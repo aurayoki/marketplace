@@ -17,4 +17,7 @@ public interface UserDao extends JpaRepository<User, Long> {
 
     @Query(value = "FROM User AS u WHERE DAY(u.date) = DAY(:date) AND MONTH(u.date) = MONTH(:date)")
     List<User> findUserByBirthday(@Param(value = "date") LocalDate date);
+
+    @Query(value = "FROM User AS u WHERE u.uniqueCode = :uniqueCode")
+    Optional<User> findUserByUniqueCode(@Param(value = "uniqueCode") String uniqueCode);
 }

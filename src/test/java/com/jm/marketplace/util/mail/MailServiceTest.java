@@ -18,7 +18,8 @@ class MailServiceTest {
     private MailService mailService;
 
     User user = new User(1L, "Anton", "Vladimirovich", "asdfsdf", "test01marketplace@gmail.com",
-            new City(1L, "Moscov"), LocalDate.of(1996, 2, 23), "89634325677", "null", null, null);
+            new City(1L, "Moscov"), LocalDate.of(1996, 2, 23),
+            "89634325677", "null", null, null, false, null);
 
     List<User> userList = new ArrayList<>();
 

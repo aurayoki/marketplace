@@ -65,6 +65,12 @@ public class User {
     @OneToMany(mappedBy="user")
     private Set<Advertisement> advertisements;
 
+    @Column(name = "active")
+    private Boolean active;
+
+    @Column(name = "unique_code")
+    private String uniqueCode;
+
     public User(String firstName, String lastName, String password, String email, City city, LocalDate date, String phone) {
         this.firstName = firstName;
         this.lastName = lastName;

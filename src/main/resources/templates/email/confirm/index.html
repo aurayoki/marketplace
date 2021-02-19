@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="fragments/headers::head('Admin page')"></head>
+<body>
+
+<nav th:replace="fragments/headers::navbar"></nav>
+
+<div class="container-fluid mt-4">
+    <div class="container">
+        <div class="card-header">
+            <h5>Ваш аккаунт успешно активирован! <a th:href="@{/}">Перейти на главную страницу</a></h5>
+        </div>
+    </div>
+</div>
+</body>
+</html>

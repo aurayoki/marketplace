@@ -161,6 +161,7 @@ public class UserServiceImpl implements UserService {
         userFromDB.setDate(user.getDate());
         userFromDB.setPhone(user.getPhone());
         userFromDB.setActive(user.getActive());
+        userFromDB.setUserImg(user.getUserImg());
         if (user.getPassword() != null && !user.getPassword().isBlank()) {
             userFromDB.setPassword(passwordEncoder.encode(user.getPassword()));
         }

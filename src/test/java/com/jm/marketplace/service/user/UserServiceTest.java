@@ -35,7 +35,7 @@ public class UserServiceTest {
 
     UserDto userDto = new UserDto(1L, "Tommy", "Garposs", "1234", "asd@gmail.com",
             new CityDto(1L, "Piter"), LocalDate.of(1992, 6, 2),
-            "89679681234", "null", null, null, false, null);
+            "89679681234", "null", null, null, null, false, null);
 
     User userTest = new User(1L, "Tommy", "Garposs", "1234", "asd@gmail.com",
             new City(1L, "Piter"), LocalDate.of(1992, 6, 2),

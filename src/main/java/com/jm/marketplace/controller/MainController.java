@@ -54,4 +54,9 @@ public class MainController {
         userService.activateUser(userDto);
         return "/email/confirm/index";
     }
+
+    @GetMapping("/login")
+    public String mainPage(){
+        return "/login";
+    }
 }

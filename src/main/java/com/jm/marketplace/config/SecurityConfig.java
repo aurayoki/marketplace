@@ -1,5 +1,6 @@
 package com.jm.marketplace.config;
 
+import com.jm.marketplace.config.handler.SuccessUserHandler;
 import com.jm.marketplace.service.user.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -9,6 +10,7 @@ import org.springframework.security.config.annotation.authentication.builders.Au
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
@@ -18,10 +20,13 @@ import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
     private UserService userService;
+    private SuccessUserHandler successUserHandler;
 
     @Autowired
-    public void setUserService(UserService userService) {
+    public void setUserService(UserService userService,
+                               SuccessUserHandler successUserHandler) {
         this.userService = userService;
+        this.successUserHandler = successUserHandler;
     }
 
     @Override
@@ -31,6 +36,16 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
+        http.formLogin()
+                // указываем страницу с формой логина
+                // указываем action с формы логина
+                // Указываем параметры логина и пароля с формы логина
+                .successHandler(successUserHandler)
+                .usernameParameter("email")
+                .passwordParameter("password")
+                // даем доступ к форме логина всем
+                .permitAll();
+
         http.authorizeRequests()
                 .antMatchers("/", "/login").permitAll()
                 .antMatchers("/static/**").permitAll()
@@ -51,6 +66,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .logoutRequestMatcher(new AntPathRequestMatcher("/logout"))
                 // указываем URL при удачном logout
                 .logoutSuccessUrl("/");
+
+        http.rememberMe().alwaysRemember(true);
     }
 
     /**

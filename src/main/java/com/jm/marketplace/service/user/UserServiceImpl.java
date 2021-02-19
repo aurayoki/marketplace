@@ -4,7 +4,11 @@ import com.jm.marketplace.config.mapper.MapperFacade;
 import com.jm.marketplace.dao.RoleDao;
 import com.jm.marketplace.dao.UserDao;
 import com.jm.marketplace.dto.UserDto;
-import com.jm.marketplace.exception.*;
+import com.jm.marketplace.exception.RoleNotFoundException;
+import com.jm.marketplace.exception.UserEmailExistsException;
+import com.jm.marketplace.exception.UserNotFoundException;
+import com.jm.marketplace.exception.UserPhoneExistsException;
+import com.jm.marketplace.exception.UserUniqueCodeNotFoundException;
 import com.jm.marketplace.model.City;
 import com.jm.marketplace.model.Role;
 import com.jm.marketplace.model.User;
@@ -15,7 +19,6 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -24,6 +27,7 @@ import java.time.LocalDate;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
@@ -31,11 +35,11 @@ public class UserServiceImpl implements UserService {
 
     private final UserDao userDao;
     private final RoleDao roleDao;
-    private PasswordEncoder passwordEncoder;
+    private final PasswordEncoder passwordEncoder;
     private final MapperFacade mapperFacade;
     @Value("${role.name.user}")
     private String userRole;
-    private MailService mailService;
+    private final MailService mailService;
 
     @Autowired
     public UserServiceImpl(UserDao userDao, RoleDao roleDao, PasswordEncoder passwordEncoder,

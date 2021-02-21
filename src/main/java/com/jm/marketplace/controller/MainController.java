@@ -1,6 +1,7 @@
 package com.jm.marketplace.controller;
 
 import com.jm.marketplace.dto.UserDto;
+import com.jm.marketplace.search.advertisement.keywords.service.SearchingByKeywordService;
 import com.jm.marketplace.service.advertisement.AdvertisementService;
 import com.jm.marketplace.service.city.CityService;
 import com.jm.marketplace.service.user.UserService;
@@ -16,20 +17,28 @@ public class MainController {
     private final AdvertisementService advertisementService;
     private final CityService cityService;
     private final UserService userService;
+    private final SearchingByKeywordService keywordService;
 
     @Autowired
-    public MainController(AdvertisementService advertisementService, CityService cityService, UserService userService) {
+    public MainController(AdvertisementService advertisementService, CityService cityService, UserService userService, SearchingByKeywordService keywordService) {
         this.advertisementService = advertisementService;
         this.cityService = cityService;
         this.userService = userService;
+        this.keywordService = keywordService;
     }
 
     @GetMapping
     public String showMainPage(Model model,
-                               @RequestParam(value = "page", required = false, defaultValue = "0") Integer page) {
-        model.addAttribute("allGoods", advertisementService.findAll(page));
+                               @RequestParam(value = "page", required = false, defaultValue = "0") Integer page,
+                               @RequestParam(value = "search", required = false) String search) {
         model.addAttribute("userDto", new UserDto());
         model.addAttribute("cities", cityService.getAllCity());
+        if(search!=null){
+            model.addAttribute("allGoods", keywordService.findByKeyword(search));
+        }
+        else {
+            model.addAttribute("allGoods", advertisementService.findAll(page));
+        }
         return "index";
     }
 

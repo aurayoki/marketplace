@@ -1,19 +1,16 @@
 package com.jm.marketplace.password.reset.controller;
 
 import com.jm.marketplace.dao.UserDao;
-import com.jm.marketplace.dto.UserDto;
 import com.jm.marketplace.model.User;
 import com.jm.marketplace.password.reset.model.PasswordResetToken;
 import com.jm.marketplace.password.reset.service.PasswordResetTokenService;
 import com.jm.marketplace.service.user.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.util.Calendar;
@@ -42,19 +39,19 @@ public class RecoveryPasswordController {
     }
 
     @GetMapping("/api/recovery/email/reset")
-    public ModelAndView showChangePasswordPage(@RequestParam(required = false) String token) {
+    public String showChangePasswordPage(@RequestParam(required = false) String token) {
         Calendar calendar = Calendar.getInstance();
         Optional<PasswordResetToken> passwordResetToken = passwordResetTokenService.getVerificationToken(token);
         if (passwordResetToken.isPresent() && !passwordResetToken.get().getExpiryDate().before(calendar.getTime())) {
             addToken = token;
-            return new ModelAndView("fragments/recoverPasswordLink");
+            return "fragments/recoverPasswordLink";
         } else {
-            return new ModelAndView("redirect:/");
+            return "redirect:/";
         }
     }
 
     @PostMapping("/api/recovery/email/reset")
-    public ModelAndView changePassword(@RequestParam String password, final RedirectAttributes redirectAttributes) {
+    public String changePassword(@RequestParam String password, final RedirectAttributes redirectAttributes) {
         Optional<PasswordResetToken> passwordResetToken = passwordResetTokenService.getVerificationToken(addToken);
         String email = passwordResetToken.get().getEmail();
         if (password.length() > 7 && userDao.findByEmail(email).isPresent()) {
@@ -66,6 +63,6 @@ public class RecoveryPasswordController {
         } else {
             redirectAttributes.addFlashAttribute("message", "Пароль должен содержать более 7 символов");
         }
-        return new ModelAndView("redirect:/");
+        return "redirect:/";
     }
 }

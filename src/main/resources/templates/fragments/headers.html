@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.w3.org/1999/xhtml">
 <head th:fragment="head(title)">
     <meta charset="UTF-8">
     <!--  CSS  -->
@@ -49,13 +49,13 @@
                     </div>
                 </li>
             </ul>
-            <ul class="navbar-nav ml-auto">
+            <ul class="navbar-nav ml-auto" sec:authorize="hasRole('ADMIN')">
                 <li class="nav-item dropdown">
                     <a class="nav-link dropdown-toggle btn-group dropleft" href="#" id="navbarDropdownAdmin" role="button"
                        data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                         Admin
                     </a>
-                    <div class="dropdown-menu dropdown-menu-right" aria-labelledby="navbarDropdownAdmin">
+                    <div class="dropdown-menu" aria-labelledby="navbarDropdownAdmin">
                         <a class="dropdown-item" th:href="@{/admin/adv_in_active}">Advertisement in active</a>
                         <a class="dropdown-item" href="#">Sign up</a>
                         <a class="dropdown-item" href="/logout">Logout</a>
@@ -79,7 +79,6 @@
         </div>
     </div>
 </nav>
-
 <div th:fragment="leftMenuUser">
     <div class="nav flex-column nav-pills" id="v-pills-tab" aria-orientation="vertical">
         <a class="btn btn-primary btn-sm btn-block" href="/user" role="button" aria-pressed="true">Профиль</a>
@@ -153,6 +152,5 @@
         </div>
     </div>
 </div>
-
 </body>
 </html>

@@ -61,7 +61,7 @@ public class JobConfiguration {
 
     @Bean
     public SimpleTrigger simpleTriggerForOneTimeDiscount() {
-        LocalDateTime localDateTime = LocalDateTime.of(2021, Month.FEBRUARY, 21, 22, 23);
+        LocalDateTime localDateTime = LocalDateTime.of(2021, Month.MAY, 21, 22, 23);
         return (SimpleTrigger) newTrigger()
                 .forJob(jobDiscountBean())
                 .withIdentity("OneTimeDiscount")

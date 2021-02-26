@@ -4,6 +4,7 @@ import org.quartz.*;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.Month;
 import java.time.ZoneId;
@@ -56,16 +57,18 @@ public class JobConfiguration {
     public JobDetail jobDiscountBean() {
         return JobBuilder
                 .newJob(OneTimeDiscount.class).withIdentity("OneTimeDiscount")
-                .storeDurably().storeDurably().build();
+                .storeDurably().build();
     }
 
     @Bean
     public SimpleTrigger simpleTriggerForOneTimeDiscount() {
-        LocalDateTime localDateTime = LocalDateTime.of(2021, Month.MAY, 21, 22, 23);
-        return (SimpleTrigger) newTrigger()
-                .forJob(jobDiscountBean())
-                .withIdentity("OneTimeDiscount")
-                .startAt(Date.from(localDateTime.atZone(ZoneId.systemDefault()).toInstant()))
-                .build();
+        Instant instantStart = LocalDateTime.of(2021, Month.MAY, 27, 12, 12)
+                .atZone(ZoneId.systemDefault()).toInstant();
+        if (instantStart.isBefore(LocalDateTime.now().atZone(ZoneId.systemDefault()).toInstant())) {
+            return (SimpleTrigger) newTrigger().build();
+        } else {
+            return (SimpleTrigger) newTrigger().withIdentity("OneTimeDiscount")
+                    .startAt(Date.from(instantStart)).forJob(jobDiscountBean()).build();
+        }
     }
 }

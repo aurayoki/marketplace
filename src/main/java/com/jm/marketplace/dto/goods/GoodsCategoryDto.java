@@ -14,5 +14,5 @@ import java.util.Set;
 public class GoodsCategoryDto {
     private Long id;
     private String name;
-    private Set<GoodsSubcategoryDto> goodsSubcategory;
+//    private Set<GoodsSubcategoryDto> goodsSubcategory;
 }

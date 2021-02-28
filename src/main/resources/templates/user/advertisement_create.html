@@ -106,28 +106,32 @@
 </div>
 <script>
 
-  // $.getJSON('http://localhost:8080/api/v1/goods/cat', function (category) {
+  function getCategory () {
+    $.getJSON('http://localhost:8080/api/v1/goods/category/7', function (data) {
+      $('#listCategoty').append(data);
+    })
+  }
+
   //   $.getJSON('http://localhost:8080/api/v1/goods/subcat', function (subCategory) {
   // $.getJSON('http://localhost:8080/api/v1/goods/type', function (type) {
-    $(() => {
-
-      $('#listCategoty').empty().val('Бытовая электроника')
-      $('#listSubvayegory').empty().val('Товары для компьютера')
-      $('#listType').empty().val('Комплектующие')
-      $('#exampleInputName').empty().val('')
-      $('#exampleInputDescription').empty().val('')
-      $('#exampleInputPrice').empty().val('')
-    })
+  $(() => {
+    $('#listCategoty').empty().val('')
+    $('#listSubvayegory').empty().val('')
+    $('#listType').empty().val('')
+    $('#exampleInputName').empty().val('')
+    $('#exampleInputDescription').empty().val('')
+    $('#exampleInputPrice').empty().val('')
+  })
   // })
   //   })
   // })
 
   $('#buttonAdvertisement').click(function () {
-    console.log('тест после')
+
     let addAdvertisement = {
-      goodsCategory: $('#listCategoty').val("Бытовая электроника"),
-      goodsSubcategory: $('#listSubvayegory').val("Товары для компьютера"),
-      goodsType: $('#listType').val("Комплектующие"),
+      goodsCategory: $('#listCategoty').val(getCategory()),
+      goodsSubcategory: $('#listSubvayegory').val('Товары для компьютера'),
+      goodsType: $('#listType').val('Комплектующие'),
       name: $('#exampleInputName').val(),
       description: $('#exampleInputDescription').val(),
       price: $('#exampleInputPrice').val(),

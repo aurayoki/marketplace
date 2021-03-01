@@ -66,7 +66,7 @@ public class CommentServiceImpl implements CommentService {
     @Transactional
     @Override
     public void saveOrUpdate(CommentDto commentDto) {
-        log.info("Сохранение или редктирование коммента. Метод: saveOrUpdate");
+        log.info("CommentService - Сохранение или редктирование коммента. Метод: saveOrUpdate");
         commentDao.save(mapperFacade.map(commentDto, Comment.class));
     }
 

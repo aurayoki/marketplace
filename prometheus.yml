@@ -1,0 +1,21 @@
+global:
+  scrape_interval: 10s
+
+scrape_configs:
+  - job_name: 'spring_micrometer'
+    metrics_path: '/actuator/prometheus'
+    scrape_interval: 5s
+    static_configs:
+      - targets: ['localhost:8080']
+
+deleteDatasources:
+  - name: Prometheus
+
+datasources:
+  - name: Prometheus
+    type: prometheus
+    access: proxy
+    url: http://localhost:8080/actuator/prometheus
+    isDefault: true
+    version: 1
+    editable: true

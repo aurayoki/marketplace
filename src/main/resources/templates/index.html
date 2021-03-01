@@ -4,13 +4,19 @@
 <body>
 <nav th:replace="fragments/headers::navbar"></nav>
 <div th:replace="fragments/headers::modalRegistration"></div>
+
 <div class="container-fluid mt-4">
-    <div class="container-fluid">
-        <div class="row w-auto">
-            <!--            Временная позиция-->
-            <div class="position-absolute top-0 start-0">
+    <div class="row m-3">
+        <div class="col px-md-5">
+            <a class="link">
                 <!--           временная ссылка, modelRecoveryPassword необходимо в дальнейшем вставить на страницу логина-->
                 <div th:replace="fragments/recoverPassword::modalRecoveryPassword"></div>
+            </a>
+        </div>
+    </div>
+    <div class="container-fluid">
+        <div class="row w-auto">
+            <div class="top-0 start-0">
             </div>
             <div th:replace="fragments/searchAdvertisementByWords::searchAdvertismentByWords"></div>
         </div>

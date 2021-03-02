@@ -103,9 +103,9 @@
 </div>
 <script>
 
-  $.getJSON('http://localhost:8080/api/v1/category/7', function (category) {
-    $.getJSON('http://localhost:8080/api/v1/subcategory/8', function (subCategory) {
-      $.getJSON('http://localhost:8080/api/v1/type', function (type) {
+  $.getJSON('http://localhost:8080/api/v1/goods/category/7', function (category) {
+    $.getJSON('http://localhost:8080/api/v1/goods/subcategory/8', function (subCategory) {
+      $.getJSON('http://localhost:8080/api/v1/goods/type', function (type) {
 
         $(() => {
             $('#categoryId').append(

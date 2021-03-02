@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping(value = "/api/v1/category/")
+@RequestMapping(value = "/api/v1/goods/")
 public class GoodsCategoryRestController {
 
     private final GoodsCategoryService goodsCategoryService;
@@ -20,13 +20,13 @@ public class GoodsCategoryRestController {
         this.goodsCategoryService = goodsCategoryService;
     }
 
-    @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(value = "category", produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(HttpStatus.OK)
     public List<GoodsCategoryDto> getCategoryAll() {
         return goodsCategoryService.findAll();
     }
 
-    @GetMapping(value = "{id}", produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(value = "category/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(HttpStatus.OK)
     public GoodsCategoryDto getByIdCat(@PathVariable(name = "id") Long id) {
         return goodsCategoryService.findById(id);

@@ -10,30 +10,30 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping(value = "/api/v1/subcategory/")
-public class GoodsSubCategoryRestController {
+@RequestMapping(value = "/api/v1/goods/")
+public class GoodsSubcategoryRestController {
 
     private final GoodsSubcategoryService goodsSubcategoryService;
 
     @Autowired
-    public GoodsSubCategoryRestController(GoodsSubcategoryService goodsSubcategoryService) {
+    public GoodsSubcategoryRestController(GoodsSubcategoryService goodsSubcategoryService) {
         this.goodsSubcategoryService = goodsSubcategoryService;
     }
 
-    @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(value = "subcategory",produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(HttpStatus.OK)
     public List<GoodsSubcategoryDto> getSubcategoryAll() {
         return goodsSubcategoryService.findAll();
     }
 
     // Написать корректное название метода.
-    @GetMapping(value = "{id}", produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(value = "subcategory/good/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(HttpStatus.OK)
     public List<GoodsSubcategoryDto> getByGoodsCategoryId(@PathVariable(name = "id") Long id) {
         return goodsSubcategoryService.findByGoodsCategoryId(id);
     }
 
-    @GetMapping(value = "{id}", produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(value = "subcategory/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(HttpStatus.OK)
     public GoodsSubcategoryDto getByIdSubCat(@PathVariable(name = "id") Long id) {
         return goodsSubcategoryService.findById(id);

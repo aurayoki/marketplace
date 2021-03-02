@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 @RestController
-@RequestMapping(value = "/api/v1/type/")
+@RequestMapping(value = "/api/v1/goods/")
 public class GoodsTypeRestController {
 
     private final GoodsTypeService goodsTypeService;
@@ -19,20 +19,20 @@ public class GoodsTypeRestController {
         this.goodsTypeService = goodsTypeService;
     }
 
-    @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(value = "type",produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(HttpStatus.OK)
     public List<GoodsTypeDto> getTypeAll() {
         return goodsTypeService.findAll();
     }
 
     // Написать корректное название метода.
-    @GetMapping(value = "{id}", produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(value = "type/good/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(HttpStatus.OK)
     public List<GoodsTypeDto> getByGoodsSubCategoryId(@PathVariable(name = "id") Long id) {
         return goodsTypeService.findByGoodsSubcategoryId(id);
     }
 
-    @GetMapping(value = "{id}", produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(value = "type/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(HttpStatus.OK)
     public GoodsTypeDto getByIdType(@PathVariable(name = "id") Long id) {
         return goodsTypeService.findById(id);

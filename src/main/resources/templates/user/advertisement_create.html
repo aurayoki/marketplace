@@ -28,7 +28,7 @@
                     <div class="form-group">
                         <select class="form-select rounded-0 border-0 border-end border-3"
                                 aria-label="Default select example" id="categoryId">
-                            <option selected="" value="" data-marker="option">Выберите категорию</option>
+                            <!--                            <option selected="" data-marker="option">Выберите категорию</option>-->
                         </select>
                     </div>
                 </div>
@@ -36,7 +36,7 @@
                     <div class="form-group">
                         <select class="form-select rounded-0 border-0 border-end border-3"
                                 aria-label="Default select example" id="subCategoryId">
-                            <option selected="" value="" data-marker="option">Выберите подкотегорию</option>
+                            <!--                            <option selected="" value="" data-marker="option">Выберите подкотегорию</option>-->
                         </select>
                     </div>
                 </div>
@@ -44,7 +44,7 @@
                     <div class="form-group">
                         <select class="form-select rounded-0 border-0 border-end border-3"
                                 aria-label="Default select example" id="typeId">
-                            <option selected="" value="" data-marker="option">Выберите тип</option>
+                            <!--                            <option selected=""  data-marker="option">Выберите тип</option>-->
                         </select>
                     </div>
                 </div>
@@ -108,17 +108,29 @@
       $.getJSON('http://localhost:8080/api/v1/goods/type', function (type) {
 
         $(() => {
-            $('#categoryId').append(
-              $('<option>').text(category.name),
-            )
-            $('#subCategoryId').append(
-              $('<option>').text(subCategory.name),
-            )
-          $.each(type, (i, value) => {
-            $('#typeId').append(
-              $('<option>').text(value.name),
-            )
+          let categoryRow = ''
+          $.each(category, (key, value) => {
+            categoryRow += '<option selected="" '
+            categoryRow += 'id="' + value.id + '" value="' + value.name + '" data-marker="option">' + value.name + ''
+            categoryRow += '</option>'
           })
+          $('#categoryId').append(categoryRow)
+
+          let subcategoryRow = ''
+          $.each(subCategory, (key, value) => {
+            subcategoryRow += '<option selected="" '
+            subcategoryRow += 'id="' + value.id + '" value="' + value.name + '" data-marker="option">' + value.name + ''
+            subcategoryRow += '</option>'
+          })
+          $('#subCategoryId').append(subcategoryRow)
+
+          let typeRow = ''
+          $.each(type, (key, value) => {
+            typeRow += '<option selected="" '
+            typeRow += 'id="' + value.id + '" value="' + value.name + '" data-marker="option">' + value.name + ''
+            typeRow += '</option>'
+          })
+          $('#typeId').append(typeRow)
           $('#exampleInputName').empty().val('')
           $('#exampleInputDescription').empty().val('')
           $('#exampleInputPrice').empty().val('')
@@ -129,15 +141,15 @@
 
   $('#buttonAdvertisement').click(function () {
 
-    let addAdvertisement = {
-      goodsCategory: $('#categoryId').val(),
-      goodsSubcategory: $('#subCategoryId').val(),
-      goodsType: $('#typeId').val(),
-      name: $('#exampleInputName').val(),
-      description: $('#exampleInputDescription').val(),
-      price: $('#exampleInputPrice').val(),
-    }
-    let json = JSON.stringify(addAdvertisement)
+    let addAdvertisement = {}
+    addAdvertisement.goodsCategory = getCheckedCategory()
+    addAdvertisement.goodsSubcategory = getCheckedSubcategory()
+    addAdvertisement.goodsType = getCheckedType()
+    addAdvertisement.name = $('#exampleInputName').val()
+    addAdvertisement.description = $('#exampleInputDescription').val()
+    addAdvertisement.price = $('#exampleInputPrice').val()
+
+    let json = JSON.stringify(addAdvertisement).replace('[', '').replace(']', '').replace('[', '').replace(']', '').replace('[', '').replace(']', '')
     console.log(json)
 
     $.ajax({
@@ -147,8 +159,40 @@
       dataType: 'json',
       data: json,
     })
-    location.reload()
   })
+
+  function getCheckedCategory () {
+    var cats = []
+    $.each($('#categoryId option:selected'), function () {
+      let cat = {}
+      cat.id = $(this).attr('id')
+      cat.name = $(this).attr('value')
+      cats.push(cat)
+    })
+    return cats
+  }
+
+  function getCheckedSubcategory () {
+    let subcats = []
+    $.each($('#subCategoryId option:selected'), function () {
+      let subcat = {}
+      subcat.id = $(this).attr('id')
+      subcat.name = $(this).attr('value')
+      subcats.push(subcat)
+    })
+    return subcats
+  }
+
+  function getCheckedType () {
+    let types = []
+    $.each($('#typeId option:selected'), function () {
+      let type = {}
+      type.id = $(this).attr('id')
+      type.name = $(this).attr('value')
+      types.push(type)
+    })
+    return types
+  }
 
 </script>
 </body>

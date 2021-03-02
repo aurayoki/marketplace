@@ -26,28 +26,25 @@
             <div class="row">
                 <div class="col-4">
                     <div class="form-group">
-                        <label class="font-weight-bold" for="listCategoty">Категория</label>
-                        <select multiple size="10"
-                                class="form-control"
-                                id="listCategoty">
+                        <select class="form-select rounded-0 border-0 border-end border-3"
+                                aria-label="Default select example" id="categoryId">
+                            <option selected="" value="" data-marker="option">Выберите категорию</option>
                         </select>
                     </div>
                 </div>
                 <div class="col-4">
                     <div class="form-group">
-                        <label class="font-weight-bold" for="listSubvayegory">Подкатегория</label>
-                        <select multiple size="10"
-                                class="form-control"
-                                id="listSubvayegory">
+                        <select class="form-select rounded-0 border-0 border-end border-3"
+                                aria-label="Default select example" id="subCategoryId">
+                            <option selected="" value="" data-marker="option">Выберите подкотегорию</option>
                         </select>
                     </div>
                 </div>
                 <div class="col-4">
                     <div class="form-group">
-                        <label class="font-weight-bold" for="listType">Тип</label>
-                        <select multiple size="10"
-                                class="form-control"
-                                id="listType">
+                        <select class="form-select rounded-0 border-0 border-end border-3"
+                                aria-label="Default select example" id="typeId">
+                            <option selected="" value="" data-marker="option">Выберите тип</option>
                         </select>
                     </div>
                 </div>
@@ -106,32 +103,36 @@
 </div>
 <script>
 
-  function getCategory () {
-    $.getJSON('http://localhost:8080/api/v1/goods/category/7', function (data) {
-      $('#listCategoty').append(data);
-    })
-  }
+  $.getJSON('http://localhost:8080/api/v1/category/7', function (category) {
+    $.getJSON('http://localhost:8080/api/v1/subcategory/8', function (subCategory) {
+      $.getJSON('http://localhost:8080/api/v1/type', function (type) {
 
-  //   $.getJSON('http://localhost:8080/api/v1/goods/subcat', function (subCategory) {
-  // $.getJSON('http://localhost:8080/api/v1/goods/type', function (type) {
-  $(() => {
-    $('#listCategoty').empty().val('')
-    $('#listSubvayegory').empty().val('')
-    $('#listType').empty().val('')
-    $('#exampleInputName').empty().val('')
-    $('#exampleInputDescription').empty().val('')
-    $('#exampleInputPrice').empty().val('')
+        $(() => {
+            $('#categoryId').append(
+              $('<option>').text(category.name),
+            )
+            $('#subCategoryId').append(
+              $('<option>').text(subCategory.name),
+            )
+          $.each(type, (i, value) => {
+            $('#typeId').append(
+              $('<option>').text(value.name),
+            )
+          })
+          $('#exampleInputName').empty().val('')
+          $('#exampleInputDescription').empty().val('')
+          $('#exampleInputPrice').empty().val('')
+        })
+      })
+    })
   })
-  // })
-  //   })
-  // })
 
   $('#buttonAdvertisement').click(function () {
 
     let addAdvertisement = {
-      goodsCategory: $('#listCategoty').val(getCategory()),
-      goodsSubcategory: $('#listSubvayegory').val('Товары для компьютера'),
-      goodsType: $('#listType').val('Комплектующие'),
+      goodsCategory: $('#categoryId').val(),
+      goodsSubcategory: $('#subCategoryId').val(),
+      goodsType: $('#typeId').val(),
       name: $('#exampleInputName').val(),
       description: $('#exampleInputDescription').val(),
       price: $('#exampleInputPrice').val(),
@@ -146,11 +147,9 @@
       dataType: 'json',
       data: json,
     })
-
     location.reload()
   })
 
 </script>
 </body>
-
 </html>

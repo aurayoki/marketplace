@@ -25,4 +25,7 @@ public interface UserService extends UserDetailsService {
 
     UserDto findByPhone(String phone);
 
+    void activateUser(UserDto userDto);
+
+    UserDto findByUniqueCode(String uniqueCode);
 }

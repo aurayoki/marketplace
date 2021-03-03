@@ -136,7 +136,7 @@ public class Bot extends TelegramLongPollingBot {
                     sendMessage.setText(addNewAdvertisement(currentChatId, currentMessageText));
                 } else if (currentMessageText.equals("Список товаров постранично")) {
                     sendMessage.setReplyMarkup(getInlineButtonsPagination(1));
-                    sendMessage.setText(getAdvertisementForCurrentPage(1));
+                    sendMessage.setText(getAdvertisementTextForCurrentPage(1));
                 } else {
                     setMessage(sendMessage);
                 }
@@ -151,15 +151,27 @@ public class Bot extends TelegramLongPollingBot {
 
                 if (update.getCallbackQuery().getData().contains("page_")) {
 
-                    int currentPage = Integer.parseInt(update.getCallbackQuery().getData().substring(5));
+                    Integer currentPage = Integer.parseInt(update.getCallbackQuery().getData().substring(5));
 
                     EditMessageText editMessageText = new EditMessageText();
                     editMessageText.setMessageId(update.getCallbackQuery().getMessage().getMessageId());
-                    editMessageText.setText(getAdvertisementForCurrentPage(currentPage));
+                    editMessageText.setText(getAdvertisementTextForCurrentPage(currentPage));
                     editMessageText.setReplyMarkup(getInlineButtonsPagination(currentPage));
                     editMessageText.setChatId(currentChatId.toString());
                     execute(editMessageText);
                     log.info(update.getCallbackQuery().getData());
+                    log.error(editMessageText.toString());
+                }
+                else if(update.getCallbackQuery().getData().contains("goods_")) {
+                    Integer advertisementId = Integer.parseInt(update.getCallbackQuery().getData().substring(6));
+                    EditMessageText editMessageText = new EditMessageText();
+                    editMessageText.setMessageId(update.getCallbackQuery().getMessage().getMessageId());
+                    editMessageText.setChatId(currentChatId.toString());
+                    editMessageText.setReplyMarkup(getInlineButtonsPagination(getPageAdvertisementById(advertisementId)));
+                    editMessageText.setText(getAdvertisementText(advertisementId));
+                    execute(editMessageText);
+                    log.info(update.getCallbackQuery().getData());
+                    log.error(editMessageText.toString());
                 }
 
             }
@@ -205,37 +217,67 @@ public class Bot extends TelegramLongPollingBot {
         replyKeyboardMarkup.setKeyboard(keyboard);
     }
 
-    private String getAdvertisementForCurrentPage(int currentPage) {
+//    private String getAdvertisementForCurrentPage(int currentPage) {
+//
+//        List<AdvertisementDto> advertisementDtos = advertisementService.findAll();
+//
+//        StringBuilder sb = new StringBuilder();
+//
+//        int startPosition = 0;
+//
+//        if (currentPage > 1) {
+//            startPosition = (currentPage - 1) * ADVERTISEMENTS_IN_PAGE;
+//        }
+//
+//        int count = 1;
+//        for (int i = startPosition; i < advertisementDtos.size(); i++) {
+//            AdvertisementDto advertisementDto = advertisementDtos.get(i);
+//            sb.append(i + 1).append("\n");
+//            sb.append(advertisementDto.getName()).append("\n");
+//            sb.append(advertisementDto.getPrice()).append("\n");
+//            sb.append(advertisementDto.getDescription()).append("\n");
+//            sb.append("-------------------");
+//            sb.append("\n");
+//            if (count == ADVERTISEMENTS_IN_PAGE) {
+//                break;
+//            }
+//            count++;
+//        }
+//
+//        return sb.toString();
+//
+//    }
 
-        List<AdvertisementDto> advertisementDtos = advertisementService.findAll();
+    private String getAdvertisementText(Integer advertisementId) {
+        StringBuilder sb = new StringBuilder();
+        AdvertisementDto advertisement = advertisementService.findById(advertisementId.longValue());
+        sb.append(advertisement.getName()).append("\n");
+        sb.append(advertisement.getPrice()).append("\n");
+        sb.append(advertisement.getPublication_date()).append("\n");
+        sb.append(advertisement.getDescription()).append("\n");
+        sb.append(advertisement.getUser()).append("\n");
+        sb.append("\n");
+        return sb.toString();
+    }
+
+    private String getAdvertisementTextForCurrentPage(int currentPage) {
+
+        List<AdvertisementDto> advertisementDtos = getAdvertisementForCurrentPage(currentPage);
 
         StringBuilder sb = new StringBuilder();
 
-        int startPosition = 0;
-
-        if (currentPage > 1) {
-            startPosition = (currentPage - 1) * ADVERTISEMENTS_IN_PAGE;
-        }
-
-        int count = 1;
-        for (int i = startPosition; i < advertisementDtos.size(); i++) {
-            AdvertisementDto advertisementDto = advertisementDtos.get(i);
-            sb.append(i + 1).append("\n");
+        for (AdvertisementDto advertisementDto : advertisementDtos) {
             sb.append(advertisementDto.getName()).append("\n");
             sb.append(advertisementDto.getPrice()).append("\n");
             sb.append(advertisementDto.getDescription()).append("\n");
+            sb.append(advertisementDto.getUser()).append("\n");
             sb.append("-------------------");
             sb.append("\n");
-            if (count == ADVERTISEMENTS_IN_PAGE) {
-                break;
-            }
-            count++;
         }
 
         return sb.toString();
 
     }
-
 
     private Map<AdvertisementDto, Integer> getAdvertisementPages() {
 
@@ -250,6 +292,10 @@ public class Bot extends TelegramLongPollingBot {
             }
         }
         return advertisementsEachPage;
+    }
+
+    private Integer getPageAdvertisementById(Integer id) {
+        return getAdvertisementPages().get(advertisementService.findById(Long.valueOf(id)));
     }
 
     private  List<AdvertisementDto> getAdvertisementForCurrentPage(Integer currentPage) {

@@ -8,7 +8,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 @RequestMapping(value = "/api/v1/goods")
 public class AdvertisementController {
 
-
     @GetMapping
     public String advertisementPage() {
         return "user/advertisement_create";

@@ -28,7 +28,6 @@
                     <div class="form-group">
                         <select class="form-select rounded-0 border-0 border-end border-3"
                                 aria-label="Default select example" id="categoryId">
-                            <!--                            <option selected="" data-marker="option">Выберите категорию</option>-->
                         </select>
                     </div>
                 </div>
@@ -36,7 +35,6 @@
                     <div class="form-group">
                         <select class="form-select rounded-0 border-0 border-end border-3"
                                 aria-label="Default select example" id="subCategoryId">
-                            <!--                            <option selected="" value="" data-marker="option">Выберите подкотегорию</option>-->
                         </select>
                     </div>
                 </div>
@@ -44,7 +42,6 @@
                     <div class="form-group">
                         <select class="form-select rounded-0 border-0 border-end border-3"
                                 aria-label="Default select example" id="typeId">
-                            <!--                            <option selected=""  data-marker="option">Выберите тип</option>-->
                         </select>
                     </div>
                 </div>
@@ -151,7 +148,7 @@
     addAdvertisement.description = $('#exampleInputDescription').val()
     addAdvertisement.price = $('#exampleInputPrice').val()
 
-    let json = JSON.stringify(addAdvertisement).replace('[', '').replace(']', '').replace('[', '').replace(']', '').replace('[', '').replace(']', '')
+    let json = JSON.stringify(addAdvertisement).replaceAll('[', '').replaceAll(']', '')
     console.log(json)
 
     $.ajax({

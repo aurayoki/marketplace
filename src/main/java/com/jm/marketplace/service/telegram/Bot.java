@@ -149,9 +149,9 @@ public class Bot extends TelegramLongPollingBot {
                 userName = update.getCallbackQuery().getFrom().getUserName();
                 currentChatId = update.getCallbackQuery().getMessage().getChatId();
 
-                if (update.getCallbackQuery().getData().contains("apb_")) {
+                if (update.getCallbackQuery().getData().contains("page_")) {
 
-                    int currentPage = Integer.parseInt(update.getCallbackQuery().getData().substring(4));
+                    int currentPage = Integer.parseInt(update.getCallbackQuery().getData().substring(5));
 
                     EditMessageText editMessageText = new EditMessageText();
                     editMessageText.setMessageId(update.getCallbackQuery().getMessage().getMessageId());
@@ -244,9 +244,8 @@ public class Bot extends TelegramLongPollingBot {
         Integer pageNumber = 1;
         int count = 1;
         for (int i = 0; i < advertisementDtos.size(); i++) {
-            AdvertisementDto advertisementDto = advertisementDtos.get(i);
             advertisementsEachPage.put(advertisementDtos.get(i), pageNumber);
-            if(i % ADVERTISEMENTS_IN_PAGE==0) {
+            if((i+1) % ADVERTISEMENTS_IN_PAGE == 0) {
                 pageNumber++;
             }
         }
@@ -273,7 +272,7 @@ public class Bot extends TelegramLongPollingBot {
             advertisementButton.setText(advertisementDto.getName());
             advertisementButton.setCallbackData("goods_" + advertisementDto.getId());
             keyboardButtonsRow.add(advertisementButton);
-        }
+       }
 
         return keyboardButtonsRow;
     }
@@ -286,10 +285,10 @@ public class Bot extends TelegramLongPollingBot {
         for (int i = 1; i <= pagesCount; i++) {
             InlineKeyboardButton pageNumberButton = new InlineKeyboardButton();
             pageNumberButton.setText(String.valueOf(i));
-            pageNumberButton.setCallbackData("apb_" + (i));
+            pageNumberButton.setCallbackData("page_" + (i));
             keyboardButtonsRowPageNamber.add(pageNumberButton);
         }
-        return keyboardButtonsRowPageNamber;
+       return keyboardButtonsRowPageNamber;
     }
 
     private InlineKeyboardMarkup getInlineButtonsPagination(Integer currentPage) {

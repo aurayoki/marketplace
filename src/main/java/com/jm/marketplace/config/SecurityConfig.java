@@ -53,8 +53,9 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .antMatchers("/create-user").permitAll()
                 .antMatchers("/email/confirm/**").permitAll()
                 //страница для добавления товара
-                .antMatchers("admin/**").access("hasRole('ADMIN')").anyRequest().hasAnyRole("ADMIN", "USER")
-                .and().formLogin().permitAll();
+                .antMatchers("/admin/**").access("hasRole('ADMIN')")
+                .and().formLogin().permitAll()
+                .successHandler(new LoginSuccessHandler());
 
         // без этого не работали методы post/put/delete рест контроллера
         http.csrf().disable();

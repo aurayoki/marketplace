@@ -13,17 +13,17 @@
             </div>
             <div class="col-9 border">
                 <h1 class="text-center">Страница редактирования пользователя</h1>
-                <form th:method="POST" th:action="@{/user/edit/save}" th:object="${userDto}" class="needs-validation" novalidate>
+                <form th:method="POST" th:action="@{/user/edit/save}" th:object="${userDto}" enctype="multipart/form-data" class="needs-validation" novalidate>
                     <div class="form-row mt-3">
                         <input hidden th:field="*{id}">
                         <div class="col-6">
                             <div class="col-auto text-center mt-4">
-                                <img src="/img/image-none.png" class="align-self-center w-25 h-25">
+                                <img th:src="@{'/images/' + ${userDto.getUserImg}}" class="align-self-center w-25 h-25">
                                 <div class="custom-file mt-4">
-                                    <input type="file" class="custom-file-input" id="customFile">
+                                    <input type="file" class="custom-file-input" id="customFile" value="multipartFile" th:field="*{multipartFile}">
                                     <label class="custom-file-label" for="customFile">Выберите фотографию</label>
                                     <small id="file" class="form-text text-danger">
-                                        Загрузка изображения пока не работает
+                                        Изображение изменится только после сохранения пользователя
                                     </small>
                                 </div>
                             </div>

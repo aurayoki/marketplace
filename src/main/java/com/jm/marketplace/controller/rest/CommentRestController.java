@@ -47,7 +47,7 @@ public class CommentRestController {
     }
 
     @GetMapping("/comment")
-    public List<CommentDto> getAllCommentsByA(@RequestBody AdvertisementDto advertisementDto) {
+    public List<CommentDto> getAllCommentsByAdvertisement(@RequestBody AdvertisementDto advertisementDto) {
         return commentService.findByAdvertisement(advertisementDto);
     }
 }

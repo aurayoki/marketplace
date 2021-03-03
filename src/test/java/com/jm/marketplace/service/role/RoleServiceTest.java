@@ -55,7 +55,7 @@ public class RoleServiceTest {
     @Test
     void findByIdShouldThrowRoleIdExistsException() {
         given(roleDaoMock.findById(anyLong())).willThrow(RoleNotFoundException.class);
-        Throwable throwable = catchThrowable(() -> roleDaoMock.findById(anyLong()));
+        Throwable throwable = catchThrowable(() -> roleService.findById(anyLong()));
 
         assertThat(throwable).isInstanceOf(RoleNotFoundException.class);
     }
@@ -63,7 +63,7 @@ public class RoleServiceTest {
     @Test
     void findByNameShouldThrowRoleNameExistsException() {
         given(roleDaoMock.findByName(anyString())).willThrow(RoleNotFoundException.class);
-        Throwable throwable = catchThrowable(() -> roleDaoMock.findByName(anyString()));
+        Throwable throwable = catchThrowable(() -> roleService.findByName(anyString()));
 
         assertThat(throwable).isInstanceOf(RoleNotFoundException.class);
     }

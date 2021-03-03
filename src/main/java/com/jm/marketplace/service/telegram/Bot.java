@@ -27,6 +27,8 @@ import javax.annotation.PostConstruct;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Component
 @Slf4j
@@ -63,6 +65,8 @@ public class Bot extends TelegramLongPollingBot {
     private UserService userService;
 
     public static final int ADVERTISEMENTS_IN_PAGE = 2;
+
+    private InlineKeyboardMarkup inlineKeyboardMarkup = null;
 
     @Autowired
     public void setUserService(UserService userService) {
@@ -102,6 +106,10 @@ public class Bot extends TelegramLongPollingBot {
         return botToken;
     }
 
+    private List<AdvertisementDto> filter() {
+        return advertisementService.findAll(); //Заглушка для фильтра, сейчас возвращает все данные.
+    }
+
     @Override
     public void onUpdateReceived(Update update) {
         try {
@@ -127,8 +135,8 @@ public class Bot extends TelegramLongPollingBot {
                 if (currentGoodAddStatus.containsKey(currentChatId)) {
                     sendMessage.setText(addNewAdvertisement(currentChatId, currentMessageText));
                 } else if (currentMessageText.equals("Список товаров постранично")) {
-                    sendMessage.setReplyMarkup(getInlineButtonsPagination());
-                    sendMessage.setText(getAdvertisementForCurrentPage(1));
+                    sendMessage.setReplyMarkup(getInlineButtonsPagination(1));
+                    sendMessage.setText(getAdvertisementTextForCurrentPage(1));
                 } else {
                     setMessage(sendMessage);
                 }
@@ -141,17 +149,29 @@ public class Bot extends TelegramLongPollingBot {
                 userName = update.getCallbackQuery().getFrom().getUserName();
                 currentChatId = update.getCallbackQuery().getMessage().getChatId();
 
-                if (update.getCallbackQuery().getData().contains("apb_")) {
+                if (update.getCallbackQuery().getData().contains("page_")) {
 
-                    int currentPage = Integer.parseInt(update.getCallbackQuery().getData().substring(4));
+                    Integer currentPage = Integer.parseInt(update.getCallbackQuery().getData().substring(5));
 
                     EditMessageText editMessageText = new EditMessageText();
                     editMessageText.setMessageId(update.getCallbackQuery().getMessage().getMessageId());
-                    editMessageText.setText(getAdvertisementForCurrentPage(currentPage));
-                    editMessageText.setReplyMarkup(getInlineButtonsPagination());
+                    editMessageText.setText(getAdvertisementTextForCurrentPage(currentPage));
+                    editMessageText.setReplyMarkup(getInlineButtonsPagination(currentPage));
                     editMessageText.setChatId(currentChatId.toString());
                     execute(editMessageText);
-
+                    log.info(update.getCallbackQuery().getData());
+                    log.error(editMessageText.toString());
+                }
+                else if(update.getCallbackQuery().getData().contains("goods_")) {
+                    Integer advertisementId = Integer.parseInt(update.getCallbackQuery().getData().substring(6));
+                    EditMessageText editMessageText = new EditMessageText();
+                    editMessageText.setMessageId(update.getCallbackQuery().getMessage().getMessageId());
+                    editMessageText.setChatId(currentChatId.toString());
+                    editMessageText.setReplyMarkup(getInlineButtonsPagination(getPageAdvertisementById(advertisementId)));
+                    editMessageText.setText(getAdvertisementText(advertisementId));
+                    execute(editMessageText);
+                    log.info(update.getCallbackQuery().getData());
+                    log.error(editMessageText.toString());
                 }
 
             }
@@ -197,61 +217,167 @@ public class Bot extends TelegramLongPollingBot {
         replyKeyboardMarkup.setKeyboard(keyboard);
     }
 
-    private String getAdvertisementForCurrentPage(int currentPage) {
+//    private String getAdvertisementForCurrentPage(int currentPage) {
+//
+//        List<AdvertisementDto> advertisementDtos = advertisementService.findAll();
+//
+//        StringBuilder sb = new StringBuilder();
+//
+//        int startPosition = 0;
+//
+//        if (currentPage > 1) {
+//            startPosition = (currentPage - 1) * ADVERTISEMENTS_IN_PAGE;
+//        }
+//
+//        int count = 1;
+//        for (int i = startPosition; i < advertisementDtos.size(); i++) {
+//            AdvertisementDto advertisementDto = advertisementDtos.get(i);
+//            sb.append(i + 1).append("\n");
+//            sb.append(advertisementDto.getName()).append("\n");
+//            sb.append(advertisementDto.getPrice()).append("\n");
+//            sb.append(advertisementDto.getDescription()).append("\n");
+//            sb.append("-------------------");
+//            sb.append("\n");
+//            if (count == ADVERTISEMENTS_IN_PAGE) {
+//                break;
+//            }
+//            count++;
+//        }
+//
+//        return sb.toString();
+//
+//    }
 
-        List<AdvertisementDto> advertisementDtos = advertisementService.findAll();
+    private String getAdvertisementText(Integer advertisementId) {
+        StringBuilder sb = new StringBuilder();
+        AdvertisementDto advertisement = advertisementService.findById(advertisementId.longValue());
+        sb.append(advertisement.getName()).append("\n");
+        sb.append(advertisement.getPrice()).append("\n");
+        sb.append(advertisement.getPublication_date()).append("\n");
+        sb.append(advertisement.getDescription()).append("\n");
+        sb.append(advertisement.getUser()).append("\n");
+        sb.append("\n");
+        return sb.toString();
+    }
+
+    private String getAdvertisementTextForCurrentPage(int currentPage) {
+
+        List<AdvertisementDto> advertisementDtos = getAdvertisementForCurrentPage(currentPage);
 
         StringBuilder sb = new StringBuilder();
 
-        int startPosition = 0;
-
-        if (currentPage > 1) {
-            startPosition = (currentPage - 1) * ADVERTISEMENTS_IN_PAGE;
-        }
-
-        int count = 1;
-        for (int i = startPosition; i < advertisementDtos.size(); i++) {
-            AdvertisementDto advertisementDto = advertisementDtos.get(i);
-            sb.append(i + 1).append("\n");
+        for (AdvertisementDto advertisementDto : advertisementDtos) {
             sb.append(advertisementDto.getName()).append("\n");
             sb.append(advertisementDto.getPrice()).append("\n");
             sb.append(advertisementDto.getDescription()).append("\n");
+            sb.append(advertisementDto.getUser()).append("\n");
             sb.append("-------------------");
             sb.append("\n");
-            if (count == ADVERTISEMENTS_IN_PAGE) {
-                break;
-            }
-            count++;
         }
 
         return sb.toString();
 
     }
 
-    private InlineKeyboardMarkup getInlineButtonsPagination() {
+    private Map<AdvertisementDto, Integer> getAdvertisementPages() {
 
+        List<AdvertisementDto> advertisementDtos = filter();
+        Map<AdvertisementDto, Integer> advertisementsEachPage = new HashMap<>();
+        Integer pageNumber = 1;
+        int count = 1;
+        for (int i = 0; i < advertisementDtos.size(); i++) {
+            advertisementsEachPage.put(advertisementDtos.get(i), pageNumber);
+            if((i+1) % ADVERTISEMENTS_IN_PAGE == 0) {
+                pageNumber++;
+            }
+        }
+        return advertisementsEachPage;
+    }
+
+    private Integer getPageAdvertisementById(Integer id) {
+        return getAdvertisementPages().get(advertisementService.findById(Long.valueOf(id)));
+    }
+
+    private  List<AdvertisementDto> getAdvertisementForCurrentPage(Integer currentPage) {
+        List<AdvertisementDto> advertisementDtos = getAdvertisementPages()
+                .entrySet()
+                .stream()
+                .filter(advertisement ->advertisement.getValue() == currentPage)
+                .map(Map.Entry::getKey)
+                .collect(Collectors.toList());
+        return advertisementDtos;
+    }
+
+
+    private List<InlineKeyboardButton> getInlineKeyboardButtonsAdvertosementForCurrentPage(Integer currentPage) {
+        List<AdvertisementDto> advertisementDtos = getAdvertisementForCurrentPage(currentPage);
+        List<InlineKeyboardButton> keyboardButtonsRow = new ArrayList<>();
+
+        for(AdvertisementDto advertisementDto : advertisementDtos) {
+            InlineKeyboardButton advertisementButton = new InlineKeyboardButton();
+            advertisementButton.setText(advertisementDto.getName());
+            advertisementButton.setCallbackData("goods_" + advertisementDto.getId());
+            keyboardButtonsRow.add(advertisementButton);
+       }
+
+        return keyboardButtonsRow;
+    }
+
+    private List<InlineKeyboardButton> getInlineKeyboardButtonPagination() {
         List<AdvertisementDto> advertisementDtos = advertisementService.findAll();
-
         int pagesCount = (int) Math.ceil(advertisementDtos.size() / (double) ADVERTISEMENTS_IN_PAGE);
-
-        List<InlineKeyboardButton> keyboardButtonsRow1 = new ArrayList<>();
+        List<InlineKeyboardButton> keyboardButtonsRowPageNamber = new ArrayList<>();
 
         for (int i = 1; i <= pagesCount; i++) {
-            InlineKeyboardButton inlineKeyboardButton = new InlineKeyboardButton();
-            inlineKeyboardButton.setText(String.valueOf(i));
-            inlineKeyboardButton.setCallbackData("apb_" + (i));
-            keyboardButtonsRow1.add(inlineKeyboardButton);
-
+            InlineKeyboardButton pageNumberButton = new InlineKeyboardButton();
+            pageNumberButton.setText(String.valueOf(i));
+            pageNumberButton.setCallbackData("page_" + (i));
+            keyboardButtonsRowPageNamber.add(pageNumberButton);
         }
+       return keyboardButtonsRowPageNamber;
+    }
 
+    private InlineKeyboardMarkup getInlineButtonsPagination(Integer currentPage) {
         List<List<InlineKeyboardButton>> rowList = new ArrayList<>();
-        rowList.add(keyboardButtonsRow1);
-
+        rowList.add(getInlineKeyboardButtonsAdvertosementForCurrentPage(currentPage));
+        rowList.add(getInlineKeyboardButtonPagination());
         InlineKeyboardMarkup inlineKeyboardMarkup = new InlineKeyboardMarkup();
         inlineKeyboardMarkup.setKeyboard(rowList);
-
         return inlineKeyboardMarkup;
     }
+
+
+//    private InlineKeyboardMarkup getInlineButtonsPagination() {
+//
+//        List<AdvertisementDto> advertisementDtos = advertisementService.findAll();
+//        int pagesCount = (int) Math.ceil(advertisementDtos.size() / (double) ADVERTISEMENTS_IN_PAGE);
+//        List<InlineKeyboardButton> keyboardButtonsRowAdvertisment = new ArrayList<>();
+//        List<InlineKeyboardButton> keyboardButtonsRowPageNamber = new ArrayList<>();
+//
+//        for (int i = 1; i <= pagesCount; i++) {
+//            InlineKeyboardButton pageNumberButton = new InlineKeyboardButton();
+//            pageNumberButton.setText(String.valueOf(i));
+//            pageNumberButton.setCallbackData("apb_" + (i));
+//            keyboardButtonsRowPageNamber.add(pageNumberButton);
+//
+//        }
+//
+//        for(int i = 0; i < advertisementDtos.size(); i++) {
+//            InlineKeyboardButton advertisementButton = new InlineKeyboardButton();
+//            advertisementButton.setText(advertisementDtos.get(i).getName());
+//            advertisementButton.setCallbackData("goods_" + advertisementDtos.get(i).getId());
+//            keyboardButtonsRowAdvertisment.add(advertisementButton);
+//        }
+//
+//        List<List<InlineKeyboardButton>> rowList = new ArrayList<>();
+//        rowList.add(keyboardButtonsRowAdvertisment);
+//        rowList.add(keyboardButtonsRowPageNamber);
+//
+//        InlineKeyboardMarkup inlineKeyboardMarkup = new InlineKeyboardMarkup();
+//        inlineKeyboardMarkup.setKeyboard(rowList);
+//
+//        return inlineKeyboardMarkup;
+//    }
 
     public void refreshVariables(Long currentChatId, String currentMessageText) {
 

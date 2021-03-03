@@ -103,8 +103,10 @@
 </div>
 <script>
 
-  $.getJSON('http://localhost:8080/api/v1/goods/category/7', function (category) {
-    $.getJSON('http://localhost:8080/api/v1/goods/subcategory/8', function (subCategory) {
+  $.getJSON('http://localhost:8080/api/v1/goods/category/', function (category) {
+
+    $.getJSON('http://localhost:8080/api/v1/goods/subcategory/', function (subCategory) {
+
       $.getJSON('http://localhost:8080/api/v1/goods/type', function (type) {
 
         $(() => {

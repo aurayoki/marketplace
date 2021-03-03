@@ -162,7 +162,7 @@
   })
 
   function getCheckedCategory () {
-    var cats = []
+    let cats = []
     $.each($('#categoryId option:selected'), function () {
       let cat = {}
       cat.id = $(this).attr('id')

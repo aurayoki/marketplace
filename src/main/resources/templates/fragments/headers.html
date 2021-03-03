@@ -193,6 +193,13 @@
                                 <input class="btn btn-default btn-login" type="submit" value="Войти">
                             </form>
                         </div>
+
+                    </div>
+                    <div class="col px-md-5">
+                        <a class="link">
+                            <!--           временная ссылка, modelRecoveryPassword необходимо в дальнейшем вставить на страницу логина-->
+                            <div th:replace="fragments/recoverPassword::modalRecoveryPassword"></div>
+                        </a>
                     </div>
                 </div>
             </div>

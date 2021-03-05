@@ -1,4 +1,4 @@
-package com.jm.marketplace.service.telegram;
+package com.jm.marketplace.telegram;
 
 import com.jm.marketplace.dto.goods.AdvertisementDto;
 import com.jm.marketplace.dto.goods.GoodsCategoryDto;
@@ -159,8 +159,6 @@ public class Bot extends TelegramLongPollingBot {
                     editMessageText.setReplyMarkup(getInlineButtonsPagination(currentPage));
                     editMessageText.setChatId(currentChatId.toString());
                     execute(editMessageText);
-                    log.info(update.getCallbackQuery().getData());
-                    log.error(editMessageText.toString());
                 }
                 else if(update.getCallbackQuery().getData().contains("goods_")) {
                     Integer advertisementId = Integer.parseInt(update.getCallbackQuery().getData().substring(6));
@@ -170,8 +168,6 @@ public class Bot extends TelegramLongPollingBot {
                     editMessageText.setReplyMarkup(getInlineButtonsPagination(getPageAdvertisementById(advertisementId)));
                     editMessageText.setText(getAdvertisementText(advertisementId));
                     execute(editMessageText);
-                    log.info(update.getCallbackQuery().getData());
-                    log.error(editMessageText.toString());
                 }
 
             }

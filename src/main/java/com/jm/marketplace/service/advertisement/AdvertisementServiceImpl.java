@@ -2,13 +2,16 @@ package com.jm.marketplace.service.advertisement;
 
 import com.jm.marketplace.config.mapper.MapperFacade;
 import com.jm.marketplace.dao.AdvertisementDao;
+import com.jm.marketplace.dto.UserDto;
 import com.jm.marketplace.dto.goods.AdvertisementDto;
 import com.jm.marketplace.exception.AdvertisementNotFoundException;
 import com.jm.marketplace.filter.AdvertisementFilter;
 import com.jm.marketplace.model.Advertisement;
+import com.jm.marketplace.service.user.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -22,6 +25,7 @@ public class AdvertisementServiceImpl implements AdvertisementService {
     private final AdvertisementDao advertisementDao;
     private final MapperFacade mapperFacade;
     private AdvertisementFilter advertisementFilter;
+    private final UserService userService;
     private static final Integer SIZE_PAGE = 4;
 
     @Autowired
@@ -30,9 +34,10 @@ public class AdvertisementServiceImpl implements AdvertisementService {
     }
 
     @Autowired
-    public AdvertisementServiceImpl(AdvertisementDao advertisementDao, MapperFacade mapperFacade) {
+    public AdvertisementServiceImpl(AdvertisementDao advertisementDao, MapperFacade mapperFacade, UserService userService) {
         this.advertisementDao = advertisementDao;
         this.mapperFacade = mapperFacade;
+        this.userService = userService;
     }
 
     @Transactional(readOnly = true)
@@ -66,6 +71,8 @@ public class AdvertisementServiceImpl implements AdvertisementService {
     @Transactional
     @Override
     public void saveOrUpdate(AdvertisementDto advertisementDto) {
+        UserDto userDto = userService.findByEmail(SecurityContextHolder.getContext().getAuthentication().getName());
+        advertisementDto.setUser(userDto);
         advertisementDao.save(mapperFacade.map(advertisementDto, Advertisement.class));
     }
 

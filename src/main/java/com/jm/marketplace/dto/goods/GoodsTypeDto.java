@@ -12,5 +12,5 @@ import lombok.Setter;
 public class GoodsTypeDto {
     private Long id;
     private String name;
-    private GoodsSubcategoryDto goodsSubcategory;
+//    private GoodsSubcategoryDto goodsSubcategory;
 }

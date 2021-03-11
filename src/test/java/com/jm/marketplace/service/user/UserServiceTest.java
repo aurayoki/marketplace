@@ -33,7 +33,7 @@ public class UserServiceTest {
     @MockBean
     private UserDao userDaoMock;
 
-    UserDto userDto = new UserDto(1L, "Tommy", "Garposs", "1234", "asd@gmail.com",
+    UserDto userDto = new UserDto(null, "Tommy", "Garposs", "1234", "asd@gmail.com",
             new CityDto(1L, "Piter"), LocalDate.of(1992, 6, 2),
             "89679681234", "null", null, null, null, false, null);
 

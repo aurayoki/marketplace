@@ -10,6 +10,8 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
+import java.security.Principal;
+
 @Controller
 @RequestMapping(value = "/")
 public class MainController {
@@ -28,9 +30,7 @@ public class MainController {
     }
 
     @GetMapping
-    public String showMainPage(Model model,
-                               @RequestParam(value = "page", required = false, defaultValue = "0") Integer page,
-                               @RequestParam(value = "search", required = false) String search) {
+    public String showMainPage(Model model, @RequestParam(value = "page", required = false, defaultValue = "0") Integer page, @RequestParam(value = "search", required = false) String search) {
         model.addAttribute("userDto", new UserDto());
         model.addAttribute("cities", cityService.getAllCity());
         if(search!=null){

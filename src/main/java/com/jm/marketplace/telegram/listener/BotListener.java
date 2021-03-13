@@ -19,7 +19,6 @@ public class BotListener implements StateMachineListener<States, Event> {
 
     @Override
     public void stateEntered(final State<States, Event> state) {
-
     }
 
     @Override

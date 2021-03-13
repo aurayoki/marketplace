@@ -213,37 +213,6 @@ public class Bot extends TelegramLongPollingBot {
         replyKeyboardMarkup.setKeyboard(keyboard);
     }
 
-//    private String getAdvertisementForCurrentPage(int currentPage) {
-//
-//        List<AdvertisementDto> advertisementDtos = advertisementService.findAll();
-//
-//        StringBuilder sb = new StringBuilder();
-//
-//        int startPosition = 0;
-//
-//        if (currentPage > 1) {
-//            startPosition = (currentPage - 1) * ADVERTISEMENTS_IN_PAGE;
-//        }
-//
-//        int count = 1;
-//        for (int i = startPosition; i < advertisementDtos.size(); i++) {
-//            AdvertisementDto advertisementDto = advertisementDtos.get(i);
-//            sb.append(i + 1).append("\n");
-//            sb.append(advertisementDto.getName()).append("\n");
-//            sb.append(advertisementDto.getPrice()).append("\n");
-//            sb.append(advertisementDto.getDescription()).append("\n");
-//            sb.append("-------------------");
-//            sb.append("\n");
-//            if (count == ADVERTISEMENTS_IN_PAGE) {
-//                break;
-//            }
-//            count++;
-//        }
-//
-//        return sb.toString();
-//
-//    }
-
     private String getAdvertisementText(Integer advertisementId) {
         StringBuilder sb = new StringBuilder();
         AdvertisementDto advertisement = advertisementService.findById(advertisementId.longValue());
@@ -343,37 +312,6 @@ public class Bot extends TelegramLongPollingBot {
     }
 
 
-//    private InlineKeyboardMarkup getInlineButtonsPagination() {
-//
-//        List<AdvertisementDto> advertisementDtos = advertisementService.findAll();
-//        int pagesCount = (int) Math.ceil(advertisementDtos.size() / (double) ADVERTISEMENTS_IN_PAGE);
-//        List<InlineKeyboardButton> keyboardButtonsRowAdvertisment = new ArrayList<>();
-//        List<InlineKeyboardButton> keyboardButtonsRowPageNamber = new ArrayList<>();
-//
-//        for (int i = 1; i <= pagesCount; i++) {
-//            InlineKeyboardButton pageNumberButton = new InlineKeyboardButton();
-//            pageNumberButton.setText(String.valueOf(i));
-//            pageNumberButton.setCallbackData("apb_" + (i));
-//            keyboardButtonsRowPageNamber.add(pageNumberButton);
-//
-//        }
-//
-//        for(int i = 0; i < advertisementDtos.size(); i++) {
-//            InlineKeyboardButton advertisementButton = new InlineKeyboardButton();
-//            advertisementButton.setText(advertisementDtos.get(i).getName());
-//            advertisementButton.setCallbackData("goods_" + advertisementDtos.get(i).getId());
-//            keyboardButtonsRowAdvertisment.add(advertisementButton);
-//        }
-//
-//        List<List<InlineKeyboardButton>> rowList = new ArrayList<>();
-//        rowList.add(keyboardButtonsRowAdvertisment);
-//        rowList.add(keyboardButtonsRowPageNamber);
-//
-//        InlineKeyboardMarkup inlineKeyboardMarkup = new InlineKeyboardMarkup();
-//        inlineKeyboardMarkup.setKeyboard(rowList);
-//
-//        return inlineKeyboardMarkup;
-//    }
 
     public void refreshVariables(Long currentChatId, String currentMessageText) {
 

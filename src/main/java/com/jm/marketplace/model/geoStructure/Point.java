@@ -1,16 +1,16 @@
-package com.jm.marketplace.dto;
+package com.jm.marketplace.model.geoStructure;
 
 import lombok.*;
 
 /**
- * ДТО координаты
+ * Координаты
  */
 @Builder
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class PointDto {
+public class Point {
 
     /**
      * Долгота
@@ -22,3 +22,4 @@ public class PointDto {
      */
     private Double latitude;
 }
+

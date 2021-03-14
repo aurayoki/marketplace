@@ -1,25 +1,28 @@
 package com.jm.marketplace.util.geo;
 
-import com.jm.marketplace.dto.PointDto;
 import com.jm.marketplace.model.geoStructure.GeoStructure;
-import org.springframework.beans.factory.annotation.Value;
+import com.jm.marketplace.model.geoStructure.Point;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 
 import java.util.Objects;
 
+/**
+ *
+ * Сервис геокодирования позволяет получить географические координаты по его адресу.
+ * http://api.sputnik.ru/maps/geocoder - Сервис геокодирования.
+ */
 @Component
-public class GeoService {
+public class GeoCoderService {
 
-    @Value(value = "http://search.maps.sputnik.ru/search/addr?q=")
-    private String baseURL;
+    private static final String BASE_URL = "http://search.maps.sputnik.ru/search/addr?q=";
 
     private static final WebClient WEB_CLIENT = WebClient.create();
 
-    public PointDto getCoordinatesByCity(String city) {
+    public Point getCoordinatesByCity(String city) {
         GeoStructure.Coordinate coordinate = Objects.requireNonNull(WEB_CLIENT.get()
-                .uri(baseURL + city)
+                .uri(BASE_URL + city)
                 .accept(MediaType.APPLICATION_JSON)
                 .retrieve()
                 .bodyToMono(GeoStructure.class).block())
@@ -34,7 +37,7 @@ public class GeoService {
                 .findFirst()
                 .orElse(null);
 
-        return PointDto.builder()
+        return Point.builder()
                 .longitude(Objects.requireNonNull(coordinate).getCoordinates().get(0))
                 .latitude(Objects.requireNonNull(coordinate).getCoordinates().get(1))
                 .build();

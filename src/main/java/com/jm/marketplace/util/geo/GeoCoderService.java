@@ -14,15 +14,15 @@ import java.util.Objects;
  * http://api.sputnik.ru/maps/geocoder - Сервис геокодирования.
  */
 @Component
-public class GeoCoderService {
+public class GeoCoderService extends GeoGeneral {
 
-    private static final String BASE_URL = "http://search.maps.sputnik.ru/search/addr?q=";
-
-    private static final WebClient WEB_CLIENT = WebClient.create();
+    public GeoCoderService() {
+        super("http://search.maps.sputnik.ru/search/addr?q=");
+    }
 
     public Point getCoordinatesByCity(String city) {
-        GeoStructure.Coordinate coordinate = Objects.requireNonNull(WEB_CLIENT.get()
-                .uri(BASE_URL + city)
+        GeoStructure.Coordinate coordinate = Objects.requireNonNull(GeoGeneral.REQUEST_HEADERS_URI_SPEC
+                .uri(getBaseURL() + city)
                 .accept(MediaType.APPLICATION_JSON)
                 .retrieve()
                 .bodyToMono(GeoStructure.class).block())

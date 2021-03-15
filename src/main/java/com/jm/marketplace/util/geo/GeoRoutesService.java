@@ -8,21 +8,17 @@ import org.springframework.web.reactive.function.client.WebClient;
 import java.util.Objects;
 
 /**
- *
  * Сервис позволяет получить дистанцию в МЕТРАХ между несколькими адресами.
  * http://api.sputnik.ru/maps/routes - Сервис маршрутов.
  */
 @Component
-public class GeoRoutesService {
-
-    private static final String BASE_URL = "http://routes.maps.sputnik.ru/osrm/router/viaroute?";
-
-    private static final WebClient WEB_CLIENT = WebClient.create();
+public class GeoRoutesService extends GeoGeneral {
 
     private final GeoCoderService geoCoderService;
 
     @Autowired
     public GeoRoutesService(GeoCoderService geoCoderService) {
+        super("http://routes.maps.sputnik.ru/osrm/router/viaroute?");
         this.geoCoderService = geoCoderService;
     }
 
@@ -34,8 +30,8 @@ public class GeoRoutesService {
         String end_point = "loc=" + geoCoderService.getCoordinatesByCity(end_city).getLatitude()
                 + "," + geoCoderService.getCoordinatesByCity(end_city).getLongitude();
 
-        return  Objects.requireNonNull(WEB_CLIENT.get()
-                .uri(BASE_URL + start_point + "&" + end_point)
+        return Objects.requireNonNull(GeoGeneral.REQUEST_HEADERS_URI_SPEC
+                .uri(getBaseURL() + start_point + "&" + end_point)
                 .retrieve()
                 .bodyToMono(JsonNode.class)
                 .block())

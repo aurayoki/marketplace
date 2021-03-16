@@ -48,7 +48,7 @@ public class OneTimeDiscount extends QuartzJobBean {
 
     @Override
     protected void executeInternal(JobExecutionContext jobExecutionContext) throws JobExecutionException {
-        List<UserDto> userDtoList = userService.findAll();
+        List<UserDto> userDtoList = mapperFacade.mapAsList(userService.findAll(), UserDto.class);
         UserDto findFirstUser = userDtoList.get(getRandomNumber(0, userDtoList.size()));
         mailService.send(mapperFacade.map(findFirstUser, User.class), subject, message);
     }

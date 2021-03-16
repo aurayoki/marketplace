@@ -1,9 +1,12 @@
 package com.jm.marketplace.service.telegram;
 
+import com.jm.marketplace.config.mapper.MapperFacade;
+import com.jm.marketplace.dto.UserDto;
 import com.jm.marketplace.dto.goods.AdvertisementDto;
 import com.jm.marketplace.dto.goods.GoodsCategoryDto;
 import com.jm.marketplace.dto.goods.GoodsSubcategoryDto;
 import com.jm.marketplace.dto.goods.GoodsTypeDto;
+import com.jm.marketplace.model.Advertisement;
 import com.jm.marketplace.service.advertisement.AdvertisementService;
 import com.jm.marketplace.service.goods.GoodsCategoryService;
 import com.jm.marketplace.service.goods.GoodsSubcategoryService;
@@ -68,6 +71,13 @@ public class Bot extends TelegramLongPollingBot {
 
     private InlineKeyboardMarkup inlineKeyboardMarkup = null;
 
+    private MapperFacade mapperFacade;
+
+    @Autowired
+    public void setMapperFacade(MapperFacade mapperFacade){
+        this.mapperFacade = mapperFacade;
+    }
+
     @Autowired
     public void setUserService(UserService userService) {
         this.userService = userService;
@@ -107,7 +117,7 @@ public class Bot extends TelegramLongPollingBot {
     }
 
     private List<AdvertisementDto> filter() {
-        return advertisementService.findAll(); //Заглушка для фильтра, сейчас возвращает все данные.
+        return mapperFacade.mapAsList(advertisementService.findAll(), AdvertisementDto.class); //Заглушка для фильтра, сейчас возвращает все данные.
     }
 
     @Override
@@ -185,7 +195,7 @@ public class Bot extends TelegramLongPollingBot {
 
     private void setMessage(SendMessage sendMessage) {
 
-        List<AdvertisementDto> advertisementDtos = advertisementService.findAll();
+        List<AdvertisementDto> advertisementDtos = mapperFacade.mapAsList(advertisementService.findAll(), AdvertisementDto.class);
         StringBuilder sb = new StringBuilder(advertisementDtos.size());
         int count = 1;
         for (AdvertisementDto advertisementDto : advertisementDtos) {
@@ -250,7 +260,7 @@ public class Bot extends TelegramLongPollingBot {
 
     private String getAdvertisementText(Integer advertisementId) {
         StringBuilder sb = new StringBuilder();
-        AdvertisementDto advertisement = advertisementService.findById(advertisementId.longValue());
+        AdvertisementDto advertisement = mapperFacade.map(advertisementService.findById(advertisementId.longValue()), AdvertisementDto.class);
         sb.append(advertisement.getName()).append("\n");
         sb.append(advertisement.getPrice()).append("\n");
         sb.append(advertisement.getPublication_date()).append("\n");
@@ -324,7 +334,7 @@ public class Bot extends TelegramLongPollingBot {
     }
 
     private List<InlineKeyboardButton> getInlineKeyboardButtonPagination() {
-        List<AdvertisementDto> advertisementDtos = advertisementService.findAll();
+        List<AdvertisementDto> advertisementDtos = mapperFacade.mapAsList(advertisementService.findAll(), AdvertisementDto.class);
         int pagesCount = (int) Math.ceil(advertisementDtos.size() / (double) ADVERTISEMENTS_IN_PAGE);
         List<InlineKeyboardButton> keyboardButtonsRowPageNamber = new ArrayList<>();
 
@@ -402,7 +412,7 @@ public class Bot extends TelegramLongPollingBot {
 
             stringBuilder.append("Выберите категорию (отправьте цифру)").append("\n");
 
-            List<GoodsCategoryDto> goodsCategoryDtos = goodsCategoryService.findAll();
+            List<GoodsCategoryDto> goodsCategoryDtos = mapperFacade.mapAsList(goodsCategoryService.findAll(), GoodsCategoryDto.class);
 
             for (int i = 0; i < goodsCategoryDtos.size(); i++) {
                 stringBuilder.append((i + 1)).append(". ").append(goodsCategoryDtos.get(i).getName()).append("\n");
@@ -413,11 +423,12 @@ public class Bot extends TelegramLongPollingBot {
         } else if (currentGoodAddStatusId == 1) {
 
             AdvertisementDto advertisementDto = usersNewAdvertisement.get(currentChatId);
-            advertisementDto.setUser(userService.findById(1L));
-            advertisementDto.setGoodsCategory(goodsCategoryService.findById(Long.parseLong(currentMessageText)));
+            advertisementDto.setUser(mapperFacade.map(userService.findById(1L), UserDto.class));
+            advertisementDto.setGoodsCategory(mapperFacade.map(goodsCategoryService.findById(Long.parseLong(currentMessageText)), GoodsCategoryDto.class));
             usersNewAdvertisement.put(currentChatId, advertisementDto);
 
-            List<GoodsSubcategoryDto> goodsSubcategoryDtos = goodsSubcategoryService.findByGoodsCategoryId(Long.parseLong(currentMessageText));
+            List<GoodsSubcategoryDto> goodsSubcategoryDtos = mapperFacade.mapAsList(goodsSubcategoryService.
+                    findByGoodsCategoryId(Long.parseLong(currentMessageText)), GoodsSubcategoryDto.class);
 
             stringBuilder.append("Выберите подкатегорию (отправьте цифру)").append("\n");
 
@@ -430,10 +441,10 @@ public class Bot extends TelegramLongPollingBot {
         } else if (currentGoodAddStatusId == 2) {
 
             AdvertisementDto advertisementDto = usersNewAdvertisement.get(currentChatId);
-            advertisementDto.setGoodsSubcategory(goodsSubcategoryService.findById(Long.parseLong(currentMessageText)));
+            advertisementDto.setGoodsSubcategory(mapperFacade.map(goodsSubcategoryService.findById(Long.parseLong(currentMessageText)), GoodsSubcategoryDto.class));
             usersNewAdvertisement.put(currentChatId, advertisementDto);
 
-            List<GoodsTypeDto> goodsTypeDtos = goodsTypeService.findByGoodsSubcategoryId(Long.parseLong(currentMessageText));
+            List<GoodsTypeDto> goodsTypeDtos = mapperFacade.mapAsList(goodsTypeService.findByGoodsSubcategoryId(Long.parseLong(currentMessageText)), GoodsTypeDto.class);
 
             stringBuilder.append("Выберите тип товара (отправьте цифру)").append("\n");
 
@@ -446,7 +457,7 @@ public class Bot extends TelegramLongPollingBot {
         } else if (currentGoodAddStatusId == 3) {
 
             AdvertisementDto advertisementDto = usersNewAdvertisement.get(currentChatId);
-            advertisementDto.setGoodsType(goodsTypeService.findById(Long.parseLong(currentMessageText)));
+            advertisementDto.setGoodsType(mapperFacade.map(goodsTypeService.findById(Long.parseLong(currentMessageText)), GoodsTypeDto.class));
             usersNewAdvertisement.put(currentChatId, advertisementDto);
 
             stringBuilder.append("Введите название товара").append("\n");
@@ -477,7 +488,7 @@ public class Bot extends TelegramLongPollingBot {
             AdvertisementDto advertisementDto = usersNewAdvertisement.get(currentChatId);
             advertisementDto.setPrice(Integer.parseInt(currentMessageText));
 
-            advertisementService.saveOrUpdate(advertisementDto); //  в данный момент при добавлении в базу дает ошибку
+            advertisementService.saveOrUpdate(mapperFacade.map(advertisementDto, Advertisement.class)); //  в данный момент при добавлении в базу дает ошибку
 
             stringBuilder.append("Объявление добавлено!").append("\n");
 

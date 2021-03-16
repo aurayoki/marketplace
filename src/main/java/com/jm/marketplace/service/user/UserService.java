@@ -9,23 +9,23 @@ import java.util.List;
 
 public interface UserService extends UserDetailsService {
 
-    void saveUser (UserDto userDto);
+    void saveUser (User user);
 
     List<User> findUserByBirthday(LocalDate date);
 
-    List<UserDto> findAll();
+    List<User> findAll();
 
-    UserDto findById(Long id);
+    User findById(Long id);
 
     void deleteById(Long id);
 
-    UserDto findByEmail(String email);
+    User findByEmail(String email);
 
     boolean checkByEmail(String email);
 
-    UserDto findByPhone(String phone);
+    User findByPhone(String phone);
 
-    void activateUser(UserDto userDto);
+    void activateUser(User user);
 
-    UserDto findByUniqueCode(String uniqueCode);
+    User findByUniqueCode(String uniqueCode);
 }

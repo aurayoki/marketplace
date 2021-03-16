@@ -1,6 +1,8 @@
 package com.jm.marketplace.controller.rest;
 
+import com.jm.marketplace.config.mapper.MapperFacade;
 import com.jm.marketplace.dto.UserDto;
+import com.jm.marketplace.model.User;
 import com.jm.marketplace.service.user.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -22,34 +24,36 @@ import java.util.List;
 public class UserRestController {
 
     private final UserService userService;
+    private MapperFacade mapperFacade;
 
     @Autowired
-    public UserRestController(UserService userService) {
+    public UserRestController(UserService userService, MapperFacade mapperFacade) {
         this.userService = userService;
+        this.mapperFacade = mapperFacade;
     }
 
     @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(HttpStatus.OK)
     public List<UserDto> showAllUsers() {
-        return userService.findAll();
+        return mapperFacade.mapAsList(userService.findAll(), UserDto.class);
     }
 
     @GetMapping(value = "{id}", produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(HttpStatus.OK)
     public UserDto getUser(@PathVariable(name = "id") Long id) {
-        return userService.findById(id);
+        return mapperFacade.map(userService.findById(id), UserDto.class);
     }
 
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(HttpStatus.CREATED)
     public void addNewUser(@RequestBody UserDto userDto) {
-        userService.saveUser(userDto);
+        userService.saveUser(mapperFacade.map(userDto, User.class));
     }
 
     @PutMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(HttpStatus.CREATED)
     public void editUser(@RequestBody UserDto userDto) {
-        userService.saveUser(userDto);
+        userService.saveUser(mapperFacade.map(userDto, User.class));
     }
 
     @DeleteMapping(value = "{id}")

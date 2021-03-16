@@ -8,5 +8,8 @@ public enum States {
     ADD_CATEGORY,
     ADD_SUBCATEGORY,
     ADD_TYPE,
+    ADD_DESCRIPTION,
+    ADD_PRICE,
+    ADD_NAME,
     SAVE;
 }

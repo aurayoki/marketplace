@@ -40,7 +40,7 @@ public class BotServiceImpl implements BotService{
     }
 
     @Override
-    public void addAdvertisement() {
+    public void addAdvertisement(Long idCategory, Long idSubcategory, Long idType, String description) {
 
     }
 

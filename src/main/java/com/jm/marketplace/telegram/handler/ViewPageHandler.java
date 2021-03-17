@@ -7,6 +7,7 @@ import com.jm.marketplace.telegram.state.Event;
 import com.jm.marketplace.telegram.state.States;
 import com.jm.marketplace.telegram.util.AdvertisementUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.statemachine.StateMachine;
 import org.springframework.statemachine.config.StateMachineFactory;
 import org.springframework.statemachine.persist.StateMachinePersister;
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageText;
@@ -36,14 +37,25 @@ public class ViewPageHandler implements Handler {
 
     @Override
     public EditMessageText update(Update update) {
-        Integer currentPage = Integer.parseInt(update.getCallbackQuery().getData().substring(5));
+        try {
+            Integer currentPage = Integer.parseInt(update.getCallbackQuery().getData().substring(5));
 
-        EditMessageText editMessageText = new EditMessageText();
-        editMessageText.setMessageId(update.getCallbackQuery().getMessage().getMessageId());
-        editMessageText.setText(advertisementUtils.getAdvertisementTextForCurrentPage(currentPage));
-        editMessageText.setReplyMarkup(getInlineButtonsPagination(currentPage));
-        editMessageText.setChatId(update.getMessage().getChatId().toString());
-        return editMessageText;
+            final StateMachine<States, Event> stateMachine = stateMachineFactory.getStateMachine();
+            stateMachine.getExtendedState().getVariables().put("PAGE", currentPage);
+            stateMachine.sendEvent(Event.VIEW_PAGE);
+
+            EditMessageText editMessageText = new EditMessageText();
+            editMessageText.setMessageId(update.getCallbackQuery().getMessage().getMessageId());
+            editMessageText.setText(advertisementUtils.getAdvertisementTextForCurrentPage(currentPage));
+            editMessageText.setReplyMarkup(getInlineButtonsPagination(currentPage));
+            editMessageText.setChatId(update.getMessage().getChatId().toString());
+            return editMessageText;
+
+        }
+        catch (Exception e) {
+            e.getStackTrace();
+            return null;
+        }
     }
 
     private InlineKeyboardMarkup getInlineButtonsPagination(int currentPage) {

@@ -1,6 +1,7 @@
 package com.jm.marketplace.telegram.handler;
 
 import com.jm.marketplace.service.advertisement.AdvertisementService;
+import com.jm.marketplace.telegram.annotations.BotCommand;
 import com.jm.marketplace.telegram.state.Event;
 import com.jm.marketplace.telegram.state.States;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,6 +14,7 @@ import org.telegram.telegrambots.meta.api.objects.Update;
 
 import java.util.List;
 
+@BotCommand(command = "PAGE", message = "")
 public class ViewAdvertisementHandler implements Handler {
 
     private final StateMachinePersister<States, Event, String> persister;
@@ -27,7 +29,7 @@ public class ViewAdvertisementHandler implements Handler {
     }
 
     @Override
-    public List<EditMessageText> update(Update message) {
+    public EditMessageText update(Update message) {
         return null;
     }
 }

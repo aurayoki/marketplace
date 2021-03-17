@@ -1,14 +1,10 @@
 package com.jm.marketplace.service.telegram;
 
+import com.jm.marketplace.dto.UserDto;
 import com.jm.marketplace.dto.goods.AdvertisementDto;
-import com.jm.marketplace.dto.goods.GoodsCategoryDto;
-import com.jm.marketplace.dto.goods.GoodsSubcategoryDto;
-import com.jm.marketplace.dto.goods.GoodsTypeDto;
 import com.jm.marketplace.service.advertisement.AdvertisementService;
-import com.jm.marketplace.service.goods.GoodsCategoryService;
-import com.jm.marketplace.service.goods.GoodsSubcategoryService;
-import com.jm.marketplace.service.goods.GoodsTypeService;
-import com.jm.marketplace.service.user.UserService;
+import com.jm.marketplace.service.telegram.advertisement.AdvertisementGenerator;
+import com.jm.marketplace.service.telegram.buttons.TelegramBotInlineButtons;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -22,12 +18,10 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMa
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardRow;
+import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
 import javax.annotation.PostConstruct;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Component
@@ -52,40 +46,23 @@ public class Bot extends TelegramLongPollingBot {
 
     private final ReplyKeyboardMarkup replyKeyboardMarkup = new ReplyKeyboardMarkup();
     private final List<KeyboardRow> keyboard = new ArrayList<>();
+    private final TelegramBotInlineButtons inlineButtons = new TelegramBotInlineButtons();
 
     private AdvertisementService advertisementService;
 
     private HashMap<Long, Integer> currentGoodAddStatus = new HashMap<>();
     private HashMap<Long, AdvertisementDto> usersNewAdvertisement = new HashMap<>();
+    private HashMap<String, AdvertisementGenerator> mapAdvertisementSelect = new HashMap<>();
 
-    private GoodsCategoryService goodsCategoryService;
-    private GoodsSubcategoryService goodsSubcategoryService;
-    private GoodsTypeService goodsTypeService;
+    private int lastPageId;
+    private int backGoodsId;
 
-    private UserService userService;
 
     public static final int ADVERTISEMENTS_IN_PAGE = 2;
 
-    private InlineKeyboardMarkup inlineKeyboardMarkup = null;
 
-    @Autowired
-    public void setUserService(UserService userService) {
-        this.userService = userService;
-    }
-
-    @Autowired
-    public void setGoodsCategoryService(GoodsCategoryService goodsCategoryService) {
-        this.goodsCategoryService = goodsCategoryService;
-    }
-
-    @Autowired
-    public void setGoodsSubcategoryService(GoodsSubcategoryService goodsSubcategoryService) {
-        this.goodsSubcategoryService = goodsSubcategoryService;
-    }
-
-    @Autowired
-    public void setGoodsTypeService(GoodsTypeService goodsTypeService) {
-        this.goodsTypeService = goodsTypeService;
+    public void register(String code, AdvertisementGenerator advertisementGenerator) {
+        mapAdvertisementSelect.put(code, advertisementGenerator);
     }
 
     @Autowired
@@ -113,30 +90,28 @@ public class Bot extends TelegramLongPollingBot {
     @Override
     public void onUpdateReceived(Update update) {
         try {
-
-            SendMessage sendMessage = null;
             Long currentChatId = null;
-            String currentMessageText = null;
             String userName = null;
+            String homePageMessage = "Товары";
 
             // если пользователь отправил сообщение боту
             if (update.getCallbackQuery() == null) {
 
-                userName = update.getMessage().getFrom().getUserName();
+                userName = update.getMessage().getFrom().getFirstName();
                 currentChatId = update.getMessage().getChatId();
-                currentMessageText = update.getMessage().getText();
+                String currentMessageText = update.getMessage().getText();
 
                 refreshVariables(currentChatId, currentMessageText);
 
-                sendMessage = new SendMessage();
+                SendMessage sendMessage = new SendMessage();
                 sendMessage.setChatId(currentChatId.toString());
                 setButtons(sendMessage);
 
                 if (currentGoodAddStatus.containsKey(currentChatId)) {
                     sendMessage.setText(addNewAdvertisement(currentChatId, currentMessageText));
                 } else if (currentMessageText.equals("Список товаров постранично")) {
-                    sendMessage.setReplyMarkup(getInlineButtonsPagination(1));
-                    sendMessage.setText(getAdvertisementTextForCurrentPage(1));
+                    sendMessage.setReplyMarkup(getInlineButtonKeyboardMarkupByGoodsAndPages(1));
+                    sendMessage.setText(homePageMessage);
                 } else {
                     setMessage(sendMessage);
                 }
@@ -146,36 +121,40 @@ public class Bot extends TelegramLongPollingBot {
                 // если пользователь нажал кнопку привязанную к сообщению
             } else {
 
-                userName = update.getCallbackQuery().getFrom().getUserName();
+                userName = update.getCallbackQuery().getFrom().getFirstName();
                 currentChatId = update.getCallbackQuery().getMessage().getChatId();
 
-                if (update.getCallbackQuery().getData().contains("page_")) {
-
+                // То что будет выводится при переключении страниц page_
+                if (checkCallbackQueryContains(update, "page_")) {
                     Integer currentPage = Integer.parseInt(update.getCallbackQuery().getData().substring(5));
+                    lastPageId = currentPage;
 
-                    EditMessageText editMessageText = new EditMessageText();
-                    editMessageText.setMessageId(update.getCallbackQuery().getMessage().getMessageId());
-                    editMessageText.setText(getAdvertisementTextForCurrentPage(currentPage));
-                    editMessageText.setReplyMarkup(getInlineButtonsPagination(currentPage));
-                    editMessageText.setChatId(currentChatId.toString());
-                    execute(editMessageText);
-                    log.info(update.getCallbackQuery().getData());
-                    log.error(editMessageText.toString());
-                }
-                else if(update.getCallbackQuery().getData().contains("goods_")) {
+                    updateChat(update, currentChatId, homePageMessage,
+                            getInlineButtonKeyboardMarkupByGoodsAndPages(currentPage));
+
+                } else if(checkCallbackQueryContains(update, "goods_")) {
                     Integer advertisementId = Integer.parseInt(update.getCallbackQuery().getData().substring(6));
-                    EditMessageText editMessageText = new EditMessageText();
-                    editMessageText.setMessageId(update.getCallbackQuery().getMessage().getMessageId());
-                    editMessageText.setChatId(currentChatId.toString());
-                    editMessageText.setReplyMarkup(getInlineButtonsPagination(getPageAdvertisementById(advertisementId)));
-                    editMessageText.setText(getAdvertisementText(advertisementId));
-                    execute(editMessageText);
-                    log.info(update.getCallbackQuery().getData());
-                    log.error(editMessageText.toString());
+                    backGoodsId = advertisementId;
+
+                    String message = getInfoAboutAdvertisementByIdAdvertisement(advertisementId);
+                    updateChat(update, currentChatId, message, inlineButtons.createButtonsOnProductPage());
+
+                } else if (checkCallbackQueryContains(update, "button_back_goods")) {
+                    Integer pageId = Math.max(1, lastPageId);
+                    InlineKeyboardMarkup inlineKeyboard = getInlineButtonKeyboardMarkupByGoodsAndPages(pageId);
+
+                    comeBack(update, currentChatId, homePageMessage, inlineKeyboard);
+
+                } else if (checkCallbackQueryContains(update, "button_back_seller")) {
+                    InlineKeyboardMarkup inlineKeyboard = inlineButtons.createButtonsOnProductPage();
+                    String message = getInfoAboutAdvertisementByIdAdvertisement(Math.max(1, backGoodsId));
+
+                    comeBack(update, currentChatId, message, inlineKeyboard);
+
+                } else if (checkCallbackQueryContains(update, "pages_seller")) {
+                    updateChat(update, currentChatId, getInfoTheSellerToByIdAdvertisement(backGoodsId), inlineButtons.getBackButtonInlineKeyboardMarkup());
                 }
-
             }
-
             log.info("Send telegram message, username: {}", userName);
         } catch (Exception e) {
             log.warn("Error with send telegram message");
@@ -217,48 +196,64 @@ public class Bot extends TelegramLongPollingBot {
         replyKeyboardMarkup.setKeyboard(keyboard);
     }
 
-//    private String getAdvertisementForCurrentPage(int currentPage) {
-//
-//        List<AdvertisementDto> advertisementDtos = advertisementService.findAll();
-//
-//        StringBuilder sb = new StringBuilder();
-//
-//        int startPosition = 0;
-//
-//        if (currentPage > 1) {
-//            startPosition = (currentPage - 1) * ADVERTISEMENTS_IN_PAGE;
-//        }
-//
-//        int count = 1;
-//        for (int i = startPosition; i < advertisementDtos.size(); i++) {
-//            AdvertisementDto advertisementDto = advertisementDtos.get(i);
-//            sb.append(i + 1).append("\n");
-//            sb.append(advertisementDto.getName()).append("\n");
-//            sb.append(advertisementDto.getPrice()).append("\n");
-//            sb.append(advertisementDto.getDescription()).append("\n");
-//            sb.append("-------------------");
-//            sb.append("\n");
-//            if (count == ADVERTISEMENTS_IN_PAGE) {
-//                break;
-//            }
-//            count++;
-//        }
-//
-//        return sb.toString();
-//
-//    }
-
-    private String getAdvertisementText(Integer advertisementId) {
-        StringBuilder sb = new StringBuilder();
-        AdvertisementDto advertisement = advertisementService.findById(advertisementId.longValue());
-        sb.append(advertisement.getName()).append("\n");
-        sb.append(advertisement.getPrice()).append("\n");
-        sb.append(advertisement.getPublication_date()).append("\n");
-        sb.append(advertisement.getDescription()).append("\n");
-        sb.append(advertisement.getUser()).append("\n");
-        sb.append("\n");
-        return sb.toString();
+    /**
+     * Проверка на наличие в update, значения из параметра value
+     */
+    private boolean checkCallbackQueryContains(Update update, String value) {
+        return update.getCallbackQuery().getData().contains(value);
     }
+
+    /**
+     * Обновляет чат по заданным параметрам.
+     */
+    private void updateChat(Update update, Long chatId, String message, InlineKeyboardMarkup inlineKeyboard) throws TelegramApiException {
+        EditMessageText editMessageText = new EditMessageText();
+        editMessageText.setMessageId(update.getCallbackQuery().getMessage().getMessageId());
+        editMessageText.setChatId(chatId.toString());
+        editMessageText.setReplyMarkup(inlineKeyboard);
+        editMessageText.setText(message);
+        execute(editMessageText);
+
+        log.info(update.getCallbackQuery().getData());
+        log.error(editMessageText.toString());
+    }
+
+    /**
+     * Переход назад по кнопкам.
+     */
+    private void comeBack(Update update, Long chatId, String message, InlineKeyboardMarkup inlineKeyboard) throws TelegramApiException {
+        updateChat(update, chatId, message, inlineKeyboard);
+    }
+
+    /**
+     * Возвращает информацию об объявлении по id объявления.
+     */
+    private String getInfoAboutAdvertisementByIdAdvertisement(Integer advertisementId) {
+        StringBuilder advertisementInfo = new StringBuilder();
+        AdvertisementDto advertisement = advertisementService.findById(advertisementId.longValue());
+        advertisementInfo.append("Объявление: ").append(advertisement.getName()).append("\n");
+        advertisementInfo.append("Цена: ").append(advertisement.getPrice()).append(" рублей").append("\n");
+        advertisementInfo.append("Время публикаций объявления: ").append(advertisement.getPublication_date()).append("\n");
+        advertisementInfo.append("Описание объявления: ").append(advertisement.getDescription()).append("\n");
+        advertisementInfo.append("\n");
+        return advertisementInfo.toString();
+    }
+
+    /**
+     * Возвращает информацию о продавце по id объявления.
+     */
+    private String getInfoTheSellerToByIdAdvertisement(Integer advertisementId) {
+        StringBuilder sellerInfo = new StringBuilder();
+        AdvertisementDto advertisement = advertisementService.findById(advertisementId.longValue());
+        UserDto user = advertisement.getUser();
+        sellerInfo.append("Имя продавца: ").append(user.getFirstName()).append("\n");
+        sellerInfo.append("Фамилие продавца: ").append(user.getLastName()).append("\n");
+        sellerInfo.append("Email продавца: ").append(user.getEmail()).append("\n");
+        sellerInfo.append("Номер телефона: ").append(user.getPhone()).append("\n");
+        return sellerInfo.toString();
+    }
+
+
 
     private String getAdvertisementTextForCurrentPage(int currentPage) {
 
@@ -298,7 +293,7 @@ public class Bot extends TelegramLongPollingBot {
         return getAdvertisementPages().get(advertisementService.findById(Long.valueOf(id)));
     }
 
-    private  List<AdvertisementDto> getAdvertisementForCurrentPage(Integer currentPage) {
+    private List<AdvertisementDto> getAdvertisementForCurrentPage(Integer currentPage) {
         List<AdvertisementDto> advertisementDtos = getAdvertisementPages()
                 .entrySet()
                 .stream()
@@ -308,76 +303,13 @@ public class Bot extends TelegramLongPollingBot {
         return advertisementDtos;
     }
 
-
-    private List<InlineKeyboardButton> getInlineKeyboardButtonsAdvertosementForCurrentPage(Integer currentPage) {
-        List<AdvertisementDto> advertisementDtos = getAdvertisementForCurrentPage(currentPage);
-        List<InlineKeyboardButton> keyboardButtonsRow = new ArrayList<>();
-
-        for(AdvertisementDto advertisementDto : advertisementDtos) {
-            InlineKeyboardButton advertisementButton = new InlineKeyboardButton();
-            advertisementButton.setText(advertisementDto.getName());
-            advertisementButton.setCallbackData("goods_" + advertisementDto.getId());
-            keyboardButtonsRow.add(advertisementButton);
-       }
-
-        return keyboardButtonsRow;
+    /**
+     * Возвращает клавиатуру, из названия товаров, и страниц в виде кнопок.
+     */
+    public InlineKeyboardMarkup getInlineButtonKeyboardMarkupByGoodsAndPages(Integer currentPage) {
+        return inlineButtons.createInlineButtonsKeyboardMarkupByGoods(advertisementService.findAll().size(), getAdvertisementForCurrentPage(currentPage));
     }
 
-    private List<InlineKeyboardButton> getInlineKeyboardButtonPagination() {
-        List<AdvertisementDto> advertisementDtos = advertisementService.findAll();
-        int pagesCount = (int) Math.ceil(advertisementDtos.size() / (double) ADVERTISEMENTS_IN_PAGE);
-        List<InlineKeyboardButton> keyboardButtonsRowPageNamber = new ArrayList<>();
-
-        for (int i = 1; i <= pagesCount; i++) {
-            InlineKeyboardButton pageNumberButton = new InlineKeyboardButton();
-            pageNumberButton.setText(String.valueOf(i));
-            pageNumberButton.setCallbackData("page_" + (i));
-            keyboardButtonsRowPageNamber.add(pageNumberButton);
-        }
-       return keyboardButtonsRowPageNamber;
-    }
-
-    private InlineKeyboardMarkup getInlineButtonsPagination(Integer currentPage) {
-        List<List<InlineKeyboardButton>> rowList = new ArrayList<>();
-        rowList.add(getInlineKeyboardButtonsAdvertosementForCurrentPage(currentPage));
-        rowList.add(getInlineKeyboardButtonPagination());
-        InlineKeyboardMarkup inlineKeyboardMarkup = new InlineKeyboardMarkup();
-        inlineKeyboardMarkup.setKeyboard(rowList);
-        return inlineKeyboardMarkup;
-    }
-
-
-//    private InlineKeyboardMarkup getInlineButtonsPagination() {
-//
-//        List<AdvertisementDto> advertisementDtos = advertisementService.findAll();
-//        int pagesCount = (int) Math.ceil(advertisementDtos.size() / (double) ADVERTISEMENTS_IN_PAGE);
-//        List<InlineKeyboardButton> keyboardButtonsRowAdvertisment = new ArrayList<>();
-//        List<InlineKeyboardButton> keyboardButtonsRowPageNamber = new ArrayList<>();
-//
-//        for (int i = 1; i <= pagesCount; i++) {
-//            InlineKeyboardButton pageNumberButton = new InlineKeyboardButton();
-//            pageNumberButton.setText(String.valueOf(i));
-//            pageNumberButton.setCallbackData("apb_" + (i));
-//            keyboardButtonsRowPageNamber.add(pageNumberButton);
-//
-//        }
-//
-//        for(int i = 0; i < advertisementDtos.size(); i++) {
-//            InlineKeyboardButton advertisementButton = new InlineKeyboardButton();
-//            advertisementButton.setText(advertisementDtos.get(i).getName());
-//            advertisementButton.setCallbackData("goods_" + advertisementDtos.get(i).getId());
-//            keyboardButtonsRowAdvertisment.add(advertisementButton);
-//        }
-//
-//        List<List<InlineKeyboardButton>> rowList = new ArrayList<>();
-//        rowList.add(keyboardButtonsRowAdvertisment);
-//        rowList.add(keyboardButtonsRowPageNamber);
-//
-//        InlineKeyboardMarkup inlineKeyboardMarkup = new InlineKeyboardMarkup();
-//        inlineKeyboardMarkup.setKeyboard(rowList);
-//
-//        return inlineKeyboardMarkup;
-//    }
 
     public void refreshVariables(Long currentChatId, String currentMessageText) {
 
@@ -392,100 +324,17 @@ public class Bot extends TelegramLongPollingBot {
         }
     }
 
+    /**
+     * Ищем в map, по id чата, соответствующий объект, и вызываем с заданными параметрами, поведение зависит от конкретного объекта.
+     */
     public String addNewAdvertisement(Long currentChatId, String currentMessageText) {
-
         int currentGoodAddStatusId = currentGoodAddStatus.get(currentChatId);
+        StringBuilder builder = new StringBuilder();
 
-        StringBuilder stringBuilder = new StringBuilder();
+        mapAdvertisementSelect.get(String.valueOf(currentGoodAddStatusId))
+                .execute(builder, currentGoodAddStatus, currentChatId, currentMessageText, usersNewAdvertisement);
 
-        if (currentGoodAddStatusId == 0) {
-
-            stringBuilder.append("Выберите категорию (отправьте цифру)").append("\n");
-
-            List<GoodsCategoryDto> goodsCategoryDtos = goodsCategoryService.findAll();
-
-            for (int i = 0; i < goodsCategoryDtos.size(); i++) {
-                stringBuilder.append((i + 1)).append(". ").append(goodsCategoryDtos.get(i).getName()).append("\n");
-            }
-
-            currentGoodAddStatus.put(currentChatId, currentGoodAddStatusId + 1);
-
-        } else if (currentGoodAddStatusId == 1) {
-
-            AdvertisementDto advertisementDto = usersNewAdvertisement.get(currentChatId);
-            advertisementDto.setUser(userService.findById(1L));
-            advertisementDto.setGoodsCategory(goodsCategoryService.findById(Long.parseLong(currentMessageText)));
-            usersNewAdvertisement.put(currentChatId, advertisementDto);
-
-            List<GoodsSubcategoryDto> goodsSubcategoryDtos = goodsSubcategoryService.findByGoodsCategoryId(Long.parseLong(currentMessageText));
-
-            stringBuilder.append("Выберите подкатегорию (отправьте цифру)").append("\n");
-
-            for (int i = 0; i < goodsSubcategoryDtos.size(); i++) {
-                stringBuilder.append((i + 1)).append(". ").append(goodsSubcategoryDtos.get(i).getName()).append("\n");
-            }
-
-            currentGoodAddStatus.put(currentChatId, currentGoodAddStatusId + 1);
-
-        } else if (currentGoodAddStatusId == 2) {
-
-            AdvertisementDto advertisementDto = usersNewAdvertisement.get(currentChatId);
-            advertisementDto.setGoodsSubcategory(goodsSubcategoryService.findById(Long.parseLong(currentMessageText)));
-            usersNewAdvertisement.put(currentChatId, advertisementDto);
-
-            List<GoodsTypeDto> goodsTypeDtos = goodsTypeService.findByGoodsSubcategoryId(Long.parseLong(currentMessageText));
-
-            stringBuilder.append("Выберите тип товара (отправьте цифру)").append("\n");
-
-            for (int i = 0; i < goodsTypeDtos.size(); i++) {
-                stringBuilder.append((i + 1)).append(". ").append(goodsTypeDtos.get(i).getName()).append("\n");
-            }
-
-            currentGoodAddStatus.put(currentChatId, currentGoodAddStatusId + 1);
-
-        } else if (currentGoodAddStatusId == 3) {
-
-            AdvertisementDto advertisementDto = usersNewAdvertisement.get(currentChatId);
-            advertisementDto.setGoodsType(goodsTypeService.findById(Long.parseLong(currentMessageText)));
-            usersNewAdvertisement.put(currentChatId, advertisementDto);
-
-            stringBuilder.append("Введите название товара").append("\n");
-
-            currentGoodAddStatus.put(currentChatId, currentGoodAddStatusId + 1);
-
-        } else if (currentGoodAddStatusId == 4) {
-
-            AdvertisementDto advertisementDto = usersNewAdvertisement.get(currentChatId);
-            advertisementDto.setName(currentMessageText);
-
-            stringBuilder.append("Введите описание товара").append("\n");
-
-            currentGoodAddStatus.put(currentChatId, currentGoodAddStatusId + 1);
-
-        } else if (currentGoodAddStatusId == 5) {
-
-            AdvertisementDto advertisementDto = usersNewAdvertisement.get(currentChatId);
-            advertisementDto.setDescription(currentMessageText);
-            usersNewAdvertisement.put(currentChatId, advertisementDto);
-
-            stringBuilder.append("Введите цену товара").append("\n");
-
-            currentGoodAddStatus.put(currentChatId, currentGoodAddStatusId + 1);
-
-        } else if (currentGoodAddStatusId == 6) {
-
-            AdvertisementDto advertisementDto = usersNewAdvertisement.get(currentChatId);
-            advertisementDto.setPrice(Integer.parseInt(currentMessageText));
-
-            advertisementService.saveOrUpdate(advertisementDto); //  в данный момент при добавлении в базу дает ошибку
-
-            stringBuilder.append("Объявление добавлено!").append("\n");
-
-            currentGoodAddStatus.remove(currentChatId);
-            usersNewAdvertisement.remove(currentChatId);
-
-        }
-        return stringBuilder.toString();
+        return builder.toString();
     }
 
 }

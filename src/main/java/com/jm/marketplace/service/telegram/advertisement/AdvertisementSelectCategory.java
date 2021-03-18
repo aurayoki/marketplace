@@ -1,6 +1,7 @@
 package com.jm.marketplace.service.telegram.advertisement;
 
 import com.jm.marketplace.dto.goods.GoodsCategoryDto;
+import com.jm.marketplace.model.goods.GoodsCategory;
 import com.jm.marketplace.service.goods.GoodsCategoryService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -31,7 +32,7 @@ public class AdvertisementSelectCategory implements AdvertisementGenerator {
     public void execute(StringBuilder builder, HashMap<Long, Integer> currentGoodsStatus, Long chatId, Object ...objects) {
         builder.append("Выберите категорию (отправьте цифру)").append("\n");
 
-        List<GoodsCategoryDto> goodsCategoryDtos = goodsCategoryService.findAll();
+        List<GoodsCategory> goodsCategoryDtos = goodsCategoryService.findAll();
 
         for (int i = 0; i < goodsCategoryDtos.size(); i++) {
             builder.append((i + 1)).append(". ").append(goodsCategoryDtos.get(i).getName()).append("\n");

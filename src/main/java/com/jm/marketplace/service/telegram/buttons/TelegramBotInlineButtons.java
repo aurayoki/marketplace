@@ -1,6 +1,6 @@
 package com.jm.marketplace.service.telegram.buttons;
 
-import com.jm.marketplace.dto.goods.AdvertisementDto;
+import com.jm.marketplace.model.Advertisement;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
@@ -113,7 +113,7 @@ public class TelegramBotInlineButtons {
      * @param advertisementDtoFullSize - количество товаров.
      * @param advertisementDtoListPage - товары конкретной страницы.
      */
-    public InlineKeyboardMarkup createInlineButtonsKeyboardMarkupByGoods(int advertisementDtoFullSize, List<AdvertisementDto> advertisementDtoListPage) {
+    public InlineKeyboardMarkup createInlineButtonsKeyboardMarkupByGoods(int advertisementDtoFullSize, List<Advertisement> advertisementDtoListPage) {
         String[] textButton = getProductNamesInArray(advertisementDtoListPage);
         String[] callbackData = getProductIdInArray(advertisementDtoListPage);
         addPrefixGoodsToId(callbackData);
@@ -129,7 +129,7 @@ public class TelegramBotInlineButtons {
         }
     }
 
-    private String[] getProductIdInArray(List<AdvertisementDto> advertisementDtoList) {
+    private String[] getProductIdInArray(List<Advertisement> advertisementDtoList) {
         String[] productId = new String[advertisementDtoList.size()];
         for (int i = 0; i < advertisementDtoList.size(); i++) {
             productId[i] = String.valueOf(advertisementDtoList.get(i).getId());
@@ -137,7 +137,7 @@ public class TelegramBotInlineButtons {
         return productId;
     }
 
-    private String[] getProductNamesInArray(List<AdvertisementDto> advertisementDtoList) {
+    private String[] getProductNamesInArray(List<Advertisement> advertisementDtoList) {
         String[] productNames = new String[advertisementDtoList.size()];
         for (int i = 0; i < advertisementDtoList.size(); i++) {
             productNames[i] = advertisementDtoList.get(i).getName();

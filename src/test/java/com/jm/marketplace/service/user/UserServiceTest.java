@@ -1,5 +1,6 @@
 package com.jm.marketplace.service.user;
 
+import com.jm.marketplace.config.mapper.MapperFacade;
 import com.jm.marketplace.dao.UserDao;
 import com.jm.marketplace.dto.CityDto;
 import com.jm.marketplace.dto.UserDto;
@@ -30,6 +31,9 @@ public class UserServiceTest {
     @Autowired
     private UserService userService;
 
+    @Autowired
+    private MapperFacade mapperFacade;
+
     @MockBean
     private UserDao userDaoMock;
 
@@ -44,7 +48,7 @@ public class UserServiceTest {
     @Test
     void findByEmailShouldGetByEmail() {
         given(userDaoMock.findByEmail(userTest.getEmail())).willReturn(Optional.of(userTest));
-        UserDto userDto = userService.findByEmail(userTest.getEmail());
+        UserDto userDto = mapperFacade.map(userService.findByEmail(userTest.getEmail()), UserDto.class);
 
         assertThat(userDto.getEmail()).isEqualTo(userTest.getEmail());
 
@@ -87,7 +91,7 @@ public class UserServiceTest {
     @Test
     void findByIdShouldGetById() {
         given(userDaoMock.findById(userTest.getId())).willReturn(Optional.of(userTest));
-        UserDto user = userService.findById(userTest.getId());
+        UserDto user = mapperFacade.map(userService.findById(userTest.getId()), UserDto.class);
 
         assertThat(user.getId()).isEqualTo(userTest.getId());
 
@@ -97,7 +101,7 @@ public class UserServiceTest {
     @Test
     void findByPhoneShouldGetByPhone() {
         given(userDaoMock.findByPhone(userTest.getPhone())).willReturn(Optional.of(userTest));
-        UserDto userDto = userService.findByPhone(userTest.getPhone());
+        UserDto userDto = mapperFacade.map(userService.findByPhone(userTest.getPhone()), UserDto.class);
 
         assertThat(userDto.getPhone()).isEqualTo(userTest.getPhone());
 
@@ -114,7 +118,7 @@ public class UserServiceTest {
 
     @Test
     void saveUser() {
-        userService.saveUser(userDto);
+        userService.saveUser(mapperFacade.map(userDto, User.class));
 
         verify(userDaoMock, times(1)).save(any(User.class));
     }
@@ -122,7 +126,7 @@ public class UserServiceTest {
     @Test
     void checkByEmail() {
         given(userDaoMock.findByEmail(userTest.getEmail())).willReturn(Optional.of(userTest));
-        UserDto userDto = userService.findByEmail(userTest.getEmail());
+        UserDto userDto = mapperFacade.map(userService.findByEmail(userTest.getEmail()), UserDto.class);
 
         assertTrue(userService.checkByEmail(userDto.getEmail()));
 

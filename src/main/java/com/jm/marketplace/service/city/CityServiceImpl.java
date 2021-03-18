@@ -12,28 +12,25 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 
 @Service
-public class CityServiceImpl implements CityService{
+public class CityServiceImpl implements CityService {
 
     private final CityDao cityDao;
-    private final MapperFacade mapperFacade;
 
     @Autowired
-    public CityServiceImpl(CityDao cityDao, MapperFacade mapperFacade) {
+    public CityServiceImpl(CityDao cityDao) {
         this.cityDao = cityDao;
-        this.mapperFacade = mapperFacade;
     }
 
     @Transactional(readOnly = true)
     @Override
-    public List<CityDto> getAllCity() {
-        return mapperFacade.mapAsList(cityDao.findAll(), CityDto.class);
+    public List<City> getAllCity() {
+       return cityDao.findAll();
     }
 
     @Transactional(readOnly = true)
     @Override
-    public CityDto findById(Long id) {
-        City city = cityDao.findById(id).orElseThrow(() ->
+    public City findById(Long id) {
+      return  cityDao.findById(id).orElseThrow(()->
                 new CityNotFoundException(String.format("City not found by id: %s", id)));
-        return mapperFacade.map(city, CityDto.class);
     }
 }

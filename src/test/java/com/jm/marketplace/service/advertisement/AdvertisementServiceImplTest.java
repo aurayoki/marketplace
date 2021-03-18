@@ -1,5 +1,6 @@
 package com.jm.marketplace.service.advertisement;
 
+import com.jm.marketplace.config.mapper.MapperFacade;
 import com.jm.marketplace.dao.AdvertisementDao;
 import com.jm.marketplace.dto.goods.AdvertisementDto;
 import com.jm.marketplace.exception.AdvertisementNotFoundException;
@@ -36,6 +37,9 @@ class AdvertisementServiceImplTest {
     @MockBean
     AdvertisementFilter advertisementFilter;
 
+    @MockBean
+    MapperFacade mapperFacade;
+
     @Test
     void testFindAll() {
         given(advertisementDao.findAll()).willReturn(Collections.emptyList());
@@ -50,7 +54,7 @@ class AdvertisementServiceImplTest {
         advertisement.setId(1L);
 
         given(advertisementDao.findById(1L)).willReturn(Optional.of(advertisement));
-        AdvertisementDto byId = advertisementService.findById(1L);
+        AdvertisementDto byId = mapperFacade.map(advertisementService.findById(1L), AdvertisementDto.class);
         assertThat(byId.getId()).isEqualTo(advertisement.getId());
 
         verify(advertisementDao, times(1)).findById(advertisement.getId());
@@ -68,8 +72,7 @@ class AdvertisementServiceImplTest {
     void saveOrUpdate() {
         AdvertisementDto advertisementDto = new AdvertisementDto();
         advertisementDto.setName("Test");
-        advertisementService.saveOrUpdate(advertisementDto);
-
+        advertisementService.saveOrUpdate(mapperFacade.map(advertisementDto, Advertisement.class));
         verify(advertisementDao, times(1))
                 .save(any(Advertisement.class));
     }

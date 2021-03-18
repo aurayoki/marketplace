@@ -1,6 +1,7 @@
 package com.jm.marketplace.service.telegram.advertisement;
 
 import com.jm.marketplace.dto.goods.AdvertisementDto;
+import com.jm.marketplace.model.Advertisement;
 import com.jm.marketplace.service.advertisement.AdvertisementService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -28,8 +29,8 @@ public class AdvertisementAddingEnd implements AdvertisementGenerator {
      */
     @Override
     public void execute(StringBuilder builder, HashMap<Long, Integer> currentGoodsStatus, Long chatId, Object... objects) {
-        HashMap<Long, AdvertisementDto> usersNewAdvertisement = (HashMap<Long, AdvertisementDto>) objects[1];
-        AdvertisementDto advertisementDto = usersNewAdvertisement.get(chatId);
+        HashMap<Long, Advertisement> usersNewAdvertisement = (HashMap<Long, Advertisement>) objects[1];
+        Advertisement advertisementDto = usersNewAdvertisement.get(chatId);
         advertisementDto.setPrice(Integer.parseInt((String) objects[0]));
 
         advertisementService.saveOrUpdate(advertisementDto); //  в данный момент при добавлении в базу дает ошибку

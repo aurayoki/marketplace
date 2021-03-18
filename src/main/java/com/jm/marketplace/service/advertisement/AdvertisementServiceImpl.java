@@ -8,10 +8,13 @@ import com.jm.marketplace.exception.AdvertisementNotFoundException;
 import com.jm.marketplace.filter.AdvertisementFilter;
 import com.jm.marketplace.model.Advertisement;
 import com.jm.marketplace.model.User;
+import com.jm.marketplace.service.general.ReadWriteService;
+import com.jm.marketplace.service.general.ReadWriteServiceImpl;
 import com.jm.marketplace.service.user.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -21,9 +24,10 @@ import java.util.List;
 import java.util.Map;
 
 @Service
-public class AdvertisementServiceImpl implements AdvertisementService {
+public class AdvertisementServiceImpl extends ReadWriteServiceImpl<Advertisement, Long> implements AdvertisementService<Advertisement, Long> {
 
     private final AdvertisementDao advertisementDao;
+    private final ReadWriteService<Advertisement, Long> readWriteService;
     private AdvertisementFilter advertisementFilter;
     private final UserService userService;
     private static final Integer SIZE_PAGE = 4;
@@ -34,15 +38,17 @@ public class AdvertisementServiceImpl implements AdvertisementService {
     }
 
     @Autowired
-    public AdvertisementServiceImpl(AdvertisementDao advertisementDao, UserService userService) {
+    public AdvertisementServiceImpl(AdvertisementDao advertisementDao, ReadWriteService<Advertisement, Long> readWriteService, UserService userService) {
+        super();
         this.advertisementDao = advertisementDao;
+        this.readWriteService = readWriteService;
         this.userService = userService;
     }
 
     @Transactional(readOnly = true)
     @Override
     public List<Advertisement> findAll() {
-        return advertisementDao.findAll();
+        return readWriteService.findAll();
     }
 
     @Transactional(readOnly = true)
@@ -61,7 +67,7 @@ public class AdvertisementServiceImpl implements AdvertisementService {
     @Transactional(readOnly = true)
     @Override
     public Advertisement findById(Long id) {
-        return advertisementDao.findById(id).orElseThrow(() ->
+        return jpaRepository.findById(id).orElseThrow(() ->
                 new AdvertisementNotFoundException(String.format("Advertisement not found by id: %s", id)));
     }
 
@@ -76,7 +82,7 @@ public class AdvertisementServiceImpl implements AdvertisementService {
     @Transactional
     @Override
     public void deleteById(Long id) {
-        advertisementDao.deleteById(id);
+        jpaRepository.deleteById(id);
     }
 
     @Transactional(readOnly = true)

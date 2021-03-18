@@ -1,7 +1,8 @@
 package com.jm.marketplace.service.telegram;
 
-import com.jm.marketplace.dto.UserDto;
 import com.jm.marketplace.dto.goods.AdvertisementDto;
+import com.jm.marketplace.model.Advertisement;
+import com.jm.marketplace.model.User;
 import com.jm.marketplace.service.advertisement.AdvertisementService;
 import com.jm.marketplace.service.telegram.advertisement.AdvertisementGenerator;
 import com.jm.marketplace.service.telegram.buttons.TelegramBotInlineButtons;
@@ -16,12 +17,14 @@ import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageTe
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup;
-import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardRow;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
 import javax.annotation.PostConstruct;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Component
@@ -83,7 +86,7 @@ public class Bot extends TelegramLongPollingBot {
         return botToken;
     }
 
-    private List<AdvertisementDto> filter() {
+    private List<Advertisement> filter() {
         return advertisementService.findAll(); //Заглушка для фильтра, сейчас возвращает все данные.
     }
 
@@ -164,14 +167,14 @@ public class Bot extends TelegramLongPollingBot {
 
     private void setMessage(SendMessage sendMessage) {
 
-        List<AdvertisementDto> advertisementDtos = advertisementService.findAll();
-        StringBuilder sb = new StringBuilder(advertisementDtos.size());
+        List<Advertisement> advertisement = advertisementService.findAll();
+        StringBuilder sb = new StringBuilder(advertisement.size());
         int count = 1;
-        for (AdvertisementDto advertisementDto : advertisementDtos) {
+        for (Advertisement advertisement1 : advertisement) {
             sb.append(count).append("\n");
-            sb.append(advertisementDto.getName()).append("\n");
-            sb.append(advertisementDto.getPrice()).append("\n");
-            sb.append(advertisementDto.getDescription()).append("\n");
+            sb.append(advertisement1.getName()).append("\n");
+            sb.append(advertisement1.getPrice()).append("\n");
+            sb.append(advertisement1.getDescription()).append("\n");
             sb.append("-------------------");
             sb.append("\n");
             count++;
@@ -230,7 +233,7 @@ public class Bot extends TelegramLongPollingBot {
      */
     private String getInfoAboutAdvertisementByIdAdvertisement(Integer advertisementId) {
         StringBuilder advertisementInfo = new StringBuilder();
-        AdvertisementDto advertisement = advertisementService.findById(advertisementId.longValue());
+        Advertisement advertisement = advertisementService.findById(advertisementId.longValue());
         advertisementInfo.append("Объявление: ").append(advertisement.getName()).append("\n");
         advertisementInfo.append("Цена: ").append(advertisement.getPrice()).append(" рублей").append("\n");
         advertisementInfo.append("Время публикаций объявления: ").append(advertisement.getPublication_date()).append("\n");
@@ -244,8 +247,8 @@ public class Bot extends TelegramLongPollingBot {
      */
     private String getInfoTheSellerToByIdAdvertisement(Integer advertisementId) {
         StringBuilder sellerInfo = new StringBuilder();
-        AdvertisementDto advertisement = advertisementService.findById(advertisementId.longValue());
-        UserDto user = advertisement.getUser();
+        Advertisement advertisement = advertisementService.findById(advertisementId.longValue());
+        User user = advertisement.getUser();
         sellerInfo.append("Имя продавца: ").append(user.getFirstName()).append("\n");
         sellerInfo.append("Фамилие продавца: ").append(user.getLastName()).append("\n");
         sellerInfo.append("Email продавца: ").append(user.getEmail()).append("\n");
@@ -257,15 +260,15 @@ public class Bot extends TelegramLongPollingBot {
 
     private String getAdvertisementTextForCurrentPage(int currentPage) {
 
-        List<AdvertisementDto> advertisementDtos = getAdvertisementForCurrentPage(currentPage);
+        List<Advertisement> advertisements = getAdvertisementForCurrentPage(currentPage);
 
         StringBuilder sb = new StringBuilder();
 
-        for (AdvertisementDto advertisementDto : advertisementDtos) {
-            sb.append(advertisementDto.getName()).append("\n");
-            sb.append(advertisementDto.getPrice()).append("\n");
-            sb.append(advertisementDto.getDescription()).append("\n");
-            sb.append(advertisementDto.getUser()).append("\n");
+        for (Advertisement advertisement : advertisements) {
+            sb.append(advertisement.getName()).append("\n");
+            sb.append(advertisement.getPrice()).append("\n");
+            sb.append(advertisement.getDescription()).append("\n");
+            sb.append(advertisement.getUser()).append("\n");
             sb.append("-------------------");
             sb.append("\n");
         }
@@ -274,14 +277,14 @@ public class Bot extends TelegramLongPollingBot {
 
     }
 
-    private Map<AdvertisementDto, Integer> getAdvertisementPages() {
+    private Map<Advertisement, Integer> getAdvertisementPages() {
 
-        List<AdvertisementDto> advertisementDtos = filter();
-        Map<AdvertisementDto, Integer> advertisementsEachPage = new HashMap<>();
+        List<Advertisement> advertisements = filter();
+        Map<Advertisement, Integer> advertisementsEachPage = new HashMap<>();
         Integer pageNumber = 1;
         int count = 1;
-        for (int i = 0; i < advertisementDtos.size(); i++) {
-            advertisementsEachPage.put(advertisementDtos.get(i), pageNumber);
+        for (int i = 0; i < advertisements.size(); i++) {
+            advertisementsEachPage.put(advertisements.get(i), pageNumber);
             if((i+1) % ADVERTISEMENTS_IN_PAGE == 0) {
                 pageNumber++;
             }
@@ -293,14 +296,14 @@ public class Bot extends TelegramLongPollingBot {
         return getAdvertisementPages().get(advertisementService.findById(Long.valueOf(id)));
     }
 
-    private List<AdvertisementDto> getAdvertisementForCurrentPage(Integer currentPage) {
-        List<AdvertisementDto> advertisementDtos = getAdvertisementPages()
+    private List<Advertisement> getAdvertisementForCurrentPage(Integer currentPage) {
+        List<Advertisement> advertisements = getAdvertisementPages()
                 .entrySet()
                 .stream()
                 .filter(advertisement ->advertisement.getValue() == currentPage)
                 .map(Map.Entry::getKey)
                 .collect(Collectors.toList());
-        return advertisementDtos;
+        return advertisements;
     }
 
     /**

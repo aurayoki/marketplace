@@ -1,5 +1,6 @@
 package com.jm.marketplace.controller.rest.goodsCategory;
 
+import com.jm.marketplace.config.mapper.MapperFacade;
 import com.jm.marketplace.dto.goods.GoodsCategoryDto;
 import com.jm.marketplace.service.goods.GoodsCategoryService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,21 +15,23 @@ import java.util.List;
 public class GoodsCategoryRestController {
 
     private final GoodsCategoryService goodsCategoryService;
+    private MapperFacade mapperFacade;
 
     @Autowired
-    public GoodsCategoryRestController(GoodsCategoryService goodsCategoryService) {
+    public GoodsCategoryRestController(GoodsCategoryService goodsCategoryService, MapperFacade mapperFacade) {
         this.goodsCategoryService = goodsCategoryService;
+        this.mapperFacade = mapperFacade;
     }
 
     @GetMapping(value = "category", produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(HttpStatus.OK)
     public List<GoodsCategoryDto> getCategoryAll() {
-        return goodsCategoryService.findAll();
+        return mapperFacade.mapAsList(goodsCategoryService.findAll(), GoodsCategoryDto.class);
     }
 
     @GetMapping(value = "category/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(HttpStatus.OK)
     public GoodsCategoryDto getByIdCat(@PathVariable(name = "id") Long id) {
-        return goodsCategoryService.findById(id);
+        return mapperFacade.map(goodsCategoryService.findById(id),GoodsCategoryDto.class);
     }
 }

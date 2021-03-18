@@ -1,5 +1,6 @@
 package com.jm.marketplace.controller.rest.goodsCategory;
 
+import com.jm.marketplace.config.mapper.MapperFacade;
 import com.jm.marketplace.dto.goods.GoodsSubcategoryDto;
 import com.jm.marketplace.service.goods.GoodsSubcategoryService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,28 +15,30 @@ import java.util.List;
 public class GoodsSubcategoryRestController {
 
     private final GoodsSubcategoryService goodsSubcategoryService;
+    private MapperFacade mapperFacade;
 
     @Autowired
-    public GoodsSubcategoryRestController(GoodsSubcategoryService goodsSubcategoryService) {
+    public GoodsSubcategoryRestController(GoodsSubcategoryService goodsSubcategoryService, MapperFacade mapperFacade) {
         this.goodsSubcategoryService = goodsSubcategoryService;
+        this.mapperFacade = mapperFacade;
     }
 
     @GetMapping(value = "subcategory",produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(HttpStatus.OK)
     public List<GoodsSubcategoryDto> getSubcategoryAll() {
-        return goodsSubcategoryService.findAll();
+        return mapperFacade.mapAsList(goodsSubcategoryService.findAll(), GoodsSubcategoryDto.class);
     }
 
     // Написать корректное название метода.
     @GetMapping(value = "subcategory/good/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(HttpStatus.OK)
     public List<GoodsSubcategoryDto> getByGoodsCategoryId(@PathVariable(name = "id") Long id) {
-        return goodsSubcategoryService.findByGoodsCategoryId(id);
+        return mapperFacade.mapAsList(goodsSubcategoryService.findByGoodsCategoryId(id), GoodsSubcategoryDto.class);
     }
 
     @GetMapping(value = "subcategory/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(HttpStatus.OK)
     public GoodsSubcategoryDto getByIdSubCat(@PathVariable(name = "id") Long id) {
-        return goodsSubcategoryService.findById(id);
+        return mapperFacade.map(goodsSubcategoryService.findById(id), GoodsSubcategoryDto.class);
     }
 }

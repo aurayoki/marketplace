@@ -1,6 +1,8 @@
 package com.jm.marketplace.config.quartzconfig;
 
+import com.jm.marketplace.config.mapper.MapperFacade;
 import com.jm.marketplace.dto.goods.AdvertisementDto;
+import com.jm.marketplace.model.Advertisement;
 import com.jm.marketplace.service.advertisement.AdvertisementService;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -21,23 +23,26 @@ import java.util.stream.Collectors;
 public class RemovalOfAnAdvertisementFromPublication extends QuartzJobBean {
 
     private AdvertisementService advertisementService;
+    private MapperFacade mapperFacade;
 
     @Autowired
-    public RemovalOfAnAdvertisementFromPublication(AdvertisementService advertisementService) {
+    public RemovalOfAnAdvertisementFromPublication(AdvertisementService advertisementService, MapperFacade mapperFacade) {
         this.advertisementService = advertisementService;
+        this.mapperFacade = mapperFacade;
     }
 
     @Override
     protected void executeInternal(JobExecutionContext jobExecutionContext) throws JobExecutionException {
-        List<AdvertisementDto> advertisementDtoList = advertisementService.findAdvertisementByStatusActive(true)
-                .stream().filter(advertisementDto -> isFilterDateForStream(advertisementDto, 30)).collect(Collectors.toList());
+        List<AdvertisementDto> advertisementDtoList = mapperFacade.mapAsList(advertisementService.findAdvertisementByStatusActive(true), AdvertisementDto.class)
+                .stream().filter(advertisement -> isFilterDateForStream(advertisement, 30))
+                .collect(Collectors.toList());
 
         log.info("Запущена проверка объявлений");
         if (!advertisementDtoList.isEmpty()) {
             advertisementDtoList.forEach(advertisementDto -> {
                 advertisementDto.setActive(false);
                 advertisementDto.setExpired(false);
-                advertisementService.saveOrUpdate(advertisementDto);
+                advertisementService.saveOrUpdate(mapperFacade.map(advertisementDto, Advertisement.class));
             });
 
         }

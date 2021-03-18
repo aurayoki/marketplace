@@ -1,5 +1,6 @@
 package com.jm.marketplace.controller.rest.goodsCategory;
 
+import com.jm.marketplace.config.mapper.MapperFacade;
 import com.jm.marketplace.dto.goods.GoodsTypeDto;
 import com.jm.marketplace.service.goods.GoodsTypeService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,28 +15,30 @@ import java.util.List;
 public class GoodsTypeRestController {
 
     private final GoodsTypeService goodsTypeService;
+    private MapperFacade mapperFacade;
 
     @Autowired
-    public GoodsTypeRestController(GoodsTypeService goodsTypeService) {
+    public GoodsTypeRestController(GoodsTypeService goodsTypeService,MapperFacade mapperFacade) {
         this.goodsTypeService = goodsTypeService;
+        this.mapperFacade = mapperFacade;
     }
 
     @GetMapping(value = "type",produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(HttpStatus.OK)
     public List<GoodsTypeDto> getTypeAll() {
-        return goodsTypeService.findAll();
+        return mapperFacade.mapAsList(goodsTypeService.findAll(), GoodsTypeDto.class);
     }
 
     // Написать корректное название метода.
     @GetMapping(value = "type/good/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(HttpStatus.OK)
     public List<GoodsTypeDto> getByGoodsSubCategoryId(@PathVariable(name = "id") Long id) {
-        return goodsTypeService.findByGoodsSubcategoryId(id);
+        return mapperFacade.mapAsList(goodsTypeService.findByGoodsSubcategoryId(id), GoodsTypeDto.class);
     }
 
     @GetMapping(value = "type/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(HttpStatus.OK)
     public GoodsTypeDto getByIdType(@PathVariable(name = "id") Long id) {
-        return goodsTypeService.findById(id);
+        return mapperFacade.map(goodsTypeService.findById(id), GoodsTypeDto.class);
     }
 }

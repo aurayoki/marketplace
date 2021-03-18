@@ -1,15 +1,16 @@
 package com.jm.marketplace.service.goods;
 
 import com.jm.marketplace.dto.goods.GoodsTypeDto;
+import com.jm.marketplace.model.goods.GoodsType;
 
 import java.util.List;
 
 public interface GoodsTypeService {
 
-    List<GoodsTypeDto> findAll();
+    List<GoodsType> findAll();
 
-    List<GoodsTypeDto> findByGoodsSubcategoryId(Long id);
+    List<GoodsType> findByGoodsSubcategoryId(Long id);
 
-    GoodsTypeDto findById(Long id);
+    GoodsType findById(Long id);
 
 }

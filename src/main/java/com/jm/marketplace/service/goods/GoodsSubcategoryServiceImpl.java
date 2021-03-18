@@ -15,32 +15,30 @@ import java.util.List;
 public class GoodsSubcategoryServiceImpl implements GoodsSubcategoryService{
 
     private final GoodsSubcategoryDao goodsSubcategoryDao;
-    private final MapperFacade mapperFacade;
 
     @Autowired
-    public GoodsSubcategoryServiceImpl(GoodsSubcategoryDao goodsSubcategoryDao, MapperFacade mapperFacade) {
+    public GoodsSubcategoryServiceImpl(GoodsSubcategoryDao goodsSubcategoryDao) {
         this.goodsSubcategoryDao = goodsSubcategoryDao;
-        this.mapperFacade = mapperFacade;
     }
 
     @Transactional(readOnly = true)
     @Override
-    public List<GoodsSubcategoryDto> findAll() {
-        return mapperFacade.mapAsList(goodsSubcategoryDao.findAll(), GoodsSubcategoryDto.class);
+    public List<GoodsSubcategory> findAll() {
+        return goodsSubcategoryDao.findAll();
     }
 
     @Transactional(readOnly = true)
     @Override
-    public List<GoodsSubcategoryDto> findByGoodsCategoryId(Long id) {
-        return mapperFacade.mapAsList(goodsSubcategoryDao.findByGoodsCategoryId(id), GoodsSubcategoryDto.class);
+    public List<GoodsSubcategory> findByGoodsCategoryId(Long id) {
+        return goodsSubcategoryDao.findByGoodsCategoryId(id);
     }
 
     @Transactional(readOnly = true)
     @Override
-    public GoodsSubcategoryDto findById(Long id) {
+    public GoodsSubcategory findById(Long id) {
         GoodsSubcategory goodsSubcategory = goodsSubcategoryDao.findById(id).orElseThrow(() ->
                 new GoodsSubcategoryNotFoundException(String.format("Goods subcategory not found by id: %s", id)));
-        return mapperFacade.map(goodsSubcategory, GoodsSubcategoryDto.class);
+        return goodsSubcategory;
     }
 
 }

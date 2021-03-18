@@ -1,5 +1,6 @@
 package com.jm.marketplace.service.role;
 
+import com.jm.marketplace.config.mapper.MapperFacade;
 import com.jm.marketplace.dao.RoleDao;
 import com.jm.marketplace.dto.RoleDto;
 import com.jm.marketplace.exception.RoleNotFoundException;
@@ -23,6 +24,9 @@ public class RoleServiceTest {
     @Autowired
     private RoleService roleService;
 
+    @Autowired
+    private MapperFacade mapperFacade;
+
     @MockBean
     private RoleDao roleDaoMock;
 
@@ -31,7 +35,7 @@ public class RoleServiceTest {
     @Test
     void findByIdShouldGetById() {
         given(roleDaoMock.findById(role.getId())).willReturn(Optional.of(role));
-        RoleDto roleDto = roleService.findById(role.getId());
+        RoleDto roleDto = mapperFacade.map(roleService.findById(role.getId()), RoleDto.class);
         assertThat(roleDto.getId().compareTo(role.getId()));
         verify(roleDaoMock, times(1)).findById(role.getId());
     }
@@ -40,7 +44,7 @@ public class RoleServiceTest {
     @Test
     void findByNameShouldGetByName() {
         given(roleDaoMock.findByName(role.getName())).willReturn(Optional.of(role));
-        RoleDto roleDto = roleService.findByName(role.getName());
+        RoleDto roleDto = mapperFacade.map(roleService.findByName(role.getName()), RoleDto.class);
         assertThat(roleDto.getName()).isEqualTo(role.getName());
         verify(roleDaoMock, times(1)).findByName(role.getName());
     }

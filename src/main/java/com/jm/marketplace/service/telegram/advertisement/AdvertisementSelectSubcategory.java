@@ -2,6 +2,8 @@ package com.jm.marketplace.service.telegram.advertisement;
 
 import com.jm.marketplace.dto.goods.AdvertisementDto;
 import com.jm.marketplace.dto.goods.GoodsSubcategoryDto;
+import com.jm.marketplace.model.Advertisement;
+import com.jm.marketplace.model.goods.GoodsSubcategory;
 import com.jm.marketplace.service.goods.GoodsCategoryService;
 import com.jm.marketplace.service.goods.GoodsSubcategoryService;
 import com.jm.marketplace.service.user.UserService;
@@ -36,13 +38,13 @@ public class AdvertisementSelectSubcategory implements AdvertisementGenerator {
      */
     @Override
     public void execute(StringBuilder builder, HashMap<Long, Integer> currentGoodsStatus, Long chatId, Object ...objects) {
-        HashMap<Long, AdvertisementDto> usersNewAdvertisement = (HashMap<Long, AdvertisementDto>) objects[1];
-        AdvertisementDto advertisementDto = usersNewAdvertisement.get(chatId);
+        HashMap<Long, Advertisement> usersNewAdvertisement = (HashMap<Long, Advertisement>) objects[1];
+        Advertisement advertisementDto = usersNewAdvertisement.get(chatId);
         advertisementDto.setUser(userService.findById(1L));
         advertisementDto.setGoodsCategory(goodsCategoryService.findById(Long.parseLong(String.valueOf(objects[0]))));
         usersNewAdvertisement.put(chatId, advertisementDto);
 
-        List<GoodsSubcategoryDto> goodsSubcategoryDtos = goodsSubcategoryService.findByGoodsCategoryId(Long.parseLong(String.valueOf(objects[0])));
+        List<GoodsSubcategory> goodsSubcategoryDtos = goodsSubcategoryService.findByGoodsCategoryId(Long.parseLong(String.valueOf(objects[0])));
 
         builder.append("Выберите подкатегорию (отправьте цифру)").append("\n");
 

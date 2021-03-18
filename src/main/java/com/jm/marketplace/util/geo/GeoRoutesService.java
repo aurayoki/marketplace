@@ -1,9 +1,10 @@
 package com.jm.marketplace.util.geo;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.jm.marketplace.config.WebClientConfig;
+import com.jm.marketplace.model.geoStructure.Point;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.springframework.web.reactive.function.client.WebClient;
 
 import java.util.Objects;
 
@@ -12,26 +13,28 @@ import java.util.Objects;
  * http://api.sputnik.ru/maps/routes - Сервис маршрутов.
  */
 @Component
-public class GeoRoutesService extends GeoGeneral {
+public class GeoRoutesService {
 
-    private final GeoCoderService geoCoderService;
+    private static final String BASE_URL = "http://routes.maps.sputnik.ru/osrm/router/viaroute?";
+
+    private final WebClientConfig webClientConfig;
 
     @Autowired
-    public GeoRoutesService(GeoCoderService geoCoderService) {
-        super("http://routes.maps.sputnik.ru/osrm/router/viaroute?");
-        this.geoCoderService = geoCoderService;
+    public GeoRoutesService(WebClientConfig webClientConfig) {
+        this.webClientConfig = webClientConfig;
     }
 
-    public int getDistanceByCity(String start_city, String end_city) {
+    public int getDistanceByAddress(Point start_point, Point end_point) {
 
-        String start_point = "loc=" + geoCoderService.getCoordinatesByCity(start_city).getLatitude()
-                + "," + geoCoderService.getCoordinatesByCity(start_city).getLongitude();
+        String start = "loc=" + start_point.getLatitude()
+                + "," + start_point.getLongitude();
 
-        String end_point = "loc=" + geoCoderService.getCoordinatesByCity(end_city).getLatitude()
-                + "," + geoCoderService.getCoordinatesByCity(end_city).getLongitude();
+        String end = "loc=" + end_point.getLatitude()
+                + "," + end_point.getLongitude();
 
-        return Objects.requireNonNull(GeoGeneral.REQUEST_HEADERS_URI_SPEC
-                .uri(getBaseURL() + start_point + "&" + end_point)
+        return Objects.requireNonNull(webClientConfig
+                .requestHeadersUriSpec()
+                .uri(BASE_URL + start + "&" + end)
                 .retrieve()
                 .bodyToMono(JsonNode.class)
                 .block())

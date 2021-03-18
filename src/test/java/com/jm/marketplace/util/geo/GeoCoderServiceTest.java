@@ -7,7 +7,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 class GeoCoderServiceTest {
 
     @Test
-    void getCoordinatesByCity() {
+    void getCoordinatesByAddress() {
          /*
        Написать тесты
         */

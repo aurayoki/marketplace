@@ -7,7 +7,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 class GeoRoutesServiceTest {
 
     @Test
-    void getDistanceByCity() {
+    void getDistanceByAddress() {
          /*
        Написать тесты
         */

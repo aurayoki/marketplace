@@ -104,9 +104,9 @@
 </head>
 <body>
 
-<nav th:fragment="navbar" class="navbar navbar-expand-lg navbar-light">
+<nav th:fragment="navbar" class="navbar navbar-expand-lg" style="background: #f1f1f1">
     <div class="container">
-        <a class="navbar-brand text-white" href="#">Marketplace</a>
+        <a class="navbar-brand" style="color: #21252c" href="/">Marketplace</a>
         <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
                 aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
@@ -148,15 +148,29 @@
             </ul>
             <ul class="navbar-nav ml-auto">
                 <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle btn-group dropleft" href="#" id="navbarDropdown2" role="button"
+                    <a href="/profile/messages" class="nav-link btn-group">
+                        <img style="max-height: 25px; max-width: 25px" src="https://img.icons8.com/doodle/48/4a90e2/messaging-.png"/>
+                    </a>
+                </li>
+                <li class="nav-item dropdown" >
+                    <a sec:authorize="isAuthenticated()" href="#" class="nav-link btn-group" style="color: silver; font-weight: bolder">
+                         Мои объявления
+                    </a>
+                </li>
+                <li class="nav-item dropdown">
+                    <a sec:authorize="!isAuthenticated()" class="nav-link dropdown-toggle btn-group dropleft" href="#" id="navbarDropdown2" role="button"
+                           data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            Вход и регистрация
+                    </a>
+                    <a sec:authorize="isAuthenticated()" class="nav-link dropdown-toggle btn-group dropleft" href="#" id="navbarDropdown2" role="button"
                        data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                        Profile
+                        Профиль
                     </a>
                     <div class="dropdown-menu dropdown-menu-right" aria-labelledby="navbarDropdown2">
-                        <a class="dropdown-item" href="/user">Profile</a>
-                        <button type="button" class="dropdown-item" data-toggle="modal" data-target="#loginModal">Авторизоваться</button>
-                        <button type="button" class="dropdown-item" data-toggle="modal" data-target="#modalRegistration">Sing up</button>
-                        <a class="dropdown-item" href="/logout">logout</a>
+                        <a class="dropdown-item" href="/user">Профиль</a>
+                        <button type="button" class="dropdown-item" data-toggle="modal" data-target="#loginModal">Войти</button>
+                        <button type="button" class="dropdown-item" data-toggle="modal" data-target="#modalRegistration">Регистрация</button>
+                        <a class="dropdown-item" href="/logout">Выйти</a>
                     </div>
                 </li>
             </ul>

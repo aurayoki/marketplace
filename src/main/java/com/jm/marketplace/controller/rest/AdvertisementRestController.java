@@ -16,11 +16,11 @@ import java.util.List;
 @RequestMapping(value = "/api/v1/goods")
 public class AdvertisementRestController {
 
-    private final AdvertisementService advertisementService;
+    private final AdvertisementService<Advertisement, Long> advertisementService;
     private MapperFacade mapperFacade;
 
     @Autowired
-    public AdvertisementRestController(AdvertisementService advertisementService, MapperFacade mapperFacade) {
+    public AdvertisementRestController(AdvertisementService<Advertisement, Long> advertisementService, MapperFacade mapperFacade) {
         this.advertisementService = advertisementService;
         this.mapperFacade = mapperFacade;
     }

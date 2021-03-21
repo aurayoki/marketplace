@@ -3,6 +3,8 @@ package com.jm.marketplace.service.telegram.advertisement;
 import com.jm.marketplace.dto.goods.AdvertisementDto;
 import com.jm.marketplace.dto.goods.GoodsSubcategoryDto;
 import com.jm.marketplace.model.Advertisement;
+import com.jm.marketplace.model.User;
+import com.jm.marketplace.model.goods.GoodsCategory;
 import com.jm.marketplace.model.goods.GoodsSubcategory;
 import com.jm.marketplace.service.goods.GoodsCategoryService;
 import com.jm.marketplace.service.goods.GoodsSubcategoryService;
@@ -15,12 +17,12 @@ import java.util.List;
 
 @Component
 public class AdvertisementSelectSubcategory implements AdvertisementGenerator {
-    private GoodsCategoryService goodsCategoryService;
-    private GoodsSubcategoryService goodsSubcategoryService;
-    private UserService userService;
+    private final GoodsCategoryService<GoodsCategory, Long> goodsCategoryService;
+    private final GoodsSubcategoryService<GoodsSubcategory, Long> goodsSubcategoryService;
+    private final UserService<User, Long> userService;
 
     @Autowired
-    public AdvertisementSelectSubcategory(GoodsCategoryService goodsCategoryService, GoodsSubcategoryService goodsSubcategoryService, UserService userService) {
+    public AdvertisementSelectSubcategory(GoodsCategoryService<GoodsCategory, Long> goodsCategoryService, GoodsSubcategoryService<GoodsSubcategory, Long> goodsSubcategoryService, UserService<User, Long> userService) {
         this.goodsCategoryService = goodsCategoryService;
         this.goodsSubcategoryService = goodsSubcategoryService;
         this.userService = userService;
@@ -40,8 +42,8 @@ public class AdvertisementSelectSubcategory implements AdvertisementGenerator {
     public void execute(StringBuilder builder, HashMap<Long, Integer> currentGoodsStatus, Long chatId, Object ...objects) {
         HashMap<Long, Advertisement> usersNewAdvertisement = (HashMap<Long, Advertisement>) objects[1];
         Advertisement advertisementDto = usersNewAdvertisement.get(chatId);
-        advertisementDto.setUser(userService.findById(1L));
-        advertisementDto.setGoodsCategory(goodsCategoryService.findById(Long.parseLong(String.valueOf(objects[0]))));
+        advertisementDto.setUser(userService.findById(1L).get());
+        advertisementDto.setGoodsCategory(goodsCategoryService.findById(Long.parseLong(String.valueOf(objects[0]))).get());
         usersNewAdvertisement.put(chatId, advertisementDto);
 
         List<GoodsSubcategory> goodsSubcategoryDtos = goodsSubcategoryService.findByGoodsCategoryId(Long.parseLong(String.valueOf(objects[0])));

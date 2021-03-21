@@ -51,11 +51,11 @@ public class Bot extends TelegramLongPollingBot {
     private final List<KeyboardRow> keyboard = new ArrayList<>();
     private final TelegramBotInlineButtons inlineButtons = new TelegramBotInlineButtons();
 
-    private AdvertisementService advertisementService;
+    private AdvertisementService<Advertisement, Long> advertisementService;
 
-    private HashMap<Long, Integer> currentGoodAddStatus = new HashMap<>();
-    private HashMap<Long, AdvertisementDto> usersNewAdvertisement = new HashMap<>();
-    private HashMap<String, AdvertisementGenerator> mapAdvertisementSelect = new HashMap<>();
+    private final HashMap<Long, Integer> currentGoodAddStatus = new HashMap<>();
+    private final HashMap<Long, AdvertisementDto> usersNewAdvertisement = new HashMap<>();
+    private final HashMap<String, AdvertisementGenerator> mapAdvertisementSelect = new HashMap<>();
 
     private int lastPageId;
     private int backGoodsId;
@@ -69,7 +69,7 @@ public class Bot extends TelegramLongPollingBot {
     }
 
     @Autowired
-    public void setAdvertisementService(AdvertisementService advertisementService) {
+    public void setAdvertisementService(AdvertisementService<Advertisement, Long> advertisementService) {
         this.advertisementService = advertisementService;
     }
 
@@ -233,7 +233,7 @@ public class Bot extends TelegramLongPollingBot {
      */
     private String getInfoAboutAdvertisementByIdAdvertisement(Integer advertisementId) {
         StringBuilder advertisementInfo = new StringBuilder();
-        Advertisement advertisement = advertisementService.findById(advertisementId.longValue());
+        Advertisement advertisement = advertisementService.findById(advertisementId.longValue()).get();
         advertisementInfo.append("Объявление: ").append(advertisement.getName()).append("\n");
         advertisementInfo.append("Цена: ").append(advertisement.getPrice()).append(" рублей").append("\n");
         advertisementInfo.append("Время публикаций объявления: ").append(advertisement.getPublication_date()).append("\n");
@@ -247,7 +247,7 @@ public class Bot extends TelegramLongPollingBot {
      */
     private String getInfoTheSellerToByIdAdvertisement(Integer advertisementId) {
         StringBuilder sellerInfo = new StringBuilder();
-        Advertisement advertisement = advertisementService.findById(advertisementId.longValue());
+        Advertisement advertisement = advertisementService.findById(advertisementId.longValue()).get();
         User user = advertisement.getUser();
         sellerInfo.append("Имя продавца: ").append(user.getFirstName()).append("\n");
         sellerInfo.append("Фамилие продавца: ").append(user.getLastName()).append("\n");

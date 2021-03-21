@@ -1,6 +1,7 @@
 package com.jm.marketplace.config;
 
 import com.jm.marketplace.config.handler.SuccessUserHandler;
+import com.jm.marketplace.model.User;
 import com.jm.marketplace.service.user.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -19,11 +20,11 @@ import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 @PropertySource(value = "classpath:security.properties")
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
-    private UserService userService;
+    private UserService<User, Long> userService;
     private SuccessUserHandler successUserHandler;
 
     @Autowired
-    public void setUserService(UserService userService,
+    public void setUserService(UserService<User, Long> userService,
                                SuccessUserHandler successUserHandler) {
         this.userService = userService;
         this.successUserHandler = successUserHandler;

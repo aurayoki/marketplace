@@ -12,9 +12,11 @@ import com.jm.marketplace.exception.UserUniqueCodeNotFoundException;
 import com.jm.marketplace.model.City;
 import com.jm.marketplace.model.Role;
 import com.jm.marketplace.model.User;
+import com.jm.marketplace.service.general.ReadWriteService;
 import com.jm.marketplace.util.mail.MailService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -24,16 +26,14 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
-import java.util.Collection;
-import java.util.List;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
-public class UserServiceImpl implements UserService {
+public class UserServiceImpl implements UserService<User, Long> {
 
     private final UserDao userDao;
+    private final ReadWriteService<User, Long> readWriteService;
     private final RoleDao roleDao;
     private final PasswordEncoder passwordEncoder;
     @Value("${role.name.user}")
@@ -41,8 +41,9 @@ public class UserServiceImpl implements UserService {
     private final MailService mailService;
 
     @Autowired
-    public UserServiceImpl(UserDao userDao, RoleDao roleDao, PasswordEncoder passwordEncoder, MailService mailService) {
+    public UserServiceImpl(UserDao userDao, @Lazy ReadWriteService<User, Long> readWriteService, RoleDao roleDao, PasswordEncoder passwordEncoder, MailService mailService) {
         this.userDao = userDao;
+        this.readWriteService = readWriteService;
         this.roleDao = roleDao;
         this.passwordEncoder = passwordEncoder;
         this.mailService = mailService;
@@ -50,20 +51,20 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
-    public void saveUser(User user) {
+    public void saveOrUpdate(User user) {
         if (user.getId() == null) {
             processNewUser(user);
         } else {
             user = updateUser(user);
         }
-        userDao.save(user);
+        readWriteService.saveOrUpdate(user);
     }
 
     @Transactional(readOnly = true)
     @Override
-    public User findById(Long id) {
-     return userDao.findById(id).orElseThrow(() ->
-                new UserNotFoundException(String.format("User not found by id: %s", id)));
+    public Optional<User> findById(Long id) {
+        return Optional.ofNullable(readWriteService.findById(id).orElseThrow(() ->
+                new UserNotFoundException(String.format("User not found by id: %s", id))));
 
     }
 
@@ -76,13 +77,13 @@ public class UserServiceImpl implements UserService {
     @Transactional(readOnly = true)
     @Override
     public List<User> findAll() {
-        return userDao.findAll();
+        return readWriteService.findAll();
     }
 
     @Transactional
     @Override
     public void deleteById(Long id) {
-        userDao.deleteById(id);
+        readWriteService.deleteById(id);
     }
 
     @Transactional(readOnly = true)
@@ -108,7 +109,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public void activateUser(User user) {
         user.setActive(true);
-        saveUser(user);
+        saveOrUpdate(user);
     }
 
     @Override

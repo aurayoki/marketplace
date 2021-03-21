@@ -5,11 +5,12 @@ import lombok.NoArgsConstructor;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
+import java.util.Optional;
 
 @NoArgsConstructor
 @AllArgsConstructor
-public abstract class ReadWriteServiceImpl<T, K> implements ReadWriteService<T, K> {
-    protected JpaRepository<T, K> jpaRepository;
+public abstract class ReadWriteServiceImpl<T, ID> implements ReadWriteService<T, ID> {
+    protected JpaRepository<T, ID> jpaRepository;
 
     @Override
     public List<T> findAll() {
@@ -22,12 +23,12 @@ public abstract class ReadWriteServiceImpl<T, K> implements ReadWriteService<T, 
     }
 
     @Override
-    public void deleteById(T t) {
-        jpaRepository.delete(t);
+    public Optional<T> findById(ID id) {
+        return jpaRepository.findById(id);
     }
 
     @Override
-    public void saveUser(T t) {
-
+    public void deleteById(ID id) {
+        jpaRepository.deleteById(id);
     }
 }

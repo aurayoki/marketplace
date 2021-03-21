@@ -22,11 +22,11 @@ import java.util.stream.Collectors;
 @NoArgsConstructor
 public class RemovalOfAnAdvertisementFromPublication extends QuartzJobBean {
 
-    private AdvertisementService advertisementService;
+    private AdvertisementService<Advertisement, Long> advertisementService;
     private MapperFacade mapperFacade;
 
     @Autowired
-    public RemovalOfAnAdvertisementFromPublication(AdvertisementService advertisementService, MapperFacade mapperFacade) {
+    public RemovalOfAnAdvertisementFromPublication(AdvertisementService<Advertisement, Long> advertisementService, MapperFacade mapperFacade) {
         this.advertisementService = advertisementService;
         this.mapperFacade = mapperFacade;
     }

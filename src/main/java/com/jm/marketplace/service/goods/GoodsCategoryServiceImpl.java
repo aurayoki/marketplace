@@ -1,36 +1,47 @@
 package com.jm.marketplace.service.goods;
 
-import com.jm.marketplace.dao.GoodsCategoryDao;
 import com.jm.marketplace.exception.GoodsCategoryNotFoundException;
 import com.jm.marketplace.model.goods.GoodsCategory;
-import com.jm.marketplace.service.goods.GoodsCategoryService;
+import com.jm.marketplace.service.general.ReadWriteService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
-public class GoodsCategoryServiceImpl implements GoodsCategoryService {
+public class GoodsCategoryServiceImpl implements GoodsCategoryService<GoodsCategory, Long> {
 
-    private final GoodsCategoryDao goodsCategoryDao;
+    private final ReadWriteService<GoodsCategory, Long> readWriteService;
 
     @Autowired
-    public GoodsCategoryServiceImpl(GoodsCategoryDao goodsCategoryDao) {
-        this.goodsCategoryDao = goodsCategoryDao;
+    public GoodsCategoryServiceImpl(@Lazy ReadWriteService<GoodsCategory, Long> readWriteService) {
+        this.readWriteService = readWriteService;
     }
 
     @Transactional(readOnly = true)
     @Override
     public List<GoodsCategory> findAll() {
-        return goodsCategoryDao.findAll();
+        return readWriteService.findAll();
     }
 
     @Transactional(readOnly = true)
     @Override
-    public GoodsCategory findById(Long id) {
-        GoodsCategory goodsCategory = goodsCategoryDao.findById(id).orElseThrow(() ->
+    public Optional<GoodsCategory> findById(Long id) {
+        GoodsCategory goodsCategory = readWriteService.findById(id).orElseThrow(() ->
                 new GoodsCategoryNotFoundException(String.format("Goods category not found by id: %s", id)));
-        return goodsCategory;
+        return Optional.ofNullable(goodsCategory);
+    }
+
+    @Override
+    public void deleteById(Long id) {
+
+    }
+
+    @Override
+    public void saveOrUpdate(GoodsCategory goodsCategory) {
+
     }
 }

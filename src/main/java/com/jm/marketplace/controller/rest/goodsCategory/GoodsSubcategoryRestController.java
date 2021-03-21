@@ -2,6 +2,7 @@ package com.jm.marketplace.controller.rest.goodsCategory;
 
 import com.jm.marketplace.config.mapper.MapperFacade;
 import com.jm.marketplace.dto.goods.GoodsSubcategoryDto;
+import com.jm.marketplace.model.goods.GoodsSubcategory;
 import com.jm.marketplace.service.goods.GoodsSubcategoryService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -14,11 +15,11 @@ import java.util.List;
 @RequestMapping(value = "/api/v1/goods/")
 public class GoodsSubcategoryRestController {
 
-    private final GoodsSubcategoryService goodsSubcategoryService;
+    private final GoodsSubcategoryService<GoodsSubcategory, Long> goodsSubcategoryService;
     private MapperFacade mapperFacade;
 
     @Autowired
-    public GoodsSubcategoryRestController(GoodsSubcategoryService goodsSubcategoryService, MapperFacade mapperFacade) {
+    public GoodsSubcategoryRestController(GoodsSubcategoryService<GoodsSubcategory, Long> goodsSubcategoryService, MapperFacade mapperFacade) {
         this.goodsSubcategoryService = goodsSubcategoryService;
         this.mapperFacade = mapperFacade;
     }

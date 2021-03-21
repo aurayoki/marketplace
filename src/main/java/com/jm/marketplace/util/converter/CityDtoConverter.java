@@ -1,6 +1,7 @@
 package com.jm.marketplace.util.converter;
 
 import com.jm.marketplace.dto.CityDto;
+import com.jm.marketplace.model.City;
 import com.jm.marketplace.service.city.CityService;
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.core.convert.converter.ConditionalGenericConverter;
@@ -18,9 +19,9 @@ import java.util.Set;
 @Component
 public class CityDtoConverter implements ConditionalGenericConverter {
 
-    private final CityService cityService;
+    private final CityService<City,Long> cityService;
 
-    public CityDtoConverter(CityService cityService) {
+    public CityDtoConverter(CityService<City,Long> cityService) {
         this.cityService = cityService;
     }
 

@@ -3,6 +3,8 @@ package com.jm.marketplace.controller;
 import com.jm.marketplace.config.mapper.MapperFacade;
 import com.jm.marketplace.dto.CityDto;
 import com.jm.marketplace.dto.UserDto;
+import com.jm.marketplace.model.Advertisement;
+import com.jm.marketplace.model.City;
 import com.jm.marketplace.model.User;
 import com.jm.marketplace.search.advertisement.keywords.service.SearchingByKeywordService;
 import com.jm.marketplace.service.advertisement.AdvertisementService;
@@ -19,19 +21,20 @@ import java.util.List;
 @RequestMapping(value = "/")
 public class MainController {
 
-    private final AdvertisementService advertisementService;
-    private final CityService cityService;
-    private final UserService userService;
+    private final AdvertisementService<Advertisement, Long> advertisementService;
+    private final CityService<City, Long> cityService;
+    private final UserService<User, Long> userService;
     private final SearchingByKeywordService keywordService;
 
-    private  MapperFacade mapperFacade;
+    private MapperFacade mapperFacade;
+
     @Autowired
-    public void setMapperFacade(MapperFacade mapperFacade){
+    public void setMapperFacade(MapperFacade mapperFacade) {
         this.mapperFacade = mapperFacade;
     }
 
     @Autowired
-    public MainController(AdvertisementService advertisementService, CityService cityService, UserService userService, SearchingByKeywordService keywordService) {
+    public MainController(AdvertisementService<Advertisement, Long> advertisementService, CityService<City, Long> cityService, UserService<User, Long> userService, SearchingByKeywordService keywordService) {
         this.advertisementService = advertisementService;
         this.cityService = cityService;
         this.userService = userService;
@@ -42,13 +45,12 @@ public class MainController {
     public String showMainPage(Model model,
                                @RequestParam(value = "page", required = false, defaultValue = "0") Integer page,
                                @RequestParam(value = "search", required = false) String search) {
-        List<CityDto> cityDto = mapperFacade.mapAsList(cityService.getAllCity(), CityDto.class);
+        List<CityDto> cityDto = mapperFacade.mapAsList(cityService.findAll(), CityDto.class);
         model.addAttribute("userDto", new UserDto());
         model.addAttribute("cities", cityDto);
-        if(search!=null){
+        if (search != null) {
             model.addAttribute("allGoods", keywordService.findByKeyword(search));
-        }
-        else {
+        } else {
             model.addAttribute("allGoods", advertisementService.findAll(page));
         }
         return "index";
@@ -56,7 +58,7 @@ public class MainController {
 
     @PostMapping(value = "/create-user")
     public String create(@ModelAttribute("userDto") UserDto userDto) {
-        userService.saveUser(mapperFacade.map(userDto, User.class));
+        userService.saveOrUpdate(mapperFacade.map(userDto, User.class));
         return "/email/confirm/verification";
     }
 
@@ -68,7 +70,7 @@ public class MainController {
     }
 
     @GetMapping("/login")
-    public String mainPage(){
+    public String mainPage() {
         return "/login";
     }
 }

@@ -17,11 +17,11 @@ import java.util.List;
 @RestController
 @RequestMapping("api/v1")
 public class CommentRestController {
-    private CommentService commentService;
+    private CommentService<Comment, Long> commentService;
     private CommentFilter commentFilter;
     private MapperFacade mapperFacade;
 
-    public CommentRestController(CommentService commentService, CommentFilter commentFilter, MapperFacade mapperFacade) {
+    public CommentRestController(CommentService<Comment, Long> commentService, CommentFilter commentFilter, MapperFacade mapperFacade) {
         this.commentService = commentService;
         this.commentFilter = commentFilter;
         this.mapperFacade = mapperFacade;

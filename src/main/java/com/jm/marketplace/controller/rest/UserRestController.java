@@ -23,11 +23,11 @@ import java.util.List;
 @RequestMapping("/api/v1/user")
 public class UserRestController {
 
-    private final UserService userService;
-    private MapperFacade mapperFacade;
+    private final UserService<User, Long> userService;
+    private final MapperFacade mapperFacade;
 
     @Autowired
-    public UserRestController(UserService userService, MapperFacade mapperFacade) {
+    public UserRestController(UserService<User, Long> userService, MapperFacade mapperFacade) {
         this.userService = userService;
         this.mapperFacade = mapperFacade;
     }
@@ -47,13 +47,13 @@ public class UserRestController {
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(HttpStatus.CREATED)
     public void addNewUser(@RequestBody UserDto userDto) {
-        userService.saveUser(mapperFacade.map(userDto, User.class));
+        userService.saveOrUpdate(mapperFacade.map(userDto, User.class));
     }
 
     @PutMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(HttpStatus.CREATED)
     public void editUser(@RequestBody UserDto userDto) {
-        userService.saveUser(mapperFacade.map(userDto, User.class));
+        userService.saveOrUpdate(mapperFacade.map(userDto, User.class));
     }
 
     @DeleteMapping(value = "{id}")

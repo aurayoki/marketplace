@@ -1,36 +1,46 @@
 package com.jm.marketplace.service.city;
 
-import com.jm.marketplace.config.mapper.MapperFacade;
-import com.jm.marketplace.dao.CityDao;
-import com.jm.marketplace.dto.CityDto;
 import com.jm.marketplace.exception.CityNotFoundException;
 import com.jm.marketplace.model.City;
+import com.jm.marketplace.service.general.ReadWriteService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
-public class CityServiceImpl implements CityService {
+public class CityServiceImpl implements CityService<City, Long> {
 
-    private final CityDao cityDao;
+    private final ReadWriteService<City, Long> readWriteService;
 
     @Autowired
-    public CityServiceImpl(CityDao cityDao) {
-        this.cityDao = cityDao;
+    public CityServiceImpl(@Lazy ReadWriteService<City, Long> readWriteService) {
+        this.readWriteService = readWriteService;
     }
 
     @Transactional(readOnly = true)
     @Override
-    public List<City> getAllCity() {
-       return cityDao.findAll();
+    public List<City> findAll () {
+        return readWriteService.findAll();
     }
 
     @Transactional(readOnly = true)
     @Override
-    public City findById(Long id) {
-      return  cityDao.findById(id).orElseThrow(()->
-                new CityNotFoundException(String.format("City not found by id: %s", id)));
+    public Optional<City> findById(Long id) {
+        return Optional.ofNullable(readWriteService.findById(id).orElseThrow(() ->
+                new CityNotFoundException(String.format("City not found by id: %s", id))));
+    }
+
+    @Override
+    public void saveOrUpdate(City city) {
+
+    }
+
+    @Override
+    public void deleteById(Long id) {
+
     }
 }

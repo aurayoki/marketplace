@@ -1,14 +1,15 @@
 package com.jm.marketplace.service.general;
 
 import java.util.List;
+import java.util.Optional;
 
-public interface ReadWriteService<T, K> {
+public interface ReadWriteService<T, ID> {
 
     List<T> findAll();
 
     void saveOrUpdate(T t);
 
-    void deleteById(T t);
+    Optional<T> findById(ID id);
 
-    void saveUser (T t);
+    void deleteById(ID id);
 }

@@ -29,7 +29,7 @@ import static org.mockito.Mockito.verify;
 public class UserServiceTest {
 
     @Autowired
-    private UserService userService;
+    private UserService<User, Long> userService;
 
     @Autowired
     private MapperFacade mapperFacade;
@@ -118,7 +118,7 @@ public class UserServiceTest {
 
     @Test
     void saveUser() {
-        userService.saveUser(mapperFacade.map(userDto, User.class));
+        userService.saveOrUpdate(mapperFacade.map(userDto, User.class));
 
         verify(userDaoMock, times(1)).save(any(User.class));
     }

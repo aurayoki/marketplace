@@ -1,20 +1,16 @@
 package com.jm.marketplace.service.advertisement;
 
-import com.jm.marketplace.config.mapper.MapperFacade;
 import com.jm.marketplace.dao.AdvertisementDao;
-import com.jm.marketplace.dto.UserDto;
-import com.jm.marketplace.dto.goods.AdvertisementDto;
 import com.jm.marketplace.exception.AdvertisementNotFoundException;
 import com.jm.marketplace.filter.AdvertisementFilter;
 import com.jm.marketplace.model.Advertisement;
 import com.jm.marketplace.model.User;
 import com.jm.marketplace.service.general.ReadWriteService;
-import com.jm.marketplace.service.general.ReadWriteServiceImpl;
 import com.jm.marketplace.service.user.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -22,14 +18,15 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 @Service
-public class AdvertisementServiceImpl extends ReadWriteServiceImpl<Advertisement, Long> implements AdvertisementService<Advertisement, Long> {
+public class AdvertisementServiceImpl implements AdvertisementService<Advertisement, Long> {
 
     private final AdvertisementDao advertisementDao;
     private final ReadWriteService<Advertisement, Long> readWriteService;
     private AdvertisementFilter advertisementFilter;
-    private final UserService userService;
+    private final UserService<User, Long> userService;
     private static final Integer SIZE_PAGE = 4;
 
     @Autowired
@@ -38,8 +35,7 @@ public class AdvertisementServiceImpl extends ReadWriteServiceImpl<Advertisement
     }
 
     @Autowired
-    public AdvertisementServiceImpl(AdvertisementDao advertisementDao, ReadWriteService<Advertisement, Long> readWriteService, UserService userService) {
-        super();
+    public AdvertisementServiceImpl(AdvertisementDao advertisementDao, @Lazy ReadWriteService<Advertisement, Long> readWriteService, UserService<User, Long> userService) {
         this.advertisementDao = advertisementDao;
         this.readWriteService = readWriteService;
         this.userService = userService;
@@ -66,9 +62,9 @@ public class AdvertisementServiceImpl extends ReadWriteServiceImpl<Advertisement
 
     @Transactional(readOnly = true)
     @Override
-    public Advertisement findById(Long id) {
-        return jpaRepository.findById(id).orElseThrow(() ->
-                new AdvertisementNotFoundException(String.format("Advertisement not found by id: %s", id)));
+    public Optional<Advertisement> findById(Long id) {
+        return Optional.ofNullable(readWriteService.findById(id).orElseThrow(() ->
+                new AdvertisementNotFoundException(String.format("Advertisement not found by id: %s", id))));
     }
 
     @Transactional
@@ -76,13 +72,13 @@ public class AdvertisementServiceImpl extends ReadWriteServiceImpl<Advertisement
     public void saveOrUpdate(Advertisement advertisement) {
         User user = userService.findByEmail(SecurityContextHolder.getContext().getAuthentication().getName());
         advertisement.setUser(user);
-        advertisementDao.save(advertisement);
+        readWriteService.saveOrUpdate(advertisement);
     }
 
     @Transactional
     @Override
     public void deleteById(Long id) {
-        jpaRepository.deleteById(id);
+        readWriteService.deleteById(id);
     }
 
     @Transactional(readOnly = true)

@@ -7,7 +7,7 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import java.time.LocalDate;
 import java.util.List;
 
-public interface UserService<T, K> extends UserDetailsService, ReadWriteService<T, K> {
+public interface UserService extends UserDetailsService, ReadWriteService<User, Long> {
 
     List<User> findUserByBirthday(LocalDate date);
 

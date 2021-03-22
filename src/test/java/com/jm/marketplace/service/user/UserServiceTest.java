@@ -29,7 +29,7 @@ import static org.mockito.Mockito.verify;
 public class UserServiceTest {
 
     @Autowired
-    private UserService<User, Long> userService;
+    private UserService userService;
 
     @Autowired
     private MapperFacade mapperFacade;

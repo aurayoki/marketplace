@@ -1,7 +1,5 @@
 package com.jm.marketplace.controller;
 
-import com.jm.marketplace.model.Advertisement;
-import com.jm.marketplace.model.User;
 import com.jm.marketplace.service.advertisement.AdvertisementService;
 import com.jm.marketplace.service.user.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,11 +16,11 @@ import java.util.Map;
 @RequestMapping(value = "/admin")
 public class AdminController {
 
-    private final AdvertisementService<Advertisement,Long> advertisementService;
-    private final UserService<User, Long> userService;
+    private final AdvertisementService advertisementService;
+    private final UserService userService;
 
     @Autowired
-    public AdminController(AdvertisementService<Advertisement,Long> advertisementService, UserService<User, Long> userService) {
+    public AdminController(AdvertisementService advertisementService, UserService userService) {
         this.advertisementService = advertisementService;
         this.userService = userService;
     }

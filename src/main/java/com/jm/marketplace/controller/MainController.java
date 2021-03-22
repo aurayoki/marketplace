@@ -3,8 +3,6 @@ package com.jm.marketplace.controller;
 import com.jm.marketplace.config.mapper.MapperFacade;
 import com.jm.marketplace.dto.CityDto;
 import com.jm.marketplace.dto.UserDto;
-import com.jm.marketplace.model.Advertisement;
-import com.jm.marketplace.model.City;
 import com.jm.marketplace.model.User;
 import com.jm.marketplace.search.advertisement.keywords.service.SearchingByKeywordService;
 import com.jm.marketplace.service.advertisement.AdvertisementService;
@@ -21,9 +19,9 @@ import java.util.List;
 @RequestMapping(value = "/")
 public class MainController {
 
-    private final AdvertisementService<Advertisement, Long> advertisementService;
-    private final CityService<City, Long> cityService;
-    private final UserService<User, Long> userService;
+    private final AdvertisementService advertisementService;
+    private final CityService cityService;
+    private final UserService userService;
     private final SearchingByKeywordService keywordService;
 
     private MapperFacade mapperFacade;
@@ -34,7 +32,7 @@ public class MainController {
     }
 
     @Autowired
-    public MainController(AdvertisementService<Advertisement, Long> advertisementService, CityService<City, Long> cityService, UserService<User, Long> userService, SearchingByKeywordService keywordService) {
+    public MainController(AdvertisementService advertisementService, CityService cityService, UserService userService, SearchingByKeywordService keywordService) {
         this.advertisementService = advertisementService;
         this.cityService = cityService;
         this.userService = userService;

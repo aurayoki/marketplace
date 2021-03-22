@@ -1,9 +1,6 @@
 package com.jm.marketplace.service.telegram.advertisement;
 
-import com.jm.marketplace.dto.goods.AdvertisementDto;
-import com.jm.marketplace.dto.goods.GoodsTypeDto;
 import com.jm.marketplace.model.Advertisement;
-import com.jm.marketplace.model.goods.GoodsSubcategory;
 import com.jm.marketplace.model.goods.GoodsType;
 import com.jm.marketplace.service.goods.GoodsSubcategoryService;
 import com.jm.marketplace.service.goods.GoodsTypeService;
@@ -15,11 +12,11 @@ import java.util.List;
 
 @Component
 public class AdvertisementSelectGoodsType implements AdvertisementGenerator {
-    private GoodsTypeService<GoodsType, Long> goodsTypeService;
-    private GoodsSubcategoryService<GoodsSubcategory, Long> goodsSubcategoryService;
+    private GoodsTypeService goodsTypeService;
+    private GoodsSubcategoryService goodsSubcategoryService;
 
     @Autowired
-    public AdvertisementSelectGoodsType(GoodsTypeService<GoodsType, Long> goodsTypeService, GoodsSubcategoryService<GoodsSubcategory, Long> goodsSubcategoryService) {
+    public AdvertisementSelectGoodsType(GoodsTypeService goodsTypeService, GoodsSubcategoryService goodsSubcategoryService) {
         this.goodsTypeService = goodsTypeService;
         this.goodsSubcategoryService = goodsSubcategoryService;
     }

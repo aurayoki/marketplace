@@ -5,7 +5,7 @@ import com.jm.marketplace.service.general.ReadWriteService;
 
 import java.util.List;
 
-public interface GoodsSubcategoryService <T, K> extends ReadWriteService<T, K> {
+public interface GoodsSubcategoryService extends ReadWriteService<GoodsSubcategory, Long> {
 
     List<GoodsSubcategory> findByGoodsCategoryId(Long id);
 

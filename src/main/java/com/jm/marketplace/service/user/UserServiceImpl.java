@@ -1,22 +1,14 @@
 package com.jm.marketplace.service.user;
 
-import com.jm.marketplace.config.mapper.MapperFacade;
 import com.jm.marketplace.dao.RoleDao;
 import com.jm.marketplace.dao.UserDao;
-import com.jm.marketplace.dto.UserDto;
-import com.jm.marketplace.exception.RoleNotFoundException;
-import com.jm.marketplace.exception.UserEmailExistsException;
-import com.jm.marketplace.exception.UserNotFoundException;
-import com.jm.marketplace.exception.UserPhoneExistsException;
-import com.jm.marketplace.exception.UserUniqueCodeNotFoundException;
-import com.jm.marketplace.model.City;
+import com.jm.marketplace.exception.*;
 import com.jm.marketplace.model.Role;
 import com.jm.marketplace.model.User;
-import com.jm.marketplace.service.general.ReadWriteService;
+import com.jm.marketplace.service.general.ReadWriteServiceImpl;
 import com.jm.marketplace.util.mail.MailService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -30,10 +22,9 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
-public class UserServiceImpl implements UserService<User, Long> {
+public class UserServiceImpl extends ReadWriteServiceImpl<User, Long> implements UserService {
 
     private final UserDao userDao;
-    private final ReadWriteService<User, Long> readWriteService;
     private final RoleDao roleDao;
     private final PasswordEncoder passwordEncoder;
     @Value("${role.name.user}")
@@ -41,9 +32,9 @@ public class UserServiceImpl implements UserService<User, Long> {
     private final MailService mailService;
 
     @Autowired
-    public UserServiceImpl(UserDao userDao, @Lazy ReadWriteService<User, Long> readWriteService, RoleDao roleDao, PasswordEncoder passwordEncoder, MailService mailService) {
+    public UserServiceImpl(UserDao userDao, RoleDao roleDao, PasswordEncoder passwordEncoder, MailService mailService) {
+        super(userDao);
         this.userDao = userDao;
-        this.readWriteService = readWriteService;
         this.roleDao = roleDao;
         this.passwordEncoder = passwordEncoder;
         this.mailService = mailService;
@@ -57,13 +48,13 @@ public class UserServiceImpl implements UserService<User, Long> {
         } else {
             user = updateUser(user);
         }
-        readWriteService.saveOrUpdate(user);
+        userDao.save(user);
     }
 
     @Transactional(readOnly = true)
     @Override
     public Optional<User> findById(Long id) {
-        return Optional.ofNullable(readWriteService.findById(id).orElseThrow(() ->
+        return Optional.ofNullable(userDao.findById(id).orElseThrow(() ->
                 new UserNotFoundException(String.format("User not found by id: %s", id))));
 
     }
@@ -72,18 +63,6 @@ public class UserServiceImpl implements UserService<User, Long> {
     @Override
     public List<User> findUserByBirthday(LocalDate date) {
         return userDao.findUserByBirthday(date);
-    }
-
-    @Transactional(readOnly = true)
-    @Override
-    public List<User> findAll() {
-        return readWriteService.findAll();
-    }
-
-    @Transactional
-    @Override
-    public void deleteById(Long id) {
-        readWriteService.deleteById(id);
     }
 
     @Transactional(readOnly = true)
@@ -114,9 +93,8 @@ public class UserServiceImpl implements UserService<User, Long> {
 
     @Override
     public User findByUniqueCode(String uniqueCode) {
-        User user = userDao.findUserByUniqueCode(uniqueCode).orElseThrow(() ->
+        return userDao.findUserByUniqueCode(uniqueCode).orElseThrow(() ->
                 new UserUniqueCodeNotFoundException(String.format("UniqueCode '%s' not found", uniqueCode)));
-        return user;
     }
 
     @Override

@@ -7,7 +7,7 @@ import com.jm.marketplace.service.general.ReadWriteService;
 
 import java.util.List;
 
-public interface CommentService <T, K> extends ReadWriteService<T, K> {
+public interface CommentService extends ReadWriteService<Comment, Long> {
     List<Comment> findByUser(User user);
     List<Comment> findByAdvertisement (Advertisement advertisement);
 }

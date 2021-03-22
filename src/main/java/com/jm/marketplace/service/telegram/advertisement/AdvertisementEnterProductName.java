@@ -1,8 +1,6 @@
 package com.jm.marketplace.service.telegram.advertisement;
 
-import com.jm.marketplace.dto.goods.AdvertisementDto;
 import com.jm.marketplace.model.Advertisement;
-import com.jm.marketplace.model.goods.GoodsType;
 import com.jm.marketplace.service.goods.GoodsTypeService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -11,10 +9,10 @@ import java.util.HashMap;
 
 @Component
 public class AdvertisementEnterProductName implements AdvertisementGenerator {
-    private final GoodsTypeService<GoodsType, Long> goodsTypeService;
+    private final GoodsTypeService goodsTypeService;
 
     @Autowired
-    public AdvertisementEnterProductName(GoodsTypeService<GoodsType, Long> goodsTypeService) {
+    public AdvertisementEnterProductName(GoodsTypeService goodsTypeService) {
         this.goodsTypeService = goodsTypeService;
     }
 

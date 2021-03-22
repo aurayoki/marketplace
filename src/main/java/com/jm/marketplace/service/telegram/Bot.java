@@ -51,7 +51,7 @@ public class Bot extends TelegramLongPollingBot {
     private final List<KeyboardRow> keyboard = new ArrayList<>();
     private final TelegramBotInlineButtons inlineButtons = new TelegramBotInlineButtons();
 
-    private AdvertisementService<Advertisement, Long> advertisementService;
+    private AdvertisementService advertisementService;
 
     private final HashMap<Long, Integer> currentGoodAddStatus = new HashMap<>();
     private final HashMap<Long, AdvertisementDto> usersNewAdvertisement = new HashMap<>();
@@ -69,7 +69,7 @@ public class Bot extends TelegramLongPollingBot {
     }
 
     @Autowired
-    public void setAdvertisementService(AdvertisementService<Advertisement, Long> advertisementService) {
+    public void setAdvertisementService(AdvertisementService advertisementService) {
         this.advertisementService = advertisementService;
     }
 

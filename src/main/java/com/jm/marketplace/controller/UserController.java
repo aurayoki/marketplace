@@ -3,7 +3,6 @@ package com.jm.marketplace.controller;
 import com.jm.marketplace.config.mapper.MapperFacade;
 import com.jm.marketplace.dto.CityDto;
 import com.jm.marketplace.dto.UserDto;
-import com.jm.marketplace.model.City;
 import com.jm.marketplace.model.User;
 import com.jm.marketplace.service.city.CityService;
 import com.jm.marketplace.service.user.UserService;
@@ -26,15 +25,15 @@ import java.util.UUID;
 @RequestMapping(value = "/user")
 public class UserController {
 
-    private final UserService<User, Long> userService;
-    private final CityService<City, Long> cityService;
+    private final UserService userService;
+    private final CityService cityService;
     private final MapperFacade mapperFacade;
 
     @Value("${upload.path}")
     private String uploadPath;
 
     @Autowired
-    public UserController(UserService<User, Long> userService, CityService<City, Long> cityService, MapperFacade mapperFacade) {
+    public UserController(UserService userService, CityService cityService, MapperFacade mapperFacade) {
         this.userService = userService;
         this.cityService = cityService;
         this.mapperFacade = mapperFacade;

@@ -7,7 +7,7 @@ import org.springframework.data.domain.Page;
 import java.util.List;
 import java.util.Map;
 
-public interface AdvertisementService<T, K> extends ReadWriteService<T, K> {
+public interface AdvertisementService extends ReadWriteService<Advertisement, Long> {
 
     Page<Advertisement> findAll(Integer page, Map<String, String> params);
 

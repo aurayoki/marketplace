@@ -19,9 +19,9 @@ import java.util.Set;
 @Component
 public class CityDtoConverter implements ConditionalGenericConverter {
 
-    private final CityService<City,Long> cityService;
+    private final CityService cityService;
 
-    public CityDtoConverter(CityService<City,Long> cityService) {
+    public CityDtoConverter(CityService cityService) {
         this.cityService = cityService;
     }
 

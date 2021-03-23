@@ -164,10 +164,9 @@ public class Bot extends TelegramLongPollingBot {
                 } else if (checkCallbackQueryContains(update, "pages_seller")) {
                     updateChat(update, currentChatId, getInfoTheSellerToByIdAdvertisement(backGoodsId), inlineButtons.getBackButtonInlineKeyboardMarkup());
                 } else if (checkCallbackQueryContains(update, "pages_city")) {
-                    updateChat1(update, currentChatId, getInfoLocationByCoordinates(backGoodsId).getLongitude(), getInfoLocationByCoordinates(backGoodsId).getLatitude(), inlineButtons.getBackButtonInlineKeyboardMarkup());
-                // рефакторинг
+                    updateChatLocation(update, currentChatId, getInfoLocationByCoordinates(backGoodsId).getLongitude(),
+                                                              getInfoLocationByCoordinates(backGoodsId).getLatitude());
                 }
-
             }
             log.info("Send telegram message, username: {}", userName);
         } catch (Exception e) {
@@ -231,14 +230,13 @@ public class Bot extends TelegramLongPollingBot {
         log.info(update.getCallbackQuery().getData());
         log.error(editMessageText.toString());
     }
-// --------------------------- Кнопка назад и ошибки -------------------
-    private void updateChat1(Update update, Long chatId, Double lon, Double lat,  InlineKeyboardMarkup inlineKeyboard) throws TelegramApiException {
+
+    private void updateChatLocation(Update update, Long chatId, Double longitude, Double latitude) throws TelegramApiException {
         SendLocation sendLocation = new SendLocation();
         sendLocation.setReplyToMessageId(update.getCallbackQuery().getMessage().getMessageId());
-        sendLocation.setLatitude(lat);
-        sendLocation.setLongitude(lon);
+        sendLocation.setLatitude(latitude);
+        sendLocation.setLongitude(longitude);
         sendLocation.setChatId(chatId.toString());
-        sendLocation.setReplyMarkup(inlineKeyboard);
         execute(sendLocation);
 
         log.info(update.getCallbackQuery().getData());
@@ -280,12 +278,10 @@ public class Bot extends TelegramLongPollingBot {
         return sellerInfo.toString();
     }
 
-    private Location getInfoLocationByCoordinates(Integer advertisementId) {
+    private Point getInfoLocationByCoordinates(Integer advertisementId) {
         Advertisement advertisement = advertisementService.findById(advertisementId.longValue());
         User user = advertisement.getUser();
-        Double lat = geoCoderService.getCoordinatesByAddress(user.getCity().getName()).getLatitude();
-        Double lon = geoCoderService.getCoordinatesByAddress(user.getCity().getName()).getLongitude();
-        return new Location(lon, lat, 100D, 1, 1, 1);
+        return geoCoderService.getCoordinatesByAddress(user.getCity().getName());
     }
 
     private String getAdvertisementTextForCurrentPage(int currentPage) {

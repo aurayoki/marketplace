@@ -36,25 +36,21 @@ public class UserServiceImpl implements UserService {
     private final UserDao userDao;
     private final RoleDao roleDao;
     private final PasswordEncoder passwordEncoder;
-    private final MapperFacade mapperFacade;
     @Value("${role.name.user}")
     private String userRole;
     private final MailService mailService;
 
     @Autowired
-    public UserServiceImpl(UserDao userDao, RoleDao roleDao, PasswordEncoder passwordEncoder,
-                           MapperFacade mapperFacade, MailService mailService) {
+    public UserServiceImpl(UserDao userDao, RoleDao roleDao, PasswordEncoder passwordEncoder, MailService mailService) {
         this.userDao = userDao;
         this.roleDao = roleDao;
         this.passwordEncoder = passwordEncoder;
-        this.mapperFacade = mapperFacade;
         this.mailService = mailService;
     }
 
     @Override
     @Transactional
-    public void saveUser(UserDto userDto) {
-        User user = mapperFacade.map(userDto, User.class);
+    public void saveUser(User user) {
         if (user.getId() == null) {
             processNewUser(user);
         } else {
@@ -65,10 +61,10 @@ public class UserServiceImpl implements UserService {
 
     @Transactional(readOnly = true)
     @Override
-    public UserDto findById(Long id) {
-        User user = userDao.findById(id).orElseThrow(() ->
+    public User findById(Long id) {
+     return userDao.findById(id).orElseThrow(() ->
                 new UserNotFoundException(String.format("User not found by id: %s", id)));
-        return mapperFacade.map(user, UserDto.class);
+
     }
 
     @Transactional(readOnly = true)
@@ -79,8 +75,8 @@ public class UserServiceImpl implements UserService {
 
     @Transactional(readOnly = true)
     @Override
-    public List<UserDto> findAll() {
-        return mapperFacade.mapAsList(userDao.findAll(), UserDto.class);
+    public List<User> findAll() {
+        return userDao.findAll();
     }
 
     @Transactional
@@ -91,8 +87,9 @@ public class UserServiceImpl implements UserService {
 
     @Transactional(readOnly = true)
     @Override
-    public UserDto findByEmail(String email) {
-        return mapperFacade.map(userDao.findByEmail(email).orElseThrow(() -> new UserEmailExistsException("Пользователь с такой почтой не найден")), UserDto.class, "password");
+    public User findByEmail(String email) {
+        return userDao.findByEmail(email).orElseThrow(() ->
+                new UserEmailExistsException("Пользователь с такой почтой не найден"));
     }
 
     @Transactional(readOnly = true)
@@ -103,26 +100,29 @@ public class UserServiceImpl implements UserService {
 
     @Transactional(readOnly = true)
     @Override
-    public UserDto findByPhone(String phone) {
-        return mapperFacade.map(userDao.findByPhone(phone).orElseThrow(() -> new UserPhoneExistsException("Пользователь с таким номером телефона не найден")), UserDto.class);
+    public User findByPhone(String phone) {
+        return userDao.findByPhone(phone).orElseThrow(() ->
+                new UserPhoneExistsException("Пользователь с таким номером телефона не найден"));
     }
 
     @Override
-    public void activateUser(UserDto userDto) {
-        userDto.setActive(true);
-        saveUser(userDto);
+    public void activateUser(User user) {
+        user.setActive(true);
+        saveUser(user);
     }
 
     @Override
-    public UserDto findByUniqueCode(String uniqueCode) {
-        User user = userDao.findUserByUniqueCode(uniqueCode).orElseThrow(() -> new UserUniqueCodeNotFoundException(String.format("UniqueCode '%s' not found", uniqueCode)));
-        return mapperFacade.map(user, UserDto.class);
+    public User findByUniqueCode(String uniqueCode) {
+        User user = userDao.findUserByUniqueCode(uniqueCode).orElseThrow(() ->
+                new UserUniqueCodeNotFoundException(String.format("UniqueCode '%s' not found", uniqueCode)));
+        return user;
     }
 
     @Override
     @Transactional(readOnly = true)
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
-        User user = userDao.findByEmail(email).orElseThrow(() -> new UsernameNotFoundException(String.format("Email '%s' not found", email)));
+        User user = userDao.findByEmail(email).orElseThrow(() ->
+                new UsernameNotFoundException(String.format("Email '%s' not found", email)));
         return new org.springframework.security.core.userdetails.User(user.getEmail(), user.getPassword(), mapRolesToAuthorities(user.getRoles()));
     }
 
@@ -166,7 +166,7 @@ public class UserServiceImpl implements UserService {
             userFromDB.setPassword(passwordEncoder.encode(user.getPassword()));
         }
         if (user.getCity() != null) {
-            userFromDB.setCity(mapperFacade.map(user.getCity(), City.class));
+            userFromDB.setCity(user.getCity());
         }
         return userFromDB;
     }

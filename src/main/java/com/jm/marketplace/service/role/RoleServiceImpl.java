@@ -15,33 +15,31 @@ import java.util.List;
 public class RoleServiceImpl implements RoleService{
 
     private final RoleDao roleDao;
-    private final MapperFacade mapperFacade;
 
     @Autowired
-    public RoleServiceImpl(RoleDao roleDao, MapperFacade mapperFacade) {
+    public RoleServiceImpl(RoleDao roleDao) {
         this.roleDao = roleDao;
-        this.mapperFacade = mapperFacade;
     }
 
     @Transactional(readOnly = true)
     @Override
-    public List<RoleDto> findAll() {
-        return mapperFacade.mapAsList(roleDao.findAll(), RoleDto.class);
+    public List<Role> findAll() {
+        return roleDao.findAll();
     }
 
     @Transactional(readOnly = true)
     @Override
-    public RoleDto findById(Long id) {
+    public Role findById(Long id) {
         Role role = roleDao.findById(id).orElseThrow(() ->
                 new RoleNotFoundException(String.format("Role not found by id: %s", id)));
-        return mapperFacade.map(role, RoleDto.class);
+        return role;
     }
 
     @Transactional(readOnly = true)
     @Override
-    public RoleDto findByName(String name) {
+    public Role findByName(String name) {
         Role role = roleDao.findByName(name).orElseThrow(() ->
                 new RoleNotFoundException(String.format("Role not found by name: %s", name)));
-        return mapperFacade.map(role, RoleDto.class);
+        return role;
     }
 }

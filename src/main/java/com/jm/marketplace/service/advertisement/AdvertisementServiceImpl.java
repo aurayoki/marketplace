@@ -7,6 +7,7 @@ import com.jm.marketplace.dto.goods.AdvertisementDto;
 import com.jm.marketplace.exception.AdvertisementNotFoundException;
 import com.jm.marketplace.filter.AdvertisementFilter;
 import com.jm.marketplace.model.Advertisement;
+import com.jm.marketplace.model.User;
 import com.jm.marketplace.service.user.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -23,7 +24,6 @@ import java.util.Map;
 public class AdvertisementServiceImpl implements AdvertisementService {
 
     private final AdvertisementDao advertisementDao;
-    private final MapperFacade mapperFacade;
     private AdvertisementFilter advertisementFilter;
     private final UserService userService;
     private static final Integer SIZE_PAGE = 4;
@@ -34,46 +34,43 @@ public class AdvertisementServiceImpl implements AdvertisementService {
     }
 
     @Autowired
-    public AdvertisementServiceImpl(AdvertisementDao advertisementDao, MapperFacade mapperFacade, UserService userService) {
+    public AdvertisementServiceImpl(AdvertisementDao advertisementDao, UserService userService) {
         this.advertisementDao = advertisementDao;
-        this.mapperFacade = mapperFacade;
         this.userService = userService;
     }
 
     @Transactional(readOnly = true)
     @Override
-    public List<AdvertisementDto> findAll() {
-        return mapperFacade.mapAsList(advertisementDao.findAll(), AdvertisementDto.class);
+    public List<Advertisement> findAll() {
+        return advertisementDao.findAll();
     }
 
     @Transactional(readOnly = true)
     @Override
-    public Page<AdvertisementDto> findAll(Integer page) {
+    public Page<Advertisement> findAll(Integer page) {
         return findAll(page, new HashMap<>());
     }
 
     @Transactional(readOnly = true)
     @Override
-    public Page<AdvertisementDto> findAll(Integer page, Map<String, String> params) {
+    public Page<Advertisement> findAll(Integer page, Map<String, String> params) {
         page = getCorrectPage(page);
-        Page<Advertisement> advertisements = advertisementDao.findAll(advertisementFilter.getSpecification(params), PageRequest.of(page, SIZE_PAGE));
-        return advertisements.map(advertisement -> mapperFacade.map(advertisement, AdvertisementDto.class));
+        return advertisementDao.findAll(advertisementFilter.getSpecification(params), PageRequest.of(page, SIZE_PAGE));
     }
 
     @Transactional(readOnly = true)
     @Override
-    public AdvertisementDto findById(Long id) {
-        Advertisement advertisement = advertisementDao.findById(id).orElseThrow(() ->
+    public Advertisement findById(Long id) {
+        return advertisementDao.findById(id).orElseThrow(() ->
                 new AdvertisementNotFoundException(String.format("Advertisement not found by id: %s", id)));
-        return mapperFacade.map(advertisement, AdvertisementDto.class);
     }
 
     @Transactional
     @Override
-    public void saveOrUpdate(AdvertisementDto advertisementDto) {
-        UserDto userDto = userService.findByEmail(SecurityContextHolder.getContext().getAuthentication().getName());
-        advertisementDto.setUser(userDto);
-        advertisementDao.save(mapperFacade.map(advertisementDto, Advertisement.class));
+    public void saveOrUpdate(Advertisement advertisement) {
+        User user = userService.findByEmail(SecurityContextHolder.getContext().getAuthentication().getName());
+        advertisement.setUser(user);
+        advertisementDao.save(advertisement);
     }
 
     @Transactional
@@ -84,8 +81,8 @@ public class AdvertisementServiceImpl implements AdvertisementService {
 
     @Transactional(readOnly = true)
     @Override
-    public List<AdvertisementDto> findAdvertisementByStatusActive(Boolean active) {
-        return mapperFacade.mapAsList(advertisementDao.findAdvertisementByStatusActive(active), AdvertisementDto.class);
+    public List<Advertisement> findAdvertisementByStatusActive(Boolean active) {
+        return advertisementDao.findAdvertisementByStatusActive(active);
     }
 
     private Integer getCorrectPage(Integer page) {

@@ -1,6 +1,8 @@
 package com.jm.marketplace.controller.rest;
 
+import com.jm.marketplace.config.mapper.MapperFacade;
 import com.jm.marketplace.dto.goods.AdvertisementDto;
+import com.jm.marketplace.model.Advertisement;
 import com.jm.marketplace.service.advertisement.AdvertisementService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -15,34 +17,36 @@ import java.util.List;
 public class AdvertisementRestController {
 
     private final AdvertisementService advertisementService;
+    private MapperFacade mapperFacade;
 
     @Autowired
-    public AdvertisementRestController(AdvertisementService advertisementService) {
+    public AdvertisementRestController(AdvertisementService advertisementService, MapperFacade mapperFacade) {
         this.advertisementService = advertisementService;
+        this.mapperFacade = mapperFacade;
     }
 
     @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(HttpStatus.OK)
     public List<AdvertisementDto> getAll() {
-        return advertisementService.findAll();
+        return mapperFacade.mapAsList(advertisementService.findAll(), AdvertisementDto.class);
     }
 
     @GetMapping(value = "{id}", produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(HttpStatus.OK)
     public AdvertisementDto getById(@PathVariable(name = "id") Long id) {
-        return advertisementService.findById(id);
+        return mapperFacade.map(advertisementService.findById(id), AdvertisementDto.class);
     }
 
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(HttpStatus.CREATED)
     public void save(@RequestBody @Valid AdvertisementDto advertisementDto) {
-        advertisementService.saveOrUpdate(advertisementDto);
+        advertisementService.saveOrUpdate(mapperFacade.map(advertisementDto, Advertisement.class));
     }
 
     @PutMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(HttpStatus.ACCEPTED)
     public void update(@RequestBody @Valid AdvertisementDto advertisementDto) {
-        advertisementService.saveOrUpdate(advertisementDto);
+        advertisementService.saveOrUpdate(mapperFacade.map(advertisementDto, Advertisement.class));
     }
 
     @DeleteMapping("{id}")

@@ -1,5 +1,6 @@
 package com.jm.marketplace.model;
 
+import com.jm.marketplace.dto.RoleDto;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -86,5 +87,13 @@ public class User {
         this.lastName = lastName;
         this.password = password;
         this.email = email;
+    }
+
+    public String getRolesString() {
+        StringBuilder stringBuilder = new StringBuilder();
+        for (Role role : roles) {
+            stringBuilder.append(role.getName()).append(" ");
+        }
+        return stringBuilder.toString();
     }
 }

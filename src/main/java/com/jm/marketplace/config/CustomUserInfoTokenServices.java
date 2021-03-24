@@ -1,6 +1,7 @@
 package com.jm.marketplace.config;
 
 import com.jm.marketplace.dto.UserDto;
+import com.jm.marketplace.model.User;
 import com.jm.marketplace.service.user.UserService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.logging.Log;
@@ -99,13 +100,13 @@ public class CustomUserInfoTokenServices implements ResourceServerTokenServices 
 
 
             if (!userService.checkByEmail(googleEmail)) {
-                UserDto userDto = new UserDto();
-                userDto.setEmail(googleEmail);
-                userDto.setFirstName(googleName);
-                userDto.setUserImg(picture);
-                userDto.setActive(true);
-                userDto.setPassword(String.valueOf(Objects.hash(googleEmail, googleName)));
-                userService.saveUser(userDto);
+                User user = new User();
+                user.setEmail(googleEmail);
+                user.setFirstName(googleName);
+                user.setUserImg(picture);
+                user.setActive(true);
+                user.setPassword(String.valueOf(Objects.hash(googleEmail, googleName)));
+                userService.saveUser(user);
             }
 
 

@@ -33,12 +33,4 @@ public class UserDto {
     private MultipartFile multipartFile;
     private Boolean active;
     private String uniqueCode;
-
-    public String getRolesString() {
-        StringBuilder stringBuilder = new StringBuilder();
-        for (RoleDto role : roles) {
-            stringBuilder.append(role.getName()).append(" ");
-        }
-        return stringBuilder.toString();
-    }
 }

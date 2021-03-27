@@ -148,12 +148,12 @@
             </ul>
             <ul class="navbar-nav ml-auto">
                 <li class="nav-item dropdown">
-                    <a href="/profile/messages" class="nav-link btn-group">
+                    <a sec:authorize="isAuthenticated()" href="/profile/messenger" class="nav-link btn-group">
                         <img style="max-height: 25px; max-width: 25px" src="https://img.icons8.com/doodle/48/4a90e2/messaging-.png"/>
                     </a>
                 </li>
                 <li class="nav-item dropdown" >
-                    <a sec:authorize="isAuthenticated()" href="#" class="nav-link btn-group" style="color: silver; font-weight: bolder">
+                    <a sec:authorize="isAuthenticated()" href="#" class="nav-link btn-group" style="color: #a2a1a1; font-weight: 400">
                          Мои объявления
                     </a>
                 </li>

@@ -53,7 +53,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .antMatchers("/create-user").permitAll()
                 .antMatchers("/email/confirm/**").permitAll()
                 //страница для добавления товара
-                .antMatchers("/admin/**").access("hasRole('ADMIN')")
+                .antMatchers("/admin/**", "profile/**").access("hasRole('ADMIN')")
                 .and().formLogin().permitAll()
                 .successHandler(new LoginSuccessHandler());
 

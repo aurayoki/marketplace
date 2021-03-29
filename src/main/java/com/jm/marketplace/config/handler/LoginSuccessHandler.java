@@ -6,7 +6,5 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class LoginSuccessHandler extends SavedRequestAwareAuthenticationSuccessHandler implements AuthenticationSuccessHandler {
-    public LoginSuccessHandler() {
-        super();
-    }
+
 }

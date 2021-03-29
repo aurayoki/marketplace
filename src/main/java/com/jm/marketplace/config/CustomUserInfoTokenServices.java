@@ -94,22 +94,22 @@ public class CustomUserInfoTokenServices implements ResourceServerTokenServices 
 
         if(map.containsKey("sub"))
         {
-            String googleName = (String) map.get("name");
+            String firstName = (String) map.get("name");
+            String lastName = (String) map.get("given_name");
             String googleEmail = (String) map.get("email");
-            String picture = (String) map.get("picture");
 
+            String picture = (String) map.get("picture");
 
             if (!userService.checkByEmail(googleEmail)) {
                 User user = new User();
                 user.setEmail(googleEmail);
-                user.setFirstName(googleName);
+                user.setFirstName(firstName);
+                user.setLastName(lastName);
                 user.setUserImg(picture);
                 user.setActive(true);
-                user.setPassword(String.valueOf(Objects.hash(googleEmail, googleName)));
+                user.setPassword(String.valueOf(Objects.hash(googleEmail, firstName)));
                 userService.saveUser(user);
             }
-
-
         }
 
         if (map.containsKey("error"))

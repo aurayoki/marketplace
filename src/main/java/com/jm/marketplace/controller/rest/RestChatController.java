@@ -2,6 +2,7 @@ package com.jm.marketplace.controller.rest;
 
 import com.jm.marketplace.config.mapper.MapperFacade;
 import com.jm.marketplace.dao.ChatMessageDao;
+import com.jm.marketplace.dto.chat.ChatMessageDto;
 import com.jm.marketplace.dto.goods.AdvertisementDto;
 import com.jm.marketplace.model.Advertisement;
 import com.jm.marketplace.model.chat.ChatMessage;
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
@@ -34,7 +36,7 @@ public class RestChatController {
     }
 
     @GetMapping("profile/messenger/get_channelID/{fromUserID}-{toUserID}-{advertisementID}")
-    public String getChannelUuid(@PathVariable String fromUserID, @PathVariable String toUserID, @PathVariable String advertisementID) {
+    public String channelUuid(@PathVariable String fromUserID, @PathVariable String toUserID, @PathVariable String advertisementID) {
         ChatChannel chatChannel = chatChannelService.findChatChannelByUsersID(fromUserID, toUserID, advertisementID);
         if (chatChannel == null) {
             User userFrom = mapperFacade.map(userService.findById(Long.parseLong(fromUserID)), User.class);
@@ -48,17 +50,8 @@ public class RestChatController {
     }
 
     @GetMapping("profile/messenger/channel/{chatID}")
-    public List<ChatMessage> getChatMessages(@PathVariable String chatID) {
-        List<ChatMessage> chatMessages =  chatMessageDao.findByChannelID(chatID);
-        return chatMessages;
+    public List<ChatMessageDto> allMessagesByChatID(@PathVariable String chatID) {
+        return mapperFacade.mapAsList(chatMessageDao.findByChannelID(chatID),
+                ChatMessageDto.class);
     }
-
-//    private boolean findAdvertisement(Set<AdvertisementDto> advertisementDto, String advertisementID) {
-//        for (AdvertisementDto advertisement: advertisementDto) {
-//            if (advertisement.getId().toString().equals(advertisementID)) {
-//                return true;
-//            }
-//        }
-//        return false;
-//    }
 }

@@ -1,7 +1,5 @@
 package com.jm.marketplace.dto.chat;
 
-
-import javax.persistence.Column;
 import java.util.Date;
 
 public class ChatMessageDto {

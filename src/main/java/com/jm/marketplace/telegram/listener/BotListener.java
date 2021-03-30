@@ -14,7 +14,7 @@ import org.springframework.statemachine.transition.Transition;
 public class BotListener implements StateMachineListener<States, Event> {
     @Override
     public void stateChanged(final State<States, Event> from, final State<States, Event> to) {
-        log.info("Переход из состояния " + from.getId() + " в состояние " + to.getId());
+//        log.info("Переход из состояния " + from.getId() + " в состояние " + to.getId());
     }
 
     @Override

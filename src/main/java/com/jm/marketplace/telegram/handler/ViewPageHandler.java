@@ -1,55 +1,77 @@
 package com.jm.marketplace.telegram.handler;
 
-import com.jm.marketplace.dto.goods.AdvertisementDto;
 import com.jm.marketplace.service.advertisement.AdvertisementService;
 import com.jm.marketplace.telegram.annotations.BotCommand;
-import com.jm.marketplace.telegram.state.Event;
-import com.jm.marketplace.telegram.state.States;
+import com.jm.marketplace.telegram.builder.EditMessageBuilder;
+import com.jm.marketplace.telegram.builder.MessageBuilder;
+import com.jm.marketplace.telegram.exception.TelegramBotException;
+import com.jm.marketplace.telegram.model.Page;
+import com.jm.marketplace.telegram.service.BotService;
 import com.jm.marketplace.telegram.util.AdvertisementUtils;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.statemachine.StateMachine;
-import org.springframework.statemachine.config.StateMachineFactory;
-import org.springframework.statemachine.persist.StateMachinePersister;
-import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageText;
+import org.springframework.stereotype.Component;
+import org.telegram.telegrambots.meta.api.methods.BotApiMethod;
 import org.telegram.telegrambots.meta.api.objects.Update;
-import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
-import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.io.Serializable;
 
-@BotCommand(command = "PAGE", message = "")
+@Component
+@Slf4j
+@BotCommand(command = "PAGE", message = "Показать объявления")
 public class ViewPageHandler implements Handler {
 
-    private final StateMachinePersister<States, Event, String> persister;
-    private final StateMachineFactory<States, Event> stateMachineFactory;
     private final AdvertisementService advertisementService;
     private final AdvertisementUtils advertisementUtils;
+    private final BotService botService;
+    private Page page = Page.create();;
 
     @Autowired
-    public ViewPageHandler(StateMachinePersister<States, Event, String> persister, StateMachineFactory<States, Event> stateMachineFactory, AdvertisementService advertisementService, AdvertisementUtils advertisementUtils) {
-        this.persister = persister;
-        this.stateMachineFactory = stateMachineFactory;
+    public ViewPageHandler(AdvertisementService advertisementService, AdvertisementUtils advertisementUtils, BotService botService) {
         this.advertisementService = advertisementService;
         this.advertisementUtils = advertisementUtils;
+        this.botService = botService;
     }
 
 
     @Override
-    public EditMessageText update(Update update) {
+    public BotApiMethod<? extends Serializable> update(Update update) {
         try {
-            Integer currentPage = Integer.parseInt(update.getCallbackQuery().getData().substring(5));
-
-            final StateMachine<States, Event> stateMachine = stateMachineFactory.getStateMachine();
-            stateMachine.getExtendedState().getVariables().put("PAGE", currentPage);
-            stateMachine.sendEvent(Event.VIEW_PAGE);
-
-            EditMessageText editMessageText = new EditMessageText();
-            editMessageText.setMessageId(update.getCallbackQuery().getMessage().getMessageId());
-            editMessageText.setText(advertisementUtils.getAdvertisementTextForCurrentPage(currentPage));
-            editMessageText.setReplyMarkup(getInlineButtonsPagination(currentPage));
-            editMessageText.setChatId(update.getMessage().getChatId().toString());
-            return editMessageText;
+            Integer currentPage;
+            BotApiMethod<? extends Serializable> message;
+            String chatId = update.getCallbackQuery().getMessage().getChatId().toString();
+            Integer messageId = update.getCallbackQuery().getMessage().getMessageId();
+            try {
+                currentPage = Integer.valueOf(update.getCallbackQuery().getData().split(" ")[1]);
+            } catch (Exception classCastException) {
+                log.error(classCastException.getMessage());
+                log.error(classCastException.getStackTrace().toString());
+                log.error(classCastException.getClass().getName());
+                currentPage = 1;
+            }
+            if(update.hasCallbackQuery()) {
+                EditMessageBuilder messageBuilder = EditMessageBuilder.create(chatId, messageId);
+                botService.showPageAdvertisement(chatId);
+                messageBuilder.row();
+                messageBuilder.button(advertisementUtils.getInlineKeyboardButtonsAdvertisementForCurrentPage(currentPage));
+                messageBuilder.row();
+                messageBuilder.button(advertisementUtils.getInlineKeyboardButtonPagination());
+                messageBuilder.line(advertisementUtils.getAdvertisementTextForCurrentPage(currentPage));
+                page.addMessage(update);
+                log.error(botService.getState(chatId));
+                return messageBuilder.build();
+            } else if(update.hasMessage()) {
+                MessageBuilder messageBuilder = MessageBuilder.create(update.getMessage().getChatId().toString());
+                messageBuilder.row();
+                messageBuilder.button(advertisementUtils.getInlineKeyboardButtonsAdvertisementForCurrentPage(currentPage));
+                messageBuilder.row();
+                messageBuilder.button(advertisementUtils.getInlineKeyboardButtonPagination());
+                messageBuilder.line(advertisementUtils.getAdvertisementTextForCurrentPage(currentPage));
+                page.addMessage(update);
+                log.error(botService.getState(chatId));
+                return messageBuilder.build();
+            }
+            throw new TelegramBotException("Как такое может быть?");
 
         }
         catch (Exception e) {
@@ -58,29 +80,8 @@ public class ViewPageHandler implements Handler {
         }
     }
 
-    private InlineKeyboardMarkup getInlineButtonsPagination(int currentPage) {
-        List<List<InlineKeyboardButton>> rowList = new ArrayList<>();
-        rowList.add(getInlineKeyboardButtonsAdvertisementForCurrentPage(currentPage));
-        rowList.add(advertisementUtils.getInlineKeyboardButtonPagination());
-        InlineKeyboardMarkup inlineKeyboardMarkup = new InlineKeyboardMarkup();
-        inlineKeyboardMarkup.setKeyboard(rowList);
-        return inlineKeyboardMarkup;
+    @Override
+    public String toString() {
+        return "ViewPageHandler{}";
     }
-
-
-    private List<InlineKeyboardButton> getInlineKeyboardButtonsAdvertisementForCurrentPage(Integer currentPage) {
-        List<AdvertisementDto> advertisementDtos = advertisementUtils.getAdvertisementForCurrentPage(currentPage);
-        List<InlineKeyboardButton> keyboardButtonsRow = new ArrayList<>();
-
-        for(AdvertisementDto advertisementDto : advertisementDtos) {
-            InlineKeyboardButton advertisementButton = new InlineKeyboardButton();
-            advertisementButton.setText(advertisementDto.getName());
-            advertisementButton.setCallbackData("GOODS " + advertisementDto.getId());
-            keyboardButtonsRow.add(advertisementButton);
-        }
-
-        return keyboardButtonsRow;
-    }
-
-
 }

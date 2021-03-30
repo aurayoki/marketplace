@@ -5,11 +5,13 @@ public enum States {
     VIEW_ADVERTISEMENT,
     VIEW_ALL_PAGES,
     ADDITION,
-    ADD_CATEGORY,
-    ADD_SUBCATEGORY,
-    ADD_TYPE,
-    ADD_DESCRIPTION,
-    ADD_PRICE,
-    ADD_NAME,
-    SAVE;
+    ADD_CATEGORY, //+
+    ADD_SUBCATEGORY, //+
+    ADD_TYPE, //+
+    ADD_DESCRIPTION, //+
+    ADD_PRICE, //+
+    ADD_NAME, //+
+    SAVE,
+    BACK,
+    NEXT;
 }

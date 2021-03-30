@@ -3,6 +3,8 @@ package com.jm.marketplace.telegram.util;
 import com.jm.marketplace.dto.goods.AdvertisementDto;
 import com.jm.marketplace.service.advertisement.AdvertisementService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
 
 import java.util.ArrayList;
@@ -11,6 +13,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+@Component
 public class AdvertisementUtils {
     private int ADVERTISEMENTS_IN_PAGE = 3;
     private final AdvertisementService advertisementService;
@@ -39,11 +42,11 @@ public class AdvertisementUtils {
         return advertisementsEachPage;
     }
 
-    public Integer getPageAdvertisementById(Integer id) {
-        return getAdvertisementPages().get(advertisementService.findById(Long.valueOf(id)));
+    public Integer getPageAdvertisementById(Long id) {
+        return getAdvertisementPages().get(advertisementService.findById(id));
     }
 
-    public List<AdvertisementDto> getAdvertisementForCurrentPage(Integer currentPage) {
+    public List<AdvertisementDto> getAdvertisementForCurrentPage(int currentPage) {
         List<AdvertisementDto> advertisementDtos = getAdvertisementPages()
                 .entrySet()
                 .stream()
@@ -51,6 +54,16 @@ public class AdvertisementUtils {
                 .map(Map.Entry::getKey)
                 .collect(Collectors.toList());
         return advertisementDtos;
+    }
+
+    public String getAdvertisemenTextById(long id) {
+        AdvertisementDto advertisementDto = advertisementService.findById(id);
+        StringBuilder sb = new StringBuilder();
+        sb.append(advertisementDto.getName()).append("\n");
+        sb.append(advertisementDto.getPrice()).append("\n");
+        sb.append(advertisementDto.getDescription()).append("\n");
+        sb.append(advertisementDto.getUser()).append("\n");
+        return sb.toString();
     }
 
     public String getAdvertisementTextForCurrentPage(int currentPage) {
@@ -95,4 +108,34 @@ public class AdvertisementUtils {
         }
         return keyboardButtonsRowPageNamber;
     }
+
+
+    public InlineKeyboardMarkup getInlineButtonsPagination(int currentPage) {
+        List<List<InlineKeyboardButton>> rowList = new ArrayList<>();
+        rowList.add(getInlineKeyboardButtonsAdvertisementForCurrentPage(currentPage));
+        rowList.add(getInlineKeyboardButtonPagination());
+        InlineKeyboardMarkup inlineKeyboardMarkup = new InlineKeyboardMarkup();
+        inlineKeyboardMarkup.setKeyboard(rowList);
+        return inlineKeyboardMarkup;
+    }
+
+
+    public List<InlineKeyboardButton> getInlineKeyboardButtonsAdvertisementForCurrentPage(int currentPage) {
+        List<AdvertisementDto> advertisementDtos = getAdvertisementForCurrentPage(currentPage);
+        return getInlineKeyboardButtons(advertisementDtos);
+    }
+
+    public static List<InlineKeyboardButton> getInlineKeyboardButtons(List<AdvertisementDto> advertisementDtos) {
+        List<InlineKeyboardButton> keyboardButtonsRow = new ArrayList<>();
+
+        for(AdvertisementDto advertisementDto : advertisementDtos) {
+            InlineKeyboardButton advertisementButton = new InlineKeyboardButton();
+            advertisementButton.setText(advertisementDto.getName());
+            advertisementButton.setCallbackData("ADV " + advertisementDto.getId());
+            keyboardButtonsRow.add(advertisementButton);
+        }
+
+        return keyboardButtonsRow;
+    }
+
 }

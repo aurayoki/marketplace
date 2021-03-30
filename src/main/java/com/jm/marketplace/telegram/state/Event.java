@@ -10,5 +10,8 @@ public enum Event {
     ADDITION_NAME,
     VIEW_PAGE,
     VIEW_ADVERTISEMENT,
-    SAVE;
+    SAVE,
+    NEXT,
+    BACK,
+    START;
 }

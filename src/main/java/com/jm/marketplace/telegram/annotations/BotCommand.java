@@ -25,7 +25,7 @@ public @interface BotCommand {
     /**
      *
      */
-    String message() default "";
+    String[] message() default {"",""};
 
     /**
      *

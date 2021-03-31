@@ -4,10 +4,12 @@ import com.jm.marketplace.dao.ChatChannelDao;
 import com.jm.marketplace.model.chat.channel.ChatChannel;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
 @Service
+@Transactional(readOnly = true)
 public class ChatChannelServiceImpl implements ChatChannelService {
     private ChatChannelDao chatChannelDao;
 

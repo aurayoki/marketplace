@@ -1,9 +1,9 @@
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
-<head th:replace="fragments/headers::head('User edit')"></head>
+<head th:replace="fragments/headers::head('Chat')"></head>
 <head>
     <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0">
-    <title>Spring Boot WebSocket Chat Application</title>
+    <title>Chat</title>
     <link rel="stylesheet" href="/css/messenger.css"/>
 </head>
 <body>
@@ -20,8 +20,8 @@
 
         <ul>
             <div id="messageArea" th:each="channel : ${channels}">
-                <a th:href="'/profile/messenger/channel?user=' + ${channel.getSender().getId()}
-                                                                         + '/ads=' + ${channel.getAdvertisement().getId()}">
+                <a onclick="goToMessage(this); return false;" href="#"
+                   th:id="${channel.getSender().getId() + '-' + channel.getAdvertisement().getId()}">
                     <div>
                         <li>
                             <p th:text="${channel.getSender().getFirstName() + ' ' + channel.getSender().getLastName() }"></p>
@@ -36,5 +36,13 @@
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.1.4/sockjs.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
+<script>
+    function goToMessage(event) {
+        let idArray = event.id.split("-");
+        let recipientID = idArray[0];
+        let advertisementID = idArray[1];
+        window.location.href = '/profile/messenger/channel/messages/' + recipientID + '-' + advertisementID;
+    }
+</script>
 </body>
 </html>

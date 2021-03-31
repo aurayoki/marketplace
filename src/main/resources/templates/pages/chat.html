@@ -14,17 +14,17 @@
 
     <input id="username" type="hidden" th:value="${user.getFirstName() + ' ' + user.getLastName()}">
     <input id="userID" th:value="${user.getId()}" type="hidden">
-    <div id="chat-page" class="hidden">
+    <div id="chat-page">
         <div class="chat-container">
             <button type="submit" class="primary" onclick="buttonBackMessenger()" style="font-size: 30px">&#8668;</button>
             <div class="chat-header">
-                <h2>Тут должно быть имя собеседника и имя товара и цена</h2>
+                <p th:text="${recipient.getFirstName() + ' ' + recipient.getLastName()}"></p>
+                <p th:text="${advertisement.getName() + ' • ' + advertisement.getPrice()}"></p>
             </div>
             <div class="connecting">
                 Connecting...
             </div>
             <ul id="messageArea">
-
             </ul>
             <form id="messageForm" name="messageForm" nameForm="messageForm">
                 <div class="form-group">

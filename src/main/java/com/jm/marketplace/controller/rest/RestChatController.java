@@ -3,21 +3,15 @@ package com.jm.marketplace.controller.rest;
 import com.jm.marketplace.config.mapper.MapperFacade;
 import com.jm.marketplace.dao.ChatMessageDao;
 import com.jm.marketplace.dto.chat.ChatMessageDto;
-import com.jm.marketplace.dto.goods.AdvertisementDto;
 import com.jm.marketplace.model.Advertisement;
-import com.jm.marketplace.model.chat.ChatMessage;
 import com.jm.marketplace.model.User;
 import com.jm.marketplace.model.chat.channel.ChatChannel;
 import com.jm.marketplace.service.advertisement.AdvertisementService;
 import com.jm.marketplace.service.chat.chatchannel.ChatChannelService;
 import com.jm.marketplace.service.user.UserService;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 
 @RestController
 public class RestChatController {
@@ -35,13 +29,15 @@ public class RestChatController {
         this.advertisementService = advertisementService;
     }
 
-    @GetMapping("profile/messenger/get_channelID/{fromUserID}-{toUserID}-{advertisementID}")
-    public String channelUuid(@PathVariable String fromUserID, @PathVariable String toUserID, @PathVariable String advertisementID) {
+    @GetMapping("profile/messenger/channel/channelID/{fromUserID}/{toUserID}/{advertisementID}")
+    public String channelUuid(@PathVariable Long fromUserID,
+                              @PathVariable Long toUserID,
+                              @PathVariable Long advertisementID) {
         ChatChannel chatChannel = chatChannelService.findChatChannelByUsersID(fromUserID, toUserID, advertisementID);
         if (chatChannel == null) {
-            User userFrom = mapperFacade.map(userService.findById(Long.parseLong(fromUserID)), User.class);
-            User userTo = mapperFacade.map(userService.findById(Long.parseLong(toUserID)), User.class);
-            Advertisement advertisement = mapperFacade.map(advertisementService.findById(Long.parseLong(advertisementID)), Advertisement.class);
+            User userFrom = mapperFacade.map(userService.findById(fromUserID), User.class);
+            User userTo = mapperFacade.map(userService.findById(toUserID), User.class);
+            Advertisement advertisement = mapperFacade.map(advertisementService.findById(advertisementID), Advertisement.class);
             chatChannel = new ChatChannel(userFrom, userTo, advertisement);
 
             chatChannelService.saveChatChannel(chatChannel);

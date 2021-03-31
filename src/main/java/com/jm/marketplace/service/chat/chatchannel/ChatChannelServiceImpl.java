@@ -17,8 +17,8 @@ public class ChatChannelServiceImpl implements ChatChannelService {
     }
 
     @Override
-    public ChatChannel findChatChannelByUsersID(String fromUserID, String toUserID, String advertisementID) {
-        return chatChannelDao.findExistingChannel(Long.parseLong(fromUserID), Long.parseLong(toUserID), Long.parseLong(advertisementID));
+    public ChatChannel findChatChannelByUsersID(Long fromUserID, Long toUserID, Long advertisementID) {
+        return chatChannelDao.findExistingChannel(fromUserID, toUserID, advertisementID);
     }
 
     public void saveChatChannel(ChatChannel chatChannel) {

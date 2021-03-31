@@ -10,7 +10,8 @@ var connectingElement = document.querySelector('.connecting');
 
 const userID = document.getElementById('userID').value;
 let channelID;
-let toUser;
+let toUserID;
+let advertisementID;
 
 var stompClient = null;
 var username = null;
@@ -23,28 +24,27 @@ var colors = [
 function connect() {
     username = document.getElementById('username').value.trim();
 
-    if(username) {
-        chatPage.classList.remove('hidden')
-        var socket = new SockJS('/ws');
-        stompClient = Stomp.over(socket);
+    var socket = new SockJS('/ws');
+    stompClient = Stomp.over(socket);
 
-        stompClient.connect({}, onConnected, onError);
-    }
+    stompClient.connect({}, onConnected, onError);
 }
 
 connect();
 
-async function onConnected() {
-    toUser = window.location.href.split("user=")[1].split('/')[0];
-    let advertisement = window.location.href.split("ads=")[1];
 
-    let response = await fetch("/profile/messenger/get_channelID/" + userID + "-" + toUser + "-" + advertisement);
+async function onConnected() {
+    let valueByUrl = window.location.href.split('/messages/')[1];
+    toUserID = valueByUrl.split('-')[0];
+    advertisementID = valueByUrl.split("-")[1];
+
+    let response = await fetch("/profile/messenger/channel/channelID/" + userID + '/' + toUserID + '/' + advertisementID);
     if (response.ok) {
         await response.text().then(function (text) {
             channelID = text;
         });
     } else {
-        alert("Ошибка соединения!!");
+        alert("Ошибка получения id чата");
     }
 
     let responseMsg = await fetch("/profile/messenger/channel/" + channelID);
@@ -52,21 +52,13 @@ async function onConnected() {
     if (responseMsg.ok) {
         messages = await responseMsg.json();
     } else {
-        alert("Ошибка соединения!!");
+        alert("Ошибка получения сообщений");
     }
 
     for (let i = 0; i < messages.length; i++) {
         onMessageReceived(undefined, messages[i]);
     }
     stompClient.subscribe("/topic/personal." + channelID, onMessageReceived);
-
-    stompClient.send("/app/personal." + channelID,
-        {},
-        JSON.stringify({
-                              username: username,
-                              recipient: toUser,
-                              content: 'JOIN'})
-    )
 
     connectingElement.classList.add('hidden');
 }
@@ -80,10 +72,10 @@ function onError(error) {
 
 function sendMessage(event) {
     var messageContent = messageInput.value.trim();
-    if(messageContent && stompClient) {
+    if (messageContent && stompClient) {
         var chatMessage = {
             username: username,
-            recipient: toUser,
+            recipient: toUserID,
             content: messageInput.value,
             channelID: channelID,
             timeSent: new Date()
@@ -107,27 +99,20 @@ function onMessageReceived(payload, msg) {
 
     var messageElement = document.createElement('li');
 
-    if(message.content === 'JOIN') {
-        messageElement.classList.add('event-message');
-        message.content = message.username + ' joined!';
-    } else if (message.content === 'LEAVE') {
-        messageElement.classList.add('event-message');
-        message.content = message.username + ' left!';
-    } else {
-        messageElement.classList.add('chat-message');
+    messageElement.classList.add('chat-message');
 
-        var avatarElement = document.createElement('i');
-        var avatarText = document.createTextNode(message.username[0]);
-        avatarElement.appendChild(avatarText);
-        avatarElement.style['background-color'] = getAvatarColor(message.username);
+    var avatarElement = document.createElement('i');
+    var avatarText = document.createTextNode(message.username[0]);
+    avatarElement.appendChild(avatarText);
+    avatarElement.style['background-color'] = getAvatarColor(message.username);
 
-        messageElement.appendChild(avatarElement);
+    messageElement.appendChild(avatarElement);
 
-        var usernameElement = document.createElement('span');
-        var usernameText = document.createTextNode(message.username);
-        usernameElement.appendChild(usernameText);
-        messageElement.appendChild(usernameElement);
-    }
+    var usernameElement = document.createElement('span');
+    var usernameText = document.createTextNode(message.username);
+    usernameElement.appendChild(usernameText);
+    messageElement.appendChild(usernameElement);
+
 
     var textElement = document.createElement('p');
     var messageText = document.createTextNode(message.content);

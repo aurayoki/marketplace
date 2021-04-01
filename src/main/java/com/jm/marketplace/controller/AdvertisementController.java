@@ -12,4 +12,6 @@ public class AdvertisementController {
     public String advertisementPage() {
         return "user/advertisement_create";
     }
+
+
 }

@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<body>
+
+
+<div class="container-fluid mt-4">
+    <div class="container">
+        <div class="row">
+            <div class="col-3 bg-dark">
+            </div>
+            <div class="col-9" id="goodsTable">
+                <ul class="list-unstyled" th:each="${good}">
+                    <li class="media bg-light m-2 border rounded shadow-sm">
+                        <div class="media col p-3">
+                            <img src="/img/image-none.png" class="align-self-center mr-3 w-25 h-25" alt="">
+                            <div class="media-body">
+                                <h3 class="mt-0 text-primary" th:text="${good.getName()}"></h3>
+                                <h5 class="mt=0" th:text="${good.price} + ' &#8381;'"></h5>
+                                <p th:text="${good.setDescription()}"></p>
+                            </div>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

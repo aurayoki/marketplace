@@ -16,8 +16,6 @@ public interface ChatChannelDao extends JpaRepository<ChatChannel, Long> {
             + "    channel.recipient.id IN (:senderUserID, :recipientUserID)"
             + "  AND"
             + "    channel.advertisement.id = :advertisementID")
-//            + "  AND "
-//            + "    channel.advertisement.user.id = :recipientUserID")
      ChatChannel findExistingChannel(
             @Param("senderUserID") long senderUserID, @Param("recipientUserID") long recipientUserID, @Param("advertisementID") long advertisementID);
 

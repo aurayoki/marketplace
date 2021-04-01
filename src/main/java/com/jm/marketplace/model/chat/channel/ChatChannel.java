@@ -29,7 +29,7 @@ public class ChatChannel {
     }
 
     public ChatChannel(User sender, User recipient, Advertisement advertisement) {
-        this.channelUuid = GenerateChatChannelID.getRandomChannelID();;
+        this.channelUuid = GenerateChatChannelID.getRandomChannelID();
         this.sender = sender;
         this.recipient = recipient;
         this.advertisement = advertisement;

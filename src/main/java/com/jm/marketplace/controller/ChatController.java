@@ -56,7 +56,7 @@ public class ChatController {
     }
 
     @RequestMapping("profile/messenger")
-    public String mainChatPage(Model model, Principal user) {
+    public String allChats(Model model, Principal user) {
         UserDto currentUser = userService.findByEmail(user.getName());
         List<ChatChannel> channels = chatChannelService.findChatChannelsByUserID(currentUser.getId());
         for (ChatChannel channel : channels) {

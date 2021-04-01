@@ -15,32 +15,30 @@ import java.util.List;
 public class GoodsTypeServiceImpl implements GoodsTypeService{
 
     private final GoodsTypeDao goodsTypeDao;
-    private final MapperFacade mapperFacade;
 
     @Autowired
-    public GoodsTypeServiceImpl(GoodsTypeDao goodsTypeDao, MapperFacade mapperFacade) {
+    public GoodsTypeServiceImpl(GoodsTypeDao goodsTypeDao) {
         this.goodsTypeDao = goodsTypeDao;
-        this.mapperFacade = mapperFacade;
     }
 
     @Transactional(readOnly = true)
     @Override
-    public List<GoodsTypeDto> findAll() {
-        return mapperFacade.mapAsList(goodsTypeDao.findAll(), GoodsTypeDto.class);
+    public List<GoodsType> findAll() {
+        return goodsTypeDao.findAll();
     }
 
     @Transactional(readOnly = true)
     @Override
-    public List<GoodsTypeDto> findByGoodsSubcategoryId(Long id) {
-        return mapperFacade.mapAsList(goodsTypeDao.findByGoodsSubcategoryId(id), GoodsTypeDto.class);
+    public List<GoodsType> findByGoodsSubcategoryId(Long id) {
+        return goodsTypeDao.findByGoodsSubcategoryId(id);
     }
 
     @Transactional(readOnly = true)
     @Override
-    public GoodsTypeDto findById(Long id) {
+    public GoodsType findById(Long id) {
         GoodsType goodsType = goodsTypeDao.findById(id).orElseThrow(() ->
                 new GoodsTypeNotFoundException(String.format("Goods type not found by id: %s", id)));
-        return mapperFacade.map(goodsType, GoodsTypeDto.class);
+        return goodsType;
     }
 
 }

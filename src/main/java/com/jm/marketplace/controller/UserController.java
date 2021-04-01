@@ -1,8 +1,12 @@
 package com.jm.marketplace.controller;
 
+import com.jm.marketplace.config.mapper.MapperFacade;
+import com.jm.marketplace.dto.CityDto;
 import com.jm.marketplace.dto.UserDto;
+import com.jm.marketplace.model.User;
 import com.jm.marketplace.service.city.CityService;
 import com.jm.marketplace.service.user.UserService;
+import ma.glasnost.orika.MapperFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
@@ -12,6 +16,7 @@ import org.springframework.web.bind.annotation.*;
 import java.io.File;
 import java.io.IOException;
 import java.security.Principal;
+import java.util.List;
 import java.util.UUID;
 
 @Controller
@@ -20,31 +25,37 @@ public class UserController {
 
     private final UserService userService;
     private final CityService cityService;
+    private MapperFacade mapperFacade;
 
     @Value("${upload.path}")
     private String uploadPath;
 
     @Autowired
-    public UserController(UserService userService, CityService cityService) {
+    public UserController(UserService userService, CityService cityService, MapperFacade mapperFacade) {
         this.userService = userService;
         this.cityService = cityService;
+        this.mapperFacade = mapperFacade;
     }
 
     @GetMapping
     public String showUser(Model model, Principal principal) {
-        model.addAttribute("userDto", userService.findByEmail(principal.getName()));
+        UserDto userDto = mapperFacade.map(userService.findByEmail(principal.getName()), UserDto.class);
+        model.addAttribute("userDto", userDto);
         return "user/index";
     }
 
     @GetMapping(value = "/edit")
     public String showUserEdit(Model model, Principal principal) {
-        model.addAttribute("userDto", userService.findByEmail(principal.getName()));
-        model.addAttribute("cities", cityService.getAllCity());
+        List<CityDto> cityDto = mapperFacade.mapAsList(cityService.getAllCity(), CityDto.class);
+        UserDto userDto = mapperFacade.map(userService.findByEmail(principal.getName()), UserDto.class);
+        model.addAttribute("userDto", userDto);
+        model.addAttribute("cities",  cityDto);
         return "user/edit";
     }
 
     @PostMapping(value = "/edit/save")
     public String saveUserEdit(@ModelAttribute UserDto userDto) throws IOException {
+
         if (userDto.getMultipartFile() != null) {
             StringBuilder stringBuilder = new StringBuilder();
             stringBuilder
@@ -56,7 +67,7 @@ public class UserController {
                     .insert(0, uploadPath);
             userDto.getMultipartFile().transferTo(new File(stringBuilder.toString()));
         }
-        userService.saveUser(userDto);
+        userService.saveUser(mapperFacade.map(userDto, User.class));
         return "user/edit";
     }
 }

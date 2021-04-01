@@ -1,6 +1,8 @@
 package com.jm.marketplace.service.advertisement;
 
+import com.jm.marketplace.dao.AdvertisementDao;
 import com.jm.marketplace.dto.goods.AdvertisementDto;
+import com.jm.marketplace.model.Advertisement;
 import org.springframework.data.domain.Page;
 
 import java.util.List;
@@ -8,17 +10,17 @@ import java.util.Map;
 
 public interface AdvertisementService {
 
-    List<AdvertisementDto> findAll();
+    List<Advertisement> findAll();
 
-    Page<AdvertisementDto> findAll(Integer page);
+    Page<Advertisement> findAll(Integer page);
 
-    Page<AdvertisementDto> findAll(Integer page, Map<String, String> params);
+    Page<Advertisement> findAll(Integer page, Map<String, String> params);
 
-    AdvertisementDto findById(Long id);
+    Advertisement findById(Long id);
 
-    void saveOrUpdate(AdvertisementDto advertisementDto);
+    void saveOrUpdate(Advertisement advertisement);
 
     void deleteById(Long id);
 
-    List<AdvertisementDto> findAdvertisementByStatusActive(Boolean field_value);
+    List<Advertisement> findAdvertisementByStatusActive(Boolean field_value);
 }

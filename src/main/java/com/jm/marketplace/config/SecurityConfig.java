@@ -62,10 +62,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     private OAuth2ClientContext oAuth2ClientContext;
 
     @Autowired
-    public void setUserService(UserService userService,
-                               SuccessUserHandler successUserHandler) {
+    public void setUserService(UserService userService) {
         this.userService = userService;
-        this.successUserHandler = successUserHandler;
     }
 
     @Override
@@ -79,7 +77,6 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 // указываем страницу с формой логина
                 // указываем action с формы логина
                 // Указываем параметры логина и пароля с формы логина
-                .successHandler(successUserHandler)
                 .usernameParameter("email")
                 .passwordParameter("password")
                 // даем доступ к форме логина всем

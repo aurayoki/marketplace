@@ -1,6 +1,7 @@
 package com.jm.marketplace.controller;
 
 import com.jm.marketplace.dto.UserDto;
+import com.jm.marketplace.model.User;
 import com.jm.marketplace.model.chat.ChatMessage;
 import com.jm.marketplace.model.chat.channel.ChatChannel;
 import com.jm.marketplace.service.advertisement.AdvertisementService;
@@ -57,7 +58,7 @@ public class ChatController {
 
     @RequestMapping("profile/messenger")
     public String allChats(Model model, Principal user) {
-        UserDto currentUser = userService.findByEmail(user.getName());
+        User currentUser = userService.findByEmail(user.getName());
         List<ChatChannel> channels = chatChannelService.findChatChannelsByUserID(currentUser.getId());
         for (ChatChannel channel : channels) {
             if (channel.getSender().getEmail().equals(currentUser.getEmail())) {

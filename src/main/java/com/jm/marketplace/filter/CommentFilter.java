@@ -1,18 +1,20 @@
 package com.jm.marketplace.filter;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.PropertySource;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.ResourceLoader;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
+import java.io.*;
 import java.net.URISyntaxException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Locale;
-import java.util.Scanner;
+import java.net.URLClassLoader;
+import java.nio.file.Files;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -35,28 +37,19 @@ public class CommentFilter {
      * Считывает строки из файла запрещённых слов, делит по запятым, убирая лишние пробелы с границ,
      * инициализирует переменную forbiddenWords запрещёнными словами.
      *
-     * @throws  FileNotFoundException
-     * @throws  URISyntaxException
+     * @throws IOException
      */
     @PostConstruct
-    public void initialize() throws FileNotFoundException, URISyntaxException {
-        pathFileForbiddenWords = pathFileForbiddenWords.startsWith("/") ? pathFileForbiddenWords : "/" + pathFileForbiddenWords;
-        try {
-            pathFileForbiddenWords = getClass().getResource(pathFileForbiddenWords).toURI().getPath();
-        } catch (NullPointerException e) {
-            log.error("NullPointerException с параметром: " + pathFileForbiddenWords + ", class CommentFilter, method: initialize", e);
-            throw new NullPointerException(e.toString());
-        } catch (URISyntaxException e) {
-            log.error("URISyntaxException с параметром: " + pathFileForbiddenWords + ", class CommentFilter, method: initialize", e);
-            throw new URISyntaxException(e.getInput(), e.getReason(), e.getIndex());
-        }
-
-        try (Scanner scanner = new Scanner(new FileInputStream(pathFileForbiddenWords))) {
+    public void initialize() throws IOException {
+        try (Scanner scanner = new Scanner(new ClassPathResource(pathFileForbiddenWords).getInputStream())) {
             scanner.useDelimiter(",");
             forbiddenWords = new ArrayList<>();
             while (scanner.hasNext()) {
                 forbiddenWords.add(scanner.next().trim().toLowerCase(Locale.ROOT));
             }
+        } catch (IOException e) {
+            log.error("Ошибка чтения файла, входные параметры: " + pathFileForbiddenWords);
+            throw new IOException(e.getMessage(), e.getCause());
         }
     }
     /**

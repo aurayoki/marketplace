@@ -138,7 +138,43 @@ public class StateMachineConfig extends EnumStateMachineConfigurerAdapter<States
                 .withExternal()
                 .source(States.VIEW_ADVERTISEMENT)
                 .target(States.VIEW_ALL_PAGES)
-                .event(Event.VIEW_PAGE);
+                .event(Event.VIEW_PAGE)
+
+                .and()
+                .withExternal()
+                .source(States.ADD_CATEGORY)
+                .target(States.START)
+                .event(Event.ERROR)
+
+                .and()
+                .withExternal()
+                .source(States.ADD_SUBCATEGORY)
+                .target(States.START)
+                .event(Event.ERROR)
+
+                .and()
+                .withExternal()
+                .source(States.ADD_TYPE)
+                .target(States.START)
+                .event(Event.ERROR)
+
+                .and()
+                .withExternal()
+                .source(States.ADD_DESCRIPTION)
+                .target(States.START)
+                .event(Event.ERROR)
+
+                .and()
+                .withExternal()
+                .source(States.ADD_PRICE)
+                .target(States.START)
+                .event(Event.ERROR)
+
+                .and()
+                .withExternal()
+                .source(States.ADD_NAME)
+                .target(States.START)
+                .event(Event.ERROR);
     }
 
     @Bean

@@ -13,5 +13,6 @@ public enum Event {
     SAVE,
     NEXT,
     BACK,
-    START;
+    START,
+    ERROR;
 }

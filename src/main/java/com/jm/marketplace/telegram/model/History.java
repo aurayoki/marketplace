@@ -4,62 +4,44 @@ import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.telegram.telegrambots.meta.api.objects.Update;
 
+import java.lang.reflect.Array;
 import java.util.ArrayDeque;
 import java.util.Deque;
 import java.util.HashMap;
 
 @Slf4j
 public final class History {
-    /**
-     * Cоздаем историю событий для пользователя.
-     * Очередь - история для каждого message(состояние его переходов,
-     * нажатий и прочего)
-     * Внутреняя мапа - множество историй для определнного чата
-     * Внешняя мама - множество множества историй.
-     */
     private Deque<Update> historyMessage = new ArrayDeque<>();
-    private HashMap<String, Deque<Update>> historyChat = new HashMap<>();
     @Getter
-    private static HashMap<String, HashMap<String, Deque<Update>>> historyMap = new HashMap<>();
+    private static HashMap<String, Deque<Update>> chatHistory = new HashMap<>();
 
 
     private History() {
     }
 
     public static History create() {
-        historyMap = new HashMap<>();
         return new History();
     }
 
     public void addMessage(Update update) {
         {
             String chatId;
-            String messageId;
             try {
                 if (update.hasCallbackQuery()) {
                     chatId = update.getCallbackQuery()
                             .getMessage()
                             .getChatId()
                             .toString();
-                    messageId = update.getCallbackQuery()
-                            .getMessage()
-                            .getMessageId()
-                            .toString();
                 } else if (update.hasMessage()) {
                     chatId = update.getMessage()
                             .getChatId()
                             .toString();
-                    messageId = update.getMessage()
-                            .getMessageId()
-                            .toString();
                 } else {
                     throw new IllegalArgumentException("");
                 }
-                    historyMessage = getHistoryMessage(chatId, messageId);
-                    historyMessage.addLast(update);
-                    historyChat = getHistoryChat(chatId);
-                    historyChat.put(messageId, historyMessage);
-                    historyMap.put(chatId, historyChat);
+                Deque<Update> historyMessage = getHistoryChat(chatId);
+                historyMessage.push(update);
+                chatHistory.put(chatId, historyMessage);
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -70,25 +52,17 @@ public final class History {
         return this;
     }
 
-    public static HashMap<String, Deque<Update>> getHistoryChat(String chatId) {
-        if(historyMap.get(chatId) == null){
-            return new HashMap<>();
-        } else {
-            return historyMap.get(chatId);
-        }
-    }
-
-    public static Deque<Update> getHistoryMessage(String chatId, String messageId) {
-        if(historyMap.get(chatId) == null || historyMap.get(chatId).get(messageId) == null){
+    public static Deque<Update> getHistoryChat(String chatId) {
+        if(chatHistory.get(chatId) == null) {
             return new ArrayDeque<>();
         } else {
-            return historyMap.get(chatId).get(messageId);
+            return chatHistory.get(chatId);
         }
     }
 
     public static Update getLastUpdate(String chatId, String messageId) {
-        historyMap.get(chatId).get(messageId).removeLast();
-        return historyMap.get(chatId).get(messageId).peekLast();
+        chatHistory.get(chatId).removeFirst();
+        return chatHistory.get(chatId).peekFirst();
     }
 
 }

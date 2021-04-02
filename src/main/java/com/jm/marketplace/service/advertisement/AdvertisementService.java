@@ -23,4 +23,6 @@ public interface AdvertisementService {
     void deleteById(Long id);
 
     List<Advertisement> findAdvertisementByStatusActive(Boolean field_value);
+
+    void saveOrUpdateForTelegramBot(Advertisement advertisement);
 }

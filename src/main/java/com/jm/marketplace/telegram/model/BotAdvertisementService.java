@@ -1,67 +1,47 @@
 package com.jm.marketplace.telegram.model;
 
 import com.jm.marketplace.config.mapper.MapperFacade;
-import com.jm.marketplace.dto.goods.AdvertisementDto;
 import com.jm.marketplace.model.Advertisement;
 import com.jm.marketplace.service.advertisement.AdvertisementService;
 import com.jm.marketplace.service.goods.GoodsCategoryService;
 import com.jm.marketplace.service.goods.GoodsSubcategoryService;
 import com.jm.marketplace.service.goods.GoodsTypeService;
 import com.jm.marketplace.service.user.UserService;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.NoSuchElementException;
 
-public final class BotAdvertisementService {
+@Service
+public  final class BotAdvertisementService {
 
     private static HashMap<String, BotAdvertisementDto> statusAdvertisement = new HashMap<>();
-    private AdvertisementService advertisementService;
-    private MapperFacade mapperFacade;
-    private GoodsCategoryService goodsCategoryService;
-    private GoodsSubcategoryService goodsSubcategoryService;
-    private GoodsTypeService goodsTypeService;
-    private UserService userService;
+    private final AdvertisementService advertisementService;
+    private final MapperFacade mapperFacade;
+    private final GoodsCategoryService goodsCategoryService;
+    private final GoodsSubcategoryService goodsSubcategoryService;
+    private final GoodsTypeService goodsTypeService;
+    private final UserService userService;
 
-    @Autowired
-    public void setAdvertisementService(AdvertisementService advertisementService) {
+    public BotAdvertisementService(AdvertisementService advertisementService,
+                                   MapperFacade mapperFacade,
+                                   GoodsCategoryService goodsCategoryService,
+                                   GoodsSubcategoryService goodsSubcategoryService,
+                                   GoodsTypeService goodsTypeService,
+                                   UserService userService) {
         this.advertisementService = advertisementService;
-    }
-
-    @Autowired
-    public void setGoodsCategoryService(GoodsCategoryService goodsCategoryService) {
+        this.mapperFacade = mapperFacade;
         this.goodsCategoryService = goodsCategoryService;
-    }
-
-    @Autowired
-    public void setUserService(UserService userService) {
+        this.goodsSubcategoryService = goodsSubcategoryService;
+        this.goodsTypeService = goodsTypeService;
         this.userService = userService;
     }
 
-    @Autowired
-    public void setGoodsSubcategoryService(GoodsSubcategoryService goodsSubcategoryService) {
-        this.goodsSubcategoryService = goodsSubcategoryService;
-    }
-    @Autowired
-    public void setGoodsTypeService(GoodsTypeService goodsTypeService) {
-        this.goodsTypeService = goodsTypeService;
-    }
-
-    private BotAdvertisementService() {
-    }
-
-    public String toString(String chatId) {
+    public  String toString(String chatId) {
         return ("BotAdvertisement{" +  statusAdvertisement.get(chatId).toString()+"}");
-    }
-
-    private static BotAdvertisementService create(String chatId) {
-        statusAdvertisement.put(chatId, new BotAdvertisementDto());
-        return new BotAdvertisementService();
-    }
-
-    public static BotAdvertisementService create() {
-        return new BotAdvertisementService();
     }
 
     public BotAdvertisementService addName(String chatId, String name) {
@@ -133,12 +113,19 @@ public final class BotAdvertisementService {
     public void save(String chatId) {
         BotAdvertisementDto botAdvertisementDto = ChooseNotNullAdvertisementDto(chatId);
         Advertisement advertisement = new Advertisement();
-        advertisement.setName(advertisement.getName());
-        advertisement.setDescription(advertisement.getDescription());
+        advertisement.setName(botAdvertisementDto.getName());
+        advertisement.setDescription(botAdvertisementDto.getDescription());
+        advertisement.setPrice(botAdvertisementDto.getPrice());
         advertisement.setUser(userService.findById(1L));
         advertisement.setGoodsSubcategory(goodsSubcategoryService.findById(botAdvertisementDto.getGoodsSubcategory()));
         advertisement.setGoodsCategory(goodsCategoryService.findById(botAdvertisementDto.getGoodsSubcategory()));
         advertisement.setGoodsType(goodsTypeService.findById(botAdvertisementDto.getGoodsSubcategory()));
-        advertisementService.saveOrUpdate(advertisement);
+        advertisement.setActive(true);
+        advertisement.setBanned(false);
+        advertisement.setExpired(false);
+        advertisement.setImage("");
+        advertisement.setPublication_date(LocalDateTime.now());
+
+        advertisementService.saveOrUpdateForTelegramBot(advertisement);
     }
 }

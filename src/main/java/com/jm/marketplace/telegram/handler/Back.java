@@ -45,17 +45,31 @@ public class Back implements Handler {
         return super.toString();
     }
 
-    public Handler getHandler(Update update) {
-        return handlers.stream()
+    private Handler getHandler(Update update) {
+        Handler handler = handlers.stream()
                 .filter(h -> h.getClass()
                         .isAnnotationPresent(BotCommand.class))
                 .filter(h -> Stream.of(h.getClass()
                         .getAnnotation(BotCommand.class)
                         .command())
-                        .anyMatch(c -> c.equalsIgnoreCase(update
-                                .getCallbackQuery()
-                                .getData()
-                                .split(" ")[0])))
-                .findAny().orElse(new StartHandler(botService));
+                        .anyMatch(c -> c.equalsIgnoreCase(getDataFromHandler(update))))
+                .findAny()
+                .orElse(handlers.stream()
+                        .filter(h -> h.getClass()
+                                .isAnnotationPresent(BotCommand.class))
+                        .filter(h -> Stream.of(h.getClass()
+                                .getAnnotation(BotCommand.class)
+                                .message())
+                                .anyMatch(c -> c.equalsIgnoreCase(getDataFromHandler(update))))
+                        .findAny().orElse(new ErrorHandler()));
+        return handler;
+    }
+
+    private String getDataFromHandler(Update update) {
+        if (update.hasCallbackQuery()) {
+            return update.getCallbackQuery().getMessage().getText();
+        } else {
+            return update.getMessage().getText();
+        }
     }
 }

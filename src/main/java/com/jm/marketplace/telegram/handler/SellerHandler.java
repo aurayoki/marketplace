@@ -13,7 +13,7 @@ import java.io.Serializable;
 
 @Component
 @Slf4j
-@BotCommand(command = "ADV", message = "")
+@BotCommand(command = "SELLER", message = "")
 public class SellerHandler implements Handler{
     private final AdvertisementUtils advertisementUtils;
     private History history = History.create();;

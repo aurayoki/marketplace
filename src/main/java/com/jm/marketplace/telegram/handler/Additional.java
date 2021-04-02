@@ -8,6 +8,7 @@ import com.jm.marketplace.telegram.model.BotAdvertisementService;
 import com.jm.marketplace.telegram.model.History;
 import com.jm.marketplace.telegram.service.BotService;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.methods.BotApiMethod;
 import org.telegram.telegrambots.meta.api.objects.Update;
@@ -22,9 +23,13 @@ import java.util.List;
 public class Additional implements Handler{
     private final BotService botService;
     private History history = History.create();;
+    private final BotAdvertisementService botAdvertisementService;
 
-    public Additional(BotService botService) {
+    @Autowired
+    public Additional(BotService botService,
+                      BotAdvertisementService botAdvertisementService) {
         this.botService = botService;
+        this.botAdvertisementService = botAdvertisementService;
     }
 
     @Override
@@ -37,7 +42,6 @@ public class Additional implements Handler{
                 chatId = update.getCallbackQuery().getMessage().getChatId().toString();
                 messageId = update.getCallbackQuery().getMessage().getMessageId();
                 EditMessageBuilder messageBuilder = EditMessageBuilder.create(chatId, messageId);
-                BotAdvertisementService botAdvertisementService = BotAdvertisementService.create();
                 if(botAdvertisementService.getEmptyTextAdvertisement(chatId).size()==0) {
                     messageBuilder.line("Товар сохранен");
                     botAdvertisementService.save(chatId);
@@ -58,7 +62,6 @@ public class Additional implements Handler{
                 chatId = update.getMessage().getChatId().toString();
                 MessageBuilder messageBuilder = MessageBuilder.create(chatId);
                 messageBuilder.clearKeyboard();
-                BotAdvertisementService botAdvertisementService = BotAdvertisementService.create();
                 if(botAdvertisementService.getEmptyTextAdvertisement(chatId).size()==0) {
                     botAdvertisementService.save(chatId);
                     messageBuilder.line("Товар сохранен");

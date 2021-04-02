@@ -39,17 +39,15 @@ public class ViewPageHandler implements Handler {
         try {
             Integer currentPage;
             BotApiMethod<? extends Serializable> message;
-            String chatId = update.getCallbackQuery().getMessage().getChatId().toString();
-            Integer messageId = update.getCallbackQuery().getMessage().getMessageId();
+
             try {
                 currentPage = Integer.valueOf(update.getCallbackQuery().getData().split(" ")[1]);
             } catch (Exception classCastException) {
-                log.error(classCastException.getMessage());
-                log.error(classCastException.getStackTrace().toString());
-                log.error(classCastException.getClass().getName());
                 currentPage = 1;
             }
             if(update.hasCallbackQuery()) {
+                String chatId = update.getCallbackQuery().getMessage().getChatId().toString();
+                Integer messageId = update.getCallbackQuery().getMessage().getMessageId();
                 EditMessageBuilder messageBuilder = EditMessageBuilder.create(chatId, messageId);
                 botService.showPageAdvertisement(chatId);
                 messageBuilder.row();
@@ -58,17 +56,17 @@ public class ViewPageHandler implements Handler {
                 messageBuilder.button(advertisementUtils.getInlineKeyboardButtonPagination());
                 messageBuilder.line(advertisementUtils.getAdvertisementTextForCurrentPage(currentPage));
                 history.addMessage(update);
-                log.error(botService.getState(chatId));
                 return messageBuilder.build();
             } else if(update.hasMessage()) {
-                MessageBuilder messageBuilder = MessageBuilder.create(update.getMessage().getChatId().toString());
+                String chatId = update.getMessage().getChatId().toString();
+                Integer messageId = update.getMessage().getMessageId();
+                MessageBuilder messageBuilder = MessageBuilder.create(chatId);
                 messageBuilder.row();
                 messageBuilder.button(advertisementUtils.getInlineKeyboardButtonsAdvertisementForCurrentPage(currentPage));
                 messageBuilder.row();
                 messageBuilder.button(advertisementUtils.getInlineKeyboardButtonPagination());
                 messageBuilder.line(advertisementUtils.getAdvertisementTextForCurrentPage(currentPage));
                 history.addMessage(update);
-                log.error(botService.getState(chatId));
                 return messageBuilder.build();
             }
             throw new TelegramBotException("Как такое может быть?");

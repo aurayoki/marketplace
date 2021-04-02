@@ -33,13 +33,17 @@ public class ErrorHandler implements Handler {
 
     @Override
     public BotApiMethod<? extends Serializable> update(Update update) {
-            String chatId = update.getMessage().getChatId().toString();
-            MessageBuilder messageBuilder = MessageBuilder.create(update.getMessage().getChatId().toString());
-            messageBuilder.clearKeyboard();
-            messageBuilder.line("Неизвестная команда.\n для начала работы введите start");
-            history.addMessage(update);
-            log.error(botService.getState(chatId));
-            return messageBuilder.build();
-
+        String chatId;
+        if(update.hasCallbackQuery()) {
+            chatId = update.getCallbackQuery().getMessage().getChatId().toString();
+        } else {
+            chatId = update.getMessage().getChatId().toString();
+        }
+        MessageBuilder messageBuilder = MessageBuilder.create(update.getMessage().getChatId().toString());
+        messageBuilder.clearKeyboard();
+        messageBuilder.line("Неизвестная команда.\n для начала работы введите start");
+        log.error("Ошибка на state: " + botService.getState(chatId));
+        log.error("Update: " + update.toString());
+        return messageBuilder.build();
     }
 }

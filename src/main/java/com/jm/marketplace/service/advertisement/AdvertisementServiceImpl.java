@@ -79,6 +79,12 @@ public class AdvertisementServiceImpl implements AdvertisementService {
 
     @Transactional
     @Override
+    public void saveOrUpdateForTelegramBot(Advertisement advertisement) {
+        advertisementDao.save(advertisement);
+    }
+
+    @Transactional
+    @Override
     public void deleteById(Long id) {
         advertisementDao.deleteById(id);
     }

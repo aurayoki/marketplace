@@ -15,10 +15,13 @@ import java.io.Serializable;
 @Slf4j
 @BotCommand(message = "", command = "SAVE")
 public class SaveHandler implements Handler{
+    private final BotAdvertisementService botAdvertisementService;
+
     @Autowired
     private BotService botService;
 
-    public SaveHandler() {
+    public SaveHandler(BotAdvertisementService botAdvertisementService) {
+        this.botAdvertisementService = botAdvertisementService;
     }
 
     @Autowired
@@ -34,41 +37,20 @@ public class SaveHandler implements Handler{
     @Override
     public BotApiMethod<? extends Serializable> update(Update update) {
         String chatId = update.getMessage().getChatId().toString();
-        BotAdvertisementService botAdvertisementService = BotAdvertisementService.create();
         String value = update.getMessage().getText();
         if(botService.getState(chatId).equalsIgnoreCase("ADD_CATEGORY")){
-            log.error(botAdvertisementService.getAdvertisement(chatId).toString());
             botAdvertisementService.addCategory(chatId, Long.valueOf(value));
-            log.error(botAdvertisementService.getAdvertisement(chatId).toString());
-        }
-        else if(botService.getState(chatId).equalsIgnoreCase("ADD_DESCRIPTION")){
-
-            log.error(botAdvertisementService.getAdvertisement(chatId).toString());
+        } else if(botService.getState(chatId).equalsIgnoreCase("ADD_DESCRIPTION")){
             botAdvertisementService.addDescription(chatId, value);
-            log.error(botAdvertisementService.getAdvertisement(chatId).toString());
-            log.error(update.getMessage().getText());
         } else if(botService.getState(chatId).equalsIgnoreCase("ADD_PRICE")){
-
-            log.error(botAdvertisementService.getAdvertisement(chatId).toString());
             botAdvertisementService.addPrice(chatId, Integer.valueOf(value));
-            log.error(botAdvertisementService.getAdvertisement(chatId).toString());
-            log.error(update.getMessage().getText());
         } else if(botService.getState(chatId).equalsIgnoreCase("ADD_NAME")){
-            log.error(botAdvertisementService.getAdvertisement(chatId).toString());
             botAdvertisementService.addName(chatId, value);
-            log.error(botAdvertisementService.getAdvertisement(chatId).toString());
-            log.error(update.getMessage().getText());
         } else if(botService.getState(chatId).equalsIgnoreCase("ADD_SUBCATEGORY")){
-            log.error(botAdvertisementService.getAdvertisement(chatId).toString());
             botAdvertisementService.addSubcategory(chatId, Long.valueOf(value));
-            log.error(botAdvertisementService.getAdvertisement(chatId).toString());
-            log.error(update.getMessage().getText());
         } else if(botService.getState(chatId).equalsIgnoreCase("ADD_TYPE")){
-            log.error(botAdvertisementService.getAdvertisement(chatId).toString());
             botAdvertisementService.addType(chatId, Long.valueOf(value));
-            log.error(botAdvertisementService.getAdvertisement(chatId).toString());
-            log.error(update.getMessage().getText());
         }
-        return new Additional(botService).update(update);
+        return new Additional(botService, botAdvertisementService).update(update);
     }
 }

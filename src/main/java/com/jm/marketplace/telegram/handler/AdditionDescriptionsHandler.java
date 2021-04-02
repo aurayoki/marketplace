@@ -2,7 +2,7 @@ package com.jm.marketplace.telegram.handler;
 
 import com.jm.marketplace.telegram.annotations.BotCommand;
 import com.jm.marketplace.telegram.builder.EditMessageBuilder;
-import com.jm.marketplace.telegram.model.Page;
+import com.jm.marketplace.telegram.model.History;
 import com.jm.marketplace.telegram.service.BotService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -16,7 +16,7 @@ import java.io.Serializable;
 @BotCommand(message = "Описание товара", command = "ADD_DESCRIPTION")
 public class AdditionDescriptionsHandler implements Handler{
     private final BotService botService;
-    private Page page = Page.create();
+    private History history = History.create();
 
     public AdditionDescriptionsHandler(BotService botService) {
         this.botService = botService;
@@ -37,7 +37,7 @@ public class AdditionDescriptionsHandler implements Handler{
         EditMessageBuilder messageBuilder = EditMessageBuilder.create(chatId, messageId);
         messageBuilder.row();
         messageBuilder.line("Введите описание товара товара: ");
-        page.addMessage(update);
+        history.addMessage(update);
         return messageBuilder.build();
     }
 }

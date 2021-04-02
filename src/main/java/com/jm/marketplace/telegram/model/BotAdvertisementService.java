@@ -2,6 +2,7 @@ package com.jm.marketplace.telegram.model;
 
 import com.jm.marketplace.config.mapper.MapperFacade;
 import com.jm.marketplace.dto.goods.AdvertisementDto;
+import com.jm.marketplace.model.Advertisement;
 import com.jm.marketplace.service.advertisement.AdvertisementService;
 import com.jm.marketplace.service.goods.GoodsCategoryService;
 import com.jm.marketplace.service.goods.GoodsSubcategoryService;
@@ -13,7 +14,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.NoSuchElementException;
 
-public final class BotAdvertisement {
+public final class BotAdvertisementService {
 
     private static HashMap<String, BotAdvertisementDto> statusAdvertisement = new HashMap<>();
     private AdvertisementService advertisementService;
@@ -47,58 +48,58 @@ public final class BotAdvertisement {
         this.goodsTypeService = goodsTypeService;
     }
 
-    private BotAdvertisement() {
+    private BotAdvertisementService() {
     }
 
     public String toString(String chatId) {
         return ("BotAdvertisement{" +  statusAdvertisement.get(chatId).toString()+"}");
     }
 
-    private static BotAdvertisement create(String chatId) {
+    private static BotAdvertisementService create(String chatId) {
         statusAdvertisement.put(chatId, new BotAdvertisementDto());
-        return new BotAdvertisement();
+        return new BotAdvertisementService();
     }
 
-    public static BotAdvertisement create() {
-        return new BotAdvertisement();
+    public static BotAdvertisementService create() {
+        return new BotAdvertisementService();
     }
 
-    public BotAdvertisement addName(String chatId, String name) {
+    public BotAdvertisementService addName(String chatId, String name) {
         BotAdvertisementDto advertisement = ChooseNotNullAdvertisementDto(chatId);
         advertisement.setName(name);
         statusAdvertisement.put(chatId, advertisement);
         return this;
     }
 
-    public BotAdvertisement addPrice(String chatId, Integer Price) {
+    public BotAdvertisementService addPrice(String chatId, Integer Price) {
         BotAdvertisementDto advertisement = ChooseNotNullAdvertisementDto(chatId);
         advertisement.setPrice(Price);
         statusAdvertisement.put(chatId, advertisement);
         return this;
     }
 
-    public BotAdvertisement addType(String chatId, Long idType) {
+    public BotAdvertisementService addType(String chatId, Long idType) {
         BotAdvertisementDto advertisement = ChooseNotNullAdvertisementDto(chatId);
         advertisement.setGoodsType(idType);
         statusAdvertisement.put(chatId, advertisement);
         return this;
     }
 
-    public BotAdvertisement addCategory(String chatId, Long idCategory) {
+    public BotAdvertisementService addCategory(String chatId, Long idCategory) {
         BotAdvertisementDto advertisement = ChooseNotNullAdvertisementDto(chatId);
         advertisement.setGoodsCategory(idCategory);
         statusAdvertisement.put(chatId, advertisement);
         return this;
     }
 
-    public BotAdvertisement addSubcategory(String chatId, Long idSubcategory) {
+    public BotAdvertisementService addSubcategory(String chatId, Long idSubcategory) {
         BotAdvertisementDto advertisement = ChooseNotNullAdvertisementDto(chatId);
         advertisement.setGoodsSubcategory(idSubcategory);
         statusAdvertisement.put(chatId, advertisement);
         return this;
     }
 
-    public BotAdvertisement addDescription(String chatId, String description) {
+    public BotAdvertisementService addDescription(String chatId, String description) {
         BotAdvertisementDto advertisement = ChooseNotNullAdvertisementDto(chatId);
         advertisement.setDescription(description);
         statusAdvertisement.put(chatId, advertisement);
@@ -130,15 +131,15 @@ public final class BotAdvertisement {
     }
 
     public void save(String chatId) {
-        BotAdvertisementDto advertisement = ChooseNotNullAdvertisementDto(chatId);
-        AdvertisementDto advertisementDto = new AdvertisementDto();
-        advertisementDto.setName(advertisement.getName());
-        advertisementDto.setDescription(advertisement.getDescription());
-        advertisementDto.setUser(userService.findById(1L));
-        advertisementDto.setGoodsSubcategory(goodsSubcategoryService.findById(advertisement.getGoodsSubcategory()));
-        advertisementDto.setGoodsCategory(goodsCategoryService.findById(advertisement.getGoodsSubcategory()));
-        advertisementDto.setGoodsType(goodsTypeService.findById(advertisement.getGoodsSubcategory()));
-        advertisementService.saveOrUpdate(advertisementDto);
+        BotAdvertisementDto botAdvertisementDto = ChooseNotNullAdvertisementDto(chatId);
+        Advertisement advertisement = new Advertisement();
+        advertisement.setName(advertisement.getName());
+        advertisement.setDescription(advertisement.getDescription());
+        advertisement.setUser(userService.findById(1L));
+        advertisement.setGoodsSubcategory(goodsSubcategoryService.findById(botAdvertisementDto.getGoodsSubcategory()));
+        advertisement.setGoodsCategory(goodsCategoryService.findById(botAdvertisementDto.getGoodsSubcategory()));
+        advertisement.setGoodsType(goodsTypeService.findById(botAdvertisementDto.getGoodsSubcategory()));
+        advertisementService.saveOrUpdate(advertisement);
     }
 
 }

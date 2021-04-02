@@ -2,7 +2,7 @@ package com.jm.marketplace.telegram.handler;
 
 import com.jm.marketplace.telegram.annotations.BotCommand;
 import com.jm.marketplace.telegram.builder.EditMessageBuilder;
-import com.jm.marketplace.telegram.model.Page;
+import com.jm.marketplace.telegram.model.History;
 import com.jm.marketplace.telegram.service.BotService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -17,7 +17,7 @@ import java.io.Serializable;
 @Component
 public class AdditionCategoryHandler implements Handler {
     private final BotService botService;
-    private Page page = Page.create();
+    private History history = History.create();
 
     @Autowired
     public AdditionCategoryHandler(BotService botService) {
@@ -36,7 +36,7 @@ public class AdditionCategoryHandler implements Handler {
         messageBuilder.row();
         messageBuilder.line("Введите категорию товара: ");
         messageBuilder.line("Тут надо вывести перечень категорий товара. И хорошо бы вводить не только цифры");
-        page.addMessage(update);
+        history.addMessage(update);
         return messageBuilder.build();
     }
 

@@ -1,6 +1,7 @@
 package com.jm.marketplace.telegram.util;
 
-import com.jm.marketplace.dto.goods.AdvertisementDto;
+
+import com.jm.marketplace.model.Advertisement;
 import com.jm.marketplace.service.advertisement.AdvertisementService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -27,14 +28,14 @@ public class AdvertisementUtils {
         ADVERTISEMENTS_IN_PAGE = count;
     }
 
-    public Map<AdvertisementDto, Integer> getAdvertisementPages() {
+    public Map<Advertisement, Integer> getAdvertisementPages() {
 
-        List<AdvertisementDto> advertisementDtos = advertisementService.findAll();
-        Map<AdvertisementDto, Integer> advertisementsEachPage = new HashMap<>();
+        List<Advertisement> advertisements = advertisementService.findAll();
+        Map<Advertisement, Integer> advertisementsEachPage = new HashMap<>();
         Integer pageNumber = 1;
         int count = 1;
-        for (int i = 0; i < advertisementDtos.size(); i++) {
-            advertisementsEachPage.put(advertisementDtos.get(i), pageNumber);
+        for (int i = 0; i < advertisements.size(); i++) {
+            advertisementsEachPage.put(advertisements.get(i), pageNumber);
             if((i+1) % ADVERTISEMENTS_IN_PAGE == 0) {
                 pageNumber++;
             }
@@ -46,37 +47,37 @@ public class AdvertisementUtils {
         return getAdvertisementPages().get(advertisementService.findById(id));
     }
 
-    public List<AdvertisementDto> getAdvertisementForCurrentPage(int currentPage) {
-        List<AdvertisementDto> advertisementDtos = getAdvertisementPages()
+    public List<Advertisement> getAdvertisementForCurrentPage(int currentPage) {
+        List<Advertisement> advertisements = getAdvertisementPages()
                 .entrySet()
                 .stream()
                 .filter(advertisement ->advertisement.getValue() == currentPage)
                 .map(Map.Entry::getKey)
                 .collect(Collectors.toList());
-        return advertisementDtos;
+        return advertisements;
     }
 
     public String getAdvertisemenTextById(long id) {
-        AdvertisementDto advertisementDto = advertisementService.findById(id);
+        Advertisement advertisement = advertisementService.findById(id);
         StringBuilder sb = new StringBuilder();
-        sb.append(advertisementDto.getName()).append("\n");
-        sb.append(advertisementDto.getPrice()).append("\n");
-        sb.append(advertisementDto.getDescription()).append("\n");
-        sb.append(advertisementDto.getUser()).append("\n");
+        sb.append(advertisement.getName()).append("\n");
+        sb.append(advertisement.getPrice()).append("\n");
+        sb.append(advertisement.getDescription()).append("\n");
+        sb.append(advertisement.getUser()).append("\n");
         return sb.toString();
     }
 
     public String getAdvertisementTextForCurrentPage(int currentPage) {
 
-        List<AdvertisementDto> advertisementDtos = getAdvertisementForCurrentPage(currentPage);
+        List<Advertisement> advertisements = getAdvertisementForCurrentPage(currentPage);
 
         StringBuilder sb = new StringBuilder();
 
-        for (AdvertisementDto advertisementDto : advertisementDtos) {
-            sb.append(advertisementDto.getName()).append("\n");
-            sb.append(advertisementDto.getPrice()).append("\n");
-            sb.append(advertisementDto.getDescription()).append("\n");
-            sb.append(advertisementDto.getUser()).append("\n");
+        for (Advertisement advertisement : advertisements) {
+            sb.append(advertisement.getName()).append("\n");
+            sb.append(advertisement.getPrice()).append("\n");
+            sb.append(advertisement.getDescription()).append("\n");
+            sb.append(advertisement.getUser()).append("\n");
             sb.append("-------------------");
             sb.append("\n");
         }
@@ -96,8 +97,8 @@ public class AdvertisementUtils {
     }
 
     public List<InlineKeyboardButton> getInlineKeyboardButtonPagination() {
-        List<AdvertisementDto> advertisementDtos = advertisementService.findAll();
-        int pagesCount = (int) Math.ceil(advertisementDtos.size() / (double) ADVERTISEMENTS_IN_PAGE);
+        List<Advertisement> advertisements = advertisementService.findAll();
+        int pagesCount = (int) Math.ceil(advertisements.size() / (double) ADVERTISEMENTS_IN_PAGE);
         List<InlineKeyboardButton> keyboardButtonsRowPageNamber = new ArrayList<>();
 
         for (int i = 1; i <= pagesCount; i++) {
@@ -121,21 +122,27 @@ public class AdvertisementUtils {
 
 
     public List<InlineKeyboardButton> getInlineKeyboardButtonsAdvertisementForCurrentPage(int currentPage) {
-        List<AdvertisementDto> advertisementDtos = getAdvertisementForCurrentPage(currentPage);
-        return getInlineKeyboardButtons(advertisementDtos);
+        List<Advertisement> advertisements = getAdvertisementForCurrentPage(currentPage);
+        return getInlineKeyboardButtons(advertisements);
     }
 
-    public static List<InlineKeyboardButton> getInlineKeyboardButtons(List<AdvertisementDto> advertisementDtos) {
+    public static List<InlineKeyboardButton> getInlineKeyboardButtons(List<Advertisement> advertisements) {
         List<InlineKeyboardButton> keyboardButtonsRow = new ArrayList<>();
 
-        for(AdvertisementDto advertisementDto : advertisementDtos) {
+        for(Advertisement advertisement : advertisements) {
             InlineKeyboardButton advertisementButton = new InlineKeyboardButton();
-            advertisementButton.setText(advertisementDto.getName());
-            advertisementButton.setCallbackData("ADV " + advertisementDto.getId());
+            advertisementButton.setText(advertisement.getName());
+            advertisementButton.setCallbackData("ADV " + advertisement.getId());
             keyboardButtonsRow.add(advertisementButton);
         }
 
         return keyboardButtonsRow;
+    }
+
+    public String getSellerInfoByIdAdvertisement(Long idAdvertisement) {
+
+
+        return "";
     }
 
 }

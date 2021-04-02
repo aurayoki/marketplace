@@ -1,9 +1,7 @@
 package com.jm.marketplace.telegram.handler;
 
-import com.jm.marketplace.telegram.UpdateReceiver;
 import com.jm.marketplace.telegram.annotations.BotCommand;
-import com.jm.marketplace.telegram.exception.TelegramBotException;
-import com.jm.marketplace.telegram.model.Page;
+import com.jm.marketplace.telegram.model.History;
 import com.jm.marketplace.telegram.service.BotService;
 import com.jm.marketplace.telegram.util.AdvertisementUtils;
 import lombok.extern.slf4j.Slf4j;
@@ -23,7 +21,7 @@ public class Back implements Handler {
     private final BotService botService;
     private final AdvertisementUtils advertisementUtils;
     private final List<Handler> handlers;
-    private Page page = Page.create();;
+    private History history = History.create();;
 
     @Autowired
     public Back(BotService botService, AdvertisementUtils advertisementUtils, List<Handler> handlers) {
@@ -37,7 +35,7 @@ public class Back implements Handler {
         String chatId = update.getCallbackQuery().getMessage().getChatId().toString();
         botService.back(chatId);
         String messageId = update.getCallbackQuery().getMessage().getMessageId().toString();
-        update = Page.getLastUpdate(chatId, messageId);
+        update = History.getLastUpdate(chatId, messageId);
 
         return getHandler(update).update(update);
     }

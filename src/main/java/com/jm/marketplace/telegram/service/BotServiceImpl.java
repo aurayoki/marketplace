@@ -1,6 +1,6 @@
 package com.jm.marketplace.telegram.service;
 
-import com.jm.marketplace.telegram.model.Page;
+import com.jm.marketplace.telegram.model.History;
 import com.jm.marketplace.telegram.state.Event;
 import com.jm.marketplace.telegram.state.States;
 import lombok.extern.slf4j.Slf4j;
@@ -16,7 +16,7 @@ public class BotServiceImpl implements BotService{
     private final StateMachinePersister<States, Event, String> persister;
 
     private final StateMachineFactory<States, Event> stateMachineFactory;
-    private Page page;
+    private History history;
 
     @Autowired
     public BotServiceImpl(StateMachinePersister<States, Event, String> persister, StateMachineFactory<States, Event> stateMachineFactory) {

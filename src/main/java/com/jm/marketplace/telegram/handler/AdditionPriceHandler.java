@@ -2,7 +2,7 @@ package com.jm.marketplace.telegram.handler;
 
 import com.jm.marketplace.telegram.annotations.BotCommand;
 import com.jm.marketplace.telegram.builder.EditMessageBuilder;
-import com.jm.marketplace.telegram.model.Page;
+import com.jm.marketplace.telegram.model.History;
 import com.jm.marketplace.telegram.service.BotService;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
@@ -16,7 +16,7 @@ import java.io.Serializable;
 @Component
 public class AdditionPriceHandler implements Handler{
     private final BotService botService;
-    private Page page = Page.create();
+    private History history = History.create();
 
     public AdditionPriceHandler(BotService botService) {
         this.botService = botService;
@@ -33,7 +33,7 @@ public class AdditionPriceHandler implements Handler{
         EditMessageBuilder messageBuilder = EditMessageBuilder.create(chatId, messageId);
         messageBuilder.row();
         messageBuilder.line("Введите цену товара товара: ");
-        page.addMessage(update);
+        history.addMessage(update);
         return messageBuilder.build();
     }
 

@@ -26,7 +26,7 @@ import static org.mockito.Mockito.verify;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
-class BotAdvertisementServiceImplTest {
+class BotAdvertisementServiceServiceImplTest {
 
     @Autowired
     private AdvertisementService advertisementService;

@@ -4,7 +4,7 @@ import com.jm.marketplace.service.advertisement.AdvertisementService;
 import com.jm.marketplace.telegram.annotations.BotCommand;
 import com.jm.marketplace.telegram.builder.EditMessageBuilder;
 import com.jm.marketplace.telegram.builder.MessageBuilder;
-import com.jm.marketplace.telegram.model.Page;
+import com.jm.marketplace.telegram.model.History;
 import com.jm.marketplace.telegram.service.BotService;
 import com.jm.marketplace.telegram.util.AdvertisementUtils;
 import lombok.extern.slf4j.Slf4j;
@@ -23,7 +23,7 @@ public class ViewAdvertisementHandler implements Handler {
     private final AdvertisementUtils advertisementUtils;
     private final AdvertisementService advertisementService;
     private final BotService botService;
-    private Page page = Page.create();;
+    private History history = History.create();;
 
     @Autowired
     public ViewAdvertisementHandler(AdvertisementUtils advertisementUtils,
@@ -41,7 +41,6 @@ public class ViewAdvertisementHandler implements Handler {
     @Override
     public BotApiMethod<? extends Serializable> update(Update update) {
         int currentAdv;
-        BotApiMethod<? extends Serializable> message;
         try {
             String chatId;
             Integer messageId;
@@ -54,7 +53,7 @@ public class ViewAdvertisementHandler implements Handler {
                 messageBuilder.row();
                 messageBuilder.button("Назад", "back");
                 messageBuilder.line(advertisementUtils.getAdvertisemenTextById(currentAdv));
-                page.addMessage(update);
+                history.addMessage(update);
                 log.error(botService.getState(chatId));
               return messageBuilder.build();
             } else {
@@ -65,7 +64,7 @@ public class ViewAdvertisementHandler implements Handler {
                 messageBuilder.row();
                 messageBuilder.button("Назад", "back");
                 messageBuilder.line(advertisementUtils.getAdvertisemenTextById(currentAdv));
-                page.addMessage(update);
+                history.addMessage(update);
                 log.error(botService.getState(chatId));
                 return messageBuilder.build();
             }

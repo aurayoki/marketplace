@@ -5,7 +5,7 @@ import com.jm.marketplace.telegram.annotations.BotCommand;
 import com.jm.marketplace.telegram.builder.EditMessageBuilder;
 import com.jm.marketplace.telegram.builder.MessageBuilder;
 import com.jm.marketplace.telegram.exception.TelegramBotException;
-import com.jm.marketplace.telegram.model.Page;
+import com.jm.marketplace.telegram.model.History;
 import com.jm.marketplace.telegram.service.BotService;
 import com.jm.marketplace.telegram.util.AdvertisementUtils;
 import lombok.extern.slf4j.Slf4j;
@@ -24,7 +24,7 @@ public class ViewPageHandler implements Handler {
     private final AdvertisementService advertisementService;
     private final AdvertisementUtils advertisementUtils;
     private final BotService botService;
-    private Page page = Page.create();;
+    private History history = History.create();;
 
     @Autowired
     public ViewPageHandler(AdvertisementService advertisementService, AdvertisementUtils advertisementUtils, BotService botService) {
@@ -57,7 +57,7 @@ public class ViewPageHandler implements Handler {
                 messageBuilder.row();
                 messageBuilder.button(advertisementUtils.getInlineKeyboardButtonPagination());
                 messageBuilder.line(advertisementUtils.getAdvertisementTextForCurrentPage(currentPage));
-                page.addMessage(update);
+                history.addMessage(update);
                 log.error(botService.getState(chatId));
                 return messageBuilder.build();
             } else if(update.hasMessage()) {
@@ -67,7 +67,7 @@ public class ViewPageHandler implements Handler {
                 messageBuilder.row();
                 messageBuilder.button(advertisementUtils.getInlineKeyboardButtonPagination());
                 messageBuilder.line(advertisementUtils.getAdvertisementTextForCurrentPage(currentPage));
-                page.addMessage(update);
+                history.addMessage(update);
                 log.error(botService.getState(chatId));
                 return messageBuilder.build();
             }

@@ -2,8 +2,7 @@ package com.jm.marketplace.telegram.handler;
 
 import com.jm.marketplace.telegram.annotations.BotCommand;
 import com.jm.marketplace.telegram.builder.MessageBuilder;
-import com.jm.marketplace.telegram.model.BotAdvertisement;
-import com.jm.marketplace.telegram.model.Page;
+import com.jm.marketplace.telegram.model.History;
 import com.jm.marketplace.telegram.service.BotService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -16,7 +15,7 @@ import java.io.Serializable;
 @Slf4j
 @BotCommand(message = "", command = "ERROR")
 public class ErrorHandler implements Handler {
-    Page page = Page.create();
+    History history = History.create();
     private BotService botService;
 
     public void setBotService(BotService botService) {
@@ -38,7 +37,7 @@ public class ErrorHandler implements Handler {
             MessageBuilder messageBuilder = MessageBuilder.create(update.getMessage().getChatId().toString());
             messageBuilder.clearKeyboard();
             messageBuilder.line("Неизвестная команда.\n для начала работы введите start");
-            page.addMessage(update);
+            history.addMessage(update);
             log.error(botService.getState(chatId));
             return messageBuilder.build();
 

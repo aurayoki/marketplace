@@ -1,6 +1,5 @@
 package com.jm.marketplace.telegram.model;
 
-import com.jm.marketplace.telegram.exception.TelegramBotException;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.telegram.telegrambots.meta.api.objects.Update;
@@ -10,7 +9,7 @@ import java.util.Deque;
 import java.util.HashMap;
 
 @Slf4j
-public final class Page {
+public final class History {
     /**
      * Cоздаем историю событий для пользователя.
      * Очередь - история для каждого message(состояние его переходов,
@@ -18,18 +17,18 @@ public final class Page {
      * Внутреняя мапа - множество историй для определнного чата
      * Внешняя мама - множество множества историй.
      */
-    private Deque<Update> history_message = new ArrayDeque<>();
-    private HashMap<String, Deque<Update>> history_chat = new HashMap<>();
+    private Deque<Update> historyMessage = new ArrayDeque<>();
+    private HashMap<String, Deque<Update>> historyChat = new HashMap<>();
     @Getter
-    private static HashMap<String, HashMap<String, Deque<Update>>> history = new HashMap<>();
+    private static HashMap<String, HashMap<String, Deque<Update>>> historyMap = new HashMap<>();
 
 
-    private Page() {
+    private History() {
     }
 
-    public static Page create() {
-        history = new HashMap<>();
-        return new Page();
+    public static History create() {
+        historyMap = new HashMap<>();
+        return new History();
     }
 
     public void addMessage(Update update) {
@@ -56,40 +55,40 @@ public final class Page {
                 } else {
                     throw new IllegalArgumentException("");
                 }
-                    history_message = getHistory_message(chatId, messageId);
-                    history_message.addLast(update);
-                    history_chat = getHistory_chat(chatId);
-                    history_chat.put(messageId, history_message);
-                    history.put(chatId, history_chat);
+                    historyMessage = getHistoryMessage(chatId, messageId);
+                    historyMessage.addLast(update);
+                    historyChat = getHistoryChat(chatId);
+                    historyChat.put(messageId, historyMessage);
+                    historyMap.put(chatId, historyChat);
             } catch (Exception e) {
                 e.printStackTrace();
             }
         }
     }
 
-    public Page getPage() {
+    public History getPage() {
         return this;
     }
 
-    public static HashMap<String, Deque<Update>> getHistory_chat(String chatId) {
-        if(history.get(chatId) == null){
+    public static HashMap<String, Deque<Update>> getHistoryChat(String chatId) {
+        if(historyMap.get(chatId) == null){
             return new HashMap<>();
         } else {
-            return history.get(chatId);
+            return historyMap.get(chatId);
         }
     }
 
-    public static Deque<Update> getHistory_message(String chatId, String messageId) {
-        if(history.get(chatId) == null || history.get(chatId).get(messageId) == null){
+    public static Deque<Update> getHistoryMessage(String chatId, String messageId) {
+        if(historyMap.get(chatId) == null || historyMap.get(chatId).get(messageId) == null){
             return new ArrayDeque<>();
         } else {
-            return history.get(chatId).get(messageId);
+            return historyMap.get(chatId).get(messageId);
         }
     }
 
     public static Update getLastUpdate(String chatId, String messageId) {
-        history.get(chatId).get(messageId).removeLast();
-        return history.get(chatId).get(messageId).peekLast();
+        historyMap.get(chatId).get(messageId).removeLast();
+        return historyMap.get(chatId).get(messageId).peekLast();
     }
 
 }

@@ -26,9 +26,10 @@ public class MainController {
     private final UserService userService;
     private final SearchingByKeywordService keywordService;
 
-    private  MapperFacade mapperFacade;
+    private MapperFacade mapperFacade;
+
     @Autowired
-    public void setMapperFacade(MapperFacade mapperFacade){
+    public void setMapperFacade(MapperFacade mapperFacade) {
         this.mapperFacade = mapperFacade;
     }
 
@@ -44,13 +45,12 @@ public class MainController {
     public String showMainPage(Model model,
                                @RequestParam(value = "page", required = false, defaultValue = "0") Integer page,
                                @RequestParam(value = "search", required = false) String search) {
-        List<CityDto> cityDto = mapperFacade.mapAsList(cityService.getAllCity(), CityDto.class);
+        List<CityDto> cityDto = mapperFacade.mapAsList(cityService.findAll(), CityDto.class);
         model.addAttribute("userDto", new UserDto());
         model.addAttribute("cities", cityDto);
-        if(search!=null){
+        if (search != null) {
             model.addAttribute("allGoods", keywordService.findByKeyword(search));
-        }
-        else {
+        } else {
             model.addAttribute("allGoods", advertisementService.findAll(page));
         }
         return "index";
@@ -58,7 +58,7 @@ public class MainController {
 
     @PostMapping(value = "/create-user")
     public String create(@ModelAttribute("userDto") UserDto userDto) {
-        userService.saveUser(mapperFacade.map(userDto, User.class));
+        userService.saveOrUpdate(mapperFacade.map(userDto, User.class));
         return "/email/confirm/verification";
     }
 
@@ -70,7 +70,7 @@ public class MainController {
     }
 
     @GetMapping("/login")
-    public String mainPage(){
+    public String mainPage() {
         return "/login";
     }
 }

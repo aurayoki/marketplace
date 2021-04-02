@@ -1,14 +1,8 @@
 package com.jm.marketplace.service.goods;
 
-import com.jm.marketplace.dto.goods.GoodsCategoryDto;
 import com.jm.marketplace.model.goods.GoodsCategory;
+import com.jm.marketplace.service.general.ReadWriteService;
 
-import java.util.List;
-
-public interface GoodsCategoryService {
-
-    List<GoodsCategory> findAll();
-
-    GoodsCategory findById(Long id);
+public interface GoodsCategoryService extends ReadWriteService<GoodsCategory, Long> {
 
 }

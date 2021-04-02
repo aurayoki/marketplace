@@ -1,6 +1,7 @@
 package com.jm.marketplace.util.converter;
 
 import com.jm.marketplace.dto.CityDto;
+import com.jm.marketplace.model.City;
 import com.jm.marketplace.service.city.CityService;
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.core.convert.converter.ConditionalGenericConverter;

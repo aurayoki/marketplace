@@ -118,7 +118,7 @@ public class UserServiceTest {
 
     @Test
     void saveUser() {
-        userService.saveUser(mapperFacade.map(userDto, User.class));
+        userService.saveOrUpdate(mapperFacade.map(userDto, User.class));
 
         verify(userDaoMock, times(1)).save(any(User.class));
     }

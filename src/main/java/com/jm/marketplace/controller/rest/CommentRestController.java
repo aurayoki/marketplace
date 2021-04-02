@@ -7,9 +7,7 @@ import com.jm.marketplace.filter.CommentFilter;
 import com.jm.marketplace.model.Advertisement;
 import com.jm.marketplace.model.Comment;
 import com.jm.marketplace.service.comment.CommentService;
-import org.checkerframework.checker.units.qual.C;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;

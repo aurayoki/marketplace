@@ -1,7 +1,5 @@
 package com.jm.marketplace.service.telegram.advertisement;
 
-import com.jm.marketplace.dto.goods.AdvertisementDto;
-import com.jm.marketplace.dto.goods.GoodsTypeDto;
 import com.jm.marketplace.model.Advertisement;
 import com.jm.marketplace.model.goods.GoodsType;
 import com.jm.marketplace.service.goods.GoodsSubcategoryService;
@@ -37,7 +35,7 @@ public class AdvertisementSelectGoodsType implements AdvertisementGenerator {
     public void execute(StringBuilder builder, HashMap<Long, Integer> currentGoodsStatus, Long chatId, Object... objects) {
         HashMap<Long, Advertisement> usersNewAdvertisement = (HashMap<Long, Advertisement>) objects[1];
         Advertisement advertisementDto = usersNewAdvertisement.get(chatId);
-        advertisementDto.setGoodsSubcategory(goodsSubcategoryService.findById(Long.parseLong((String) objects[0])));
+        advertisementDto.setGoodsSubcategory(goodsSubcategoryService.findById(Long.parseLong((String) objects[0])).get());
         usersNewAdvertisement.put(chatId, advertisementDto);
 
         List<GoodsType> goodsTypeDtos = goodsTypeService.findByGoodsSubcategoryId(Long.parseLong((String) objects[0]));

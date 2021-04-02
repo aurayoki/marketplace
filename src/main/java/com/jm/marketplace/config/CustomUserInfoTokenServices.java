@@ -108,7 +108,7 @@ public class CustomUserInfoTokenServices implements ResourceServerTokenServices 
                 user.setUserImg(picture);
                 user.setActive(true);
                 user.setPassword(String.valueOf(Objects.hash(googleEmail, firstName)));
-                userService.saveUser(user);
+                userService.saveOrUpdate(user);
             }
         }
 

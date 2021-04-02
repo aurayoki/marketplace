@@ -73,6 +73,6 @@ public class ViewAdvertisementHandler implements Handler {
         } catch (NumberFormatException numberFormatException) {
             log.error("\nNumber format exception: " + numberFormatException.getStackTrace());
         }
-           return null;
+        return new ErrorHandler().update(update);
     }
 }

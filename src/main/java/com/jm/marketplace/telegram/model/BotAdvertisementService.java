@@ -141,5 +141,4 @@ public final class BotAdvertisementService {
         advertisement.setGoodsType(goodsTypeService.findById(botAdvertisementDto.getGoodsSubcategory()));
         advertisementService.saveOrUpdate(advertisement);
     }
-
 }

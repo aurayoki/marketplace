@@ -17,7 +17,7 @@ import java.io.Serializable;
 
 @Component
 @Slf4j
-@BotCommand(command = "/START", message = "start")
+@BotCommand(command = "START", message = "start")
 public class StartHandler implements Handler{
 
     private final BotService botService;
@@ -49,7 +49,7 @@ public class StartHandler implements Handler{
         }
         catch (Exception e) {
             e.getStackTrace();
-            return null;
+            return new ErrorHandler().update(update);
         }
     }
 

@@ -76,7 +76,7 @@ public class ViewPageHandler implements Handler {
         }
         catch (Exception e) {
             e.getStackTrace();
-            return null;
+            return new ErrorHandler().update(update);
         }
     }
 

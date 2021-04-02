@@ -1,13 +1,8 @@
 package com.jm.marketplace.service.city;
 
-import com.jm.marketplace.dto.CityDto;
 import com.jm.marketplace.model.City;
+import com.jm.marketplace.service.general.ReadWriteService;
 
-import java.util.List;
+public interface CityService extends ReadWriteService<City, Long> {
 
-public interface CityService {
-
-    List<City> getAllCity();
-
-    City findById(Long id);
 }

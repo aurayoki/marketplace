@@ -6,12 +6,14 @@ import com.jm.marketplace.dto.UserDto;
 import com.jm.marketplace.model.User;
 import com.jm.marketplace.service.city.CityService;
 import com.jm.marketplace.service.user.UserService;
-import ma.glasnost.orika.MapperFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
 
 import java.io.File;
 import java.io.IOException;
@@ -25,7 +27,7 @@ public class UserController {
 
     private final UserService userService;
     private final CityService cityService;
-    private MapperFacade mapperFacade;
+    private final MapperFacade mapperFacade;
 
     @Value("${upload.path}")
     private String uploadPath;
@@ -46,10 +48,10 @@ public class UserController {
 
     @GetMapping(value = "/edit")
     public String showUserEdit(Model model, Principal principal) {
-        List<CityDto> cityDto = mapperFacade.mapAsList(cityService.getAllCity(), CityDto.class);
+        List<CityDto> cityDto = mapperFacade.mapAsList(cityService.findAll(), CityDto.class);
         UserDto userDto = mapperFacade.map(userService.findByEmail(principal.getName()), UserDto.class);
         model.addAttribute("userDto", userDto);
-        model.addAttribute("cities",  cityDto);
+        model.addAttribute("cities", cityDto);
         return "user/edit";
     }
 
@@ -63,11 +65,11 @@ public class UserController {
                     .append(userDto.getMultipartFile().getOriginalFilename());
             userDto.setUserImg(stringBuilder.toString());
             stringBuilder
-                    .insert(0,"/")
+                    .insert(0, "/")
                     .insert(0, uploadPath);
             userDto.getMultipartFile().transferTo(new File(stringBuilder.toString()));
         }
-        userService.saveUser(mapperFacade.map(userDto, User.class));
+        userService.saveOrUpdate(mapperFacade.map(userDto, User.class));
         return "user/edit";
     }
 }

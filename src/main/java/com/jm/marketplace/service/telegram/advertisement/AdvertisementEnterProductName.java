@@ -1,6 +1,5 @@
 package com.jm.marketplace.service.telegram.advertisement;
 
-import com.jm.marketplace.dto.goods.AdvertisementDto;
 import com.jm.marketplace.model.Advertisement;
 import com.jm.marketplace.service.goods.GoodsTypeService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,7 +9,7 @@ import java.util.HashMap;
 
 @Component
 public class AdvertisementEnterProductName implements AdvertisementGenerator {
-    private GoodsTypeService goodsTypeService;
+    private final GoodsTypeService goodsTypeService;
 
     @Autowired
     public AdvertisementEnterProductName(GoodsTypeService goodsTypeService) {
@@ -31,7 +30,7 @@ public class AdvertisementEnterProductName implements AdvertisementGenerator {
     public void execute(StringBuilder builder, HashMap<Long, Integer> currentGoodsStatus, Long chatId, Object... objects) {
         HashMap<Long, Advertisement> usersNewAdvertisement = (HashMap<Long, Advertisement>) objects[1];
         Advertisement advertisementDto = usersNewAdvertisement.get(chatId);
-        advertisementDto.setGoodsType(goodsTypeService.findById(Long.parseLong((String) objects[0])));
+        advertisementDto.setGoodsType(goodsTypeService.findById(Long.parseLong((String) objects[0])).get());
         usersNewAdvertisement.put(chatId, advertisementDto);
 
         builder.append("Введите название товара").append("\n");

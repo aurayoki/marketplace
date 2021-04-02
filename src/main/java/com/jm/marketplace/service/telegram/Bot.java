@@ -279,7 +279,7 @@ public class Bot extends TelegramLongPollingBot {
     }
 
     private Point getInfoLocationByCoordinates(Integer advertisementId) {
-        Advertisement advertisement = advertisementService.findById(advertisementId.longValue()).orElseThrow(IllegalArgumentException::new);
+        Advertisement advertisement = advertisementService.findById(advertisementId.longValue()).get();
         User user = advertisement.getUser();
         return geoCoderService.getCoordinatesByAddress(user.getCity().getName());
     }

@@ -3,17 +3,22 @@ package com.jm.marketplace.service.telegram;
 import com.jm.marketplace.dto.goods.AdvertisementDto;
 import com.jm.marketplace.model.Advertisement;
 import com.jm.marketplace.model.User;
+import com.jm.marketplace.model.geoStructure.Point;
 import com.jm.marketplace.service.advertisement.AdvertisementService;
 import com.jm.marketplace.service.telegram.advertisement.AdvertisementGenerator;
 import com.jm.marketplace.service.telegram.buttons.TelegramBotInlineButtons;
+import com.jm.marketplace.util.geo.GeoCoderService;
+import com.jm.marketplace.util.geo.GeoRoutesService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
+import org.telegram.telegrambots.meta.api.methods.send.SendLocation;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageText;
+import org.telegram.telegrambots.meta.api.objects.Location;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup;
@@ -52,6 +57,7 @@ public class Bot extends TelegramLongPollingBot {
     private final TelegramBotInlineButtons inlineButtons = new TelegramBotInlineButtons();
 
     private AdvertisementService advertisementService;
+    private GeoCoderService geoCoderService;
 
     private final HashMap<Long, Integer> currentGoodAddStatus = new HashMap<>();
     private final HashMap<Long, AdvertisementDto> usersNewAdvertisement = new HashMap<>();
@@ -69,8 +75,9 @@ public class Bot extends TelegramLongPollingBot {
     }
 
     @Autowired
-    public void setAdvertisementService(AdvertisementService advertisementService) {
+    public void setAdvertisementService(AdvertisementService advertisementService, GeoCoderService geoCoderService) {
         this.advertisementService = advertisementService;
+        this.geoCoderService = geoCoderService;
     }
 
     @PostConstruct
@@ -135,7 +142,7 @@ public class Bot extends TelegramLongPollingBot {
                     updateChat(update, currentChatId, homePageMessage,
                             getInlineButtonKeyboardMarkupByGoodsAndPages(currentPage));
 
-                } else if(checkCallbackQueryContains(update, "goods_")) {
+                } else if (checkCallbackQueryContains(update, "goods_")) {
                     Integer advertisementId = Integer.parseInt(update.getCallbackQuery().getData().substring(6));
                     backGoodsId = advertisementId;
 
@@ -156,6 +163,9 @@ public class Bot extends TelegramLongPollingBot {
 
                 } else if (checkCallbackQueryContains(update, "pages_seller")) {
                     updateChat(update, currentChatId, getInfoTheSellerToByIdAdvertisement(backGoodsId), inlineButtons.getBackButtonInlineKeyboardMarkup());
+                } else if (checkCallbackQueryContains(update, "pages_city")) {
+                    updateChatLocation(update, currentChatId, getInfoLocationByCoordinates(backGoodsId).getLongitude(),
+                                                              getInfoLocationByCoordinates(backGoodsId).getLatitude());
                 }
             }
             log.info("Send telegram message, username: {}", userName);
@@ -221,6 +231,18 @@ public class Bot extends TelegramLongPollingBot {
         log.error(editMessageText.toString());
     }
 
+    private void updateChatLocation(Update update, Long chatId, Double longitude, Double latitude) throws TelegramApiException {
+        SendLocation sendLocation = new SendLocation();
+        sendLocation.setReplyToMessageId(update.getCallbackQuery().getMessage().getMessageId());
+        sendLocation.setLatitude(latitude);
+        sendLocation.setLongitude(longitude);
+        sendLocation.setChatId(chatId.toString());
+        execute(sendLocation);
+
+        log.info(update.getCallbackQuery().getData());
+        log.error(sendLocation.toString());
+    }
+
     /**
      * Переход назад по кнопкам.
      */
@@ -256,7 +278,11 @@ public class Bot extends TelegramLongPollingBot {
         return sellerInfo.toString();
     }
 
-
+    private Point getInfoLocationByCoordinates(Integer advertisementId) {
+        Advertisement advertisement = advertisementService.findById(advertisementId.longValue());
+        User user = advertisement.getUser();
+        return geoCoderService.getCoordinatesByAddress(user.getCity().getName());
+    }
 
     private String getAdvertisementTextForCurrentPage(int currentPage) {
 
@@ -285,7 +311,7 @@ public class Bot extends TelegramLongPollingBot {
         int count = 1;
         for (int i = 0; i < advertisements.size(); i++) {
             advertisementsEachPage.put(advertisements.get(i), pageNumber);
-            if((i+1) % ADVERTISEMENTS_IN_PAGE == 0) {
+            if ((i + 1) % ADVERTISEMENTS_IN_PAGE == 0) {
                 pageNumber++;
             }
         }
@@ -300,7 +326,7 @@ public class Bot extends TelegramLongPollingBot {
         List<Advertisement> advertisements = getAdvertisementPages()
                 .entrySet()
                 .stream()
-                .filter(advertisement ->advertisement.getValue() == currentPage)
+                .filter(advertisement -> advertisement.getValue() == currentPage)
                 .map(Map.Entry::getKey)
                 .collect(Collectors.toList());
         return advertisements;
@@ -319,7 +345,7 @@ public class Bot extends TelegramLongPollingBot {
         if (currentMessageText.equals("Добавить товар")) {
             currentGoodAddStatus.put(currentChatId, 0);
             usersNewAdvertisement.put(currentChatId, new AdvertisementDto());
-        } else if (currentMessageText.equals(listAdvertisement) || currentMessageText.equals(listAdvertisementPagination) ) {
+        } else if (currentMessageText.equals(listAdvertisement) || currentMessageText.equals(listAdvertisementPagination)) {
             if (currentGoodAddStatus.containsKey(currentChatId)) {
                 currentGoodAddStatus.remove(currentChatId);
                 usersNewAdvertisement.remove(currentChatId);

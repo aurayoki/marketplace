@@ -83,9 +83,9 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .antMatchers("/", "/login**").permitAll()
                 .antMatchers("/static/**").permitAll()
                 .antMatchers("/api/**",
-                                        "/admin/**",
-                                        "/swagger-ui/**",
-                                        "v2/api-docs").access("hasRole('ADMIN')")
+                        "/admin/**",
+                        "/swagger-ui/**",
+                        "v2/api-docs").access("hasRole('ADMIN')")
                 .antMatchers("/create-user").permitAll()
                 .antMatchers("/email/confirm/**").permitAll()
                 //страница для добавления товара

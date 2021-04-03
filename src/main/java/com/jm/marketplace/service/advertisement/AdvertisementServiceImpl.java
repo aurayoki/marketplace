@@ -13,7 +13,9 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -22,6 +24,7 @@ import java.util.Optional;
 @Service
 public class AdvertisementServiceImpl extends ReadWriteServiceImpl<Advertisement, Long> implements AdvertisementService {
 
+    private int ADVERTISEMENTS_IN_PAGE = 4;
     private final AdvertisementDao advertisementDao;
     private AdvertisementFilter advertisementFilter;
     private final UserService userService;
@@ -64,6 +67,12 @@ public class AdvertisementServiceImpl extends ReadWriteServiceImpl<Advertisement
     public void saveOrUpdate(Advertisement advertisement) {
         User user = userService.findByEmail(SecurityContextHolder.getContext().getAuthentication().getName());
         advertisement.setUser(user);
+        advertisementDao.save(advertisement);
+    }
+
+    @Transactional
+    @Override
+    public void saveOrUpdateForTelegramBot(Advertisement advertisement) {
         advertisementDao.save(advertisement);
     }
 

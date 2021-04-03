@@ -3,6 +3,8 @@ package com.jm.marketplace.controller;
 import com.jm.marketplace.config.mapper.MapperFacade;
 import com.jm.marketplace.dto.CityDto;
 import com.jm.marketplace.dto.UserDto;
+import com.jm.marketplace.dto.goods.AdvertisementDto;
+import com.jm.marketplace.model.Advertisement;
 import com.jm.marketplace.model.User;
 import com.jm.marketplace.search.advertisement.keywords.service.SearchingByKeywordService;
 import com.jm.marketplace.service.advertisement.AdvertisementService;
@@ -67,6 +69,14 @@ public class MainController {
         UserDto userDto = mapperFacade.map(userService.findByUniqueCode(code), UserDto.class);
         userService.activateUser(mapperFacade.map(userDto, User.class));
         return "/email/confirm/index";
+    }
+
+    @GetMapping(value = "/good/{id}")
+    public String showAdvertisementById(@PathVariable(value = "id") Long id,
+                                        Model model) {
+        AdvertisementDto advertisement = mapperFacade.map(advertisementService.findById(id), AdvertisementDto.class);
+        model.addAttribute("good", advertisement);
+        return "advertisementPage";
     }
 
     @GetMapping("/login")

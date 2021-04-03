@@ -1,5 +1,6 @@
 package com.jm.marketplace.service.telegram.advertisement;
 
+import com.jm.marketplace.dto.goods.AdvertisementDto;
 import com.jm.marketplace.model.Advertisement;
 import com.jm.marketplace.service.advertisement.AdvertisementService;
 import org.springframework.beans.factory.annotation.Autowired;

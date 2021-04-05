@@ -55,27 +55,15 @@
         }
 
         @-o-keyframes shake {
-            0%, 100% {
-                -o-transform: translateX(0);
-            }
-            10%, 30%, 50%, 70%, 90% {
-                -o-transform: translateX(-10px);
-            }
-            20%, 40%, 60%, 80% {
-                -o-transform: translateX(10px);
-            }
+            0%, 100% {-o-transform: translateX(0);}
+            10%, 30%, 50%, 70%, 90% {-o-transform: translateX(-10px);}
+            20%, 40%, 60%, 80% {-o-transform: translateX(10px);}
         }
 
         @keyframes shake {
-            0%, 100% {
-                transform: translateX(0);
-            }
-            10%, 30%, 50%, 70%, 90% {
-                transform: translateX(-10px);
-            }
-            20%, 40%, 60%, 80% {
-                transform: translateX(10px);
-            }
+            0%, 100% {transform: translateX(0);}
+            10%, 30%, 50%, 70%, 90% {transform: translateX(-10px);}
+            20%, 40%, 60%, 80% {transform: translateX(10px);}
         }
 
         .shake {
@@ -85,7 +73,7 @@
             animation-name: shake;
         }
 
-        .login .modal-dialog {
+        .login .modal-dialog{
             width: 350px;
         }
 
@@ -132,9 +120,9 @@
 </head>
 <body>
 
-<nav th:fragment="navbar" class="navbar navbar-expand-lg navbar-light">
+<nav th:fragment="navbar" class="navbar navbar-expand-lg" style="background: #f1f1f1">
     <div class="container">
-        <a class="navbar-brand text-white" href="#">Marketplace</a>
+        <a class="navbar-brand" style="color: #21252c" href="/">Marketplace</a>
         <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
                 aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
@@ -177,33 +165,34 @@
             </ul>
             <ul class="navbar-nav ml-auto">
                 <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle btn-group dropleft" href="#" id="navbarDropdown2" role="button"
+                    <a sec:authorize="isAuthenticated()" href="/profile/messenger" class="nav-link btn-group">
+                        <img style="max-height: 25px; max-width: 25px" src="https://img.icons8.com/doodle/48/4a90e2/messaging-.png"/>
+                    </a>
+                </li>
+                <li class="nav-item dropdown" >
+                    <a sec:authorize="isAuthenticated()" href="#" class="nav-link btn-group" style="color: #a2a1a1; font-weight: 400">
+                         Мои объявления
+                    </a>
+                </li>
+                <li class="nav-item dropdown">
+                    <a sec:authorize="!isAuthenticated()" class="nav-link dropdown-toggle btn-group dropleft" href="#" id="navbarDropdown2" role="button"
+                           data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            Вход и регистрация
+                    </a>
+                    <a sec:authorize="isAuthenticated()" class="nav-link dropdown-toggle btn-group dropleft" href="#" id="navbarDropdown2" role="button"
                        data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                        Profile
+                        Профиль
                     </a>
                     <div class="dropdown-menu dropdown-menu-right" aria-labelledby="navbarDropdown2">
-                        <div sec:authorize="isAuthenticated()">
-                             <a class="dropdown-item" href="/user">Profile</a>
-                        </div>
-                        <div sec:authorize="!isAuthenticated()">
-                            <button type="button" class="dropdown-item" data-toggle="modal" data-target="#loginModal">
-                                Авторизоваться
-                            </button>
-                        </div>
-                        <div sec:authorize="!isAuthenticated()">
-                            <button type="button" class="dropdown-item" data-toggle="modal"
-                                    data-target="#modalRegistration">Sing up
-                            </button>
-                        </div>
-                        <div sec:authorize="isAuthenticated()">
-                            <a class="dropdown-item" href="/logout">logout</a>
-                        </div>
+                        <a class="dropdown-item" href="/user">Профиль</a>
+                        <button type="button" class="dropdown-item" data-toggle="modal" data-target="#loginModal">Войти</button>
+                        <button type="button" class="dropdown-item" data-toggle="modal" data-target="#modalRegistration">Регистрация</button>
+                        <a class="dropdown-item" href="/logout">Выйти</a>
                     </div>
                 </li>
             </ul>
             <ul class="navbar-nav">
-                <a class="btn btn-outline-primary btn-sm" th:href="@{/api/v1/goods}" role="button">Разместить
-                    объявление</a>
+                <a class="btn btn-outline-primary btn-sm" th:href="@{/api/v1/goods}" role="button">Разместить объявление</a>
             </ul>
         </div>
     </div>
@@ -216,7 +205,7 @@
     </div>
 </div>
 
-<div class="modal fade login" id="loginModal" role="dialog" th:fragment="loginModal">
+<div class="modal fade login" id="loginModal"  role="dialog" th:fragment="loginModal">
     <div class="modal-dialog login animated">
         <div class="modal-content">
             <div class="modal-header">

@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="fragments/headers::head('User edit')"></head>
+<head>
+      <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0">
+      <title>Spring Boot WebSocket Chat Application</title>
+      <link rel="stylesheet" href="/css/chatPage.css" />
+</head>
+  <body>
+    <noscript>
+      <h2>Sorry! Your browser doesn't support Javascript</h2>
+    </noscript>
+    <nav th:replace="fragments/headers::navbar"></nav>
+
+    <input id="username" type="hidden" th:value="${user.getFirstName() + ' ' + user.getLastName()}">
+    <input id="userID" th:value="${user.getId()}" type="hidden">
+    <div id="chat-page">
+        <div class="chat-container">
+            <button type="submit" class="primary" onclick="buttonBackMessenger()" style="font-size: 30px">&#8668;</button>
+            <div class="chat-header">
+                <p th:text="${recipient.getFirstName() + ' ' + recipient.getLastName()}"></p>
+                <p th:text="${advertisement.getName() + ' • ' + advertisement.getPrice()}"></p>
+            </div>
+            <div class="connecting">
+                Connecting...
+            </div>
+            <ul id="messageArea">
+            </ul>
+            <form id="messageForm" name="messageForm" nameForm="messageForm">
+                <div class="form-group">
+                    <div class="input-group clearfix">
+                        <input type="text" id="message" placeholder="Type a message..." autocomplete="off" class="form-control"/>
+                        <button type="submit" class="primary">Send</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.1.4/sockjs.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
+    <script src="/js/chatPage.js"></script>
+  </body>
+</html>

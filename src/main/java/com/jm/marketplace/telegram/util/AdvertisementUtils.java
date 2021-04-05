@@ -58,7 +58,7 @@ public class AdvertisementUtils {
     }
 
     public String getAdvertisemenTextById(long id) {
-        Advertisement advertisement = advertisementService.findById(id);
+        Advertisement advertisement = advertisementService.findById(id).get();
         StringBuilder sb = new StringBuilder();
         sb.append(advertisement.getName()).append("\n");
         sb.append(advertisement.getPrice()).append("\n");

@@ -1,5 +1,6 @@
 package com.jm.marketplace.telegram.service;
 
+import com.jm.marketplace.model.geoStructure.Point;
 import org.telegram.telegrambots.meta.api.objects.Update;
 
 public interface BotService {
@@ -30,4 +31,6 @@ public interface BotService {
     void next(final String chatId);
 
     String getState(String chatId);
+
+
 }

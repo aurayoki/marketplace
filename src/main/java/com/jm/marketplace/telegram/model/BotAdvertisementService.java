@@ -116,10 +116,10 @@ public  final class BotAdvertisementService {
         advertisement.setName(botAdvertisementDto.getName());
         advertisement.setDescription(botAdvertisementDto.getDescription());
         advertisement.setPrice(botAdvertisementDto.getPrice());
-        advertisement.setUser(userService.findById(1L));
-        advertisement.setGoodsSubcategory(goodsSubcategoryService.findById(botAdvertisementDto.getGoodsSubcategory()));
-        advertisement.setGoodsCategory(goodsCategoryService.findById(botAdvertisementDto.getGoodsSubcategory()));
-        advertisement.setGoodsType(goodsTypeService.findById(botAdvertisementDto.getGoodsSubcategory()));
+        advertisement.setUser(userService.findById(1L).get());
+        advertisement.setGoodsSubcategory(goodsSubcategoryService.findById(botAdvertisementDto.getGoodsSubcategory()).get());
+        advertisement.setGoodsCategory(goodsCategoryService.findById(botAdvertisementDto.getGoodsSubcategory()).get());
+        advertisement.setGoodsType(goodsTypeService.findById(botAdvertisementDto.getGoodsSubcategory()).get());
         advertisement.setActive(true);
         advertisement.setBanned(false);
         advertisement.setExpired(false);

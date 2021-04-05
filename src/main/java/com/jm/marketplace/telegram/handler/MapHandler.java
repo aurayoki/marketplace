@@ -8,6 +8,7 @@ import com.jm.marketplace.telegram.util.AdvertisementUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.methods.BotApiMethod;
+import org.telegram.telegrambots.meta.api.methods.send.SendLocation;
 import org.telegram.telegrambots.meta.api.objects.Update;
 
 import java.io.Serializable;
@@ -33,6 +34,7 @@ public class MapHandler implements Handler{
                 messageBuilder.line("Тут текст");
                 messageBuilder.row();
                 messageBuilder.button("Назад","BACK");
+
                 return messageBuilder.build();
             } else {
                 String chatId = update.getMessage().getChatId().toString();

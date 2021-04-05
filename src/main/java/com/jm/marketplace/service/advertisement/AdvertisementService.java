@@ -14,4 +14,6 @@ public interface AdvertisementService extends ReadWriteService<Advertisement, Lo
     List<Advertisement> findAdvertisementByStatusActive(Boolean field_value);
 
     Page<Advertisement> findAll(Integer page);
+
+    void saveOrUpdateForTelegramBot(Advertisement advertisement);
 }

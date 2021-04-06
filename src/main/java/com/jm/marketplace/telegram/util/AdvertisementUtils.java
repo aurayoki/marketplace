@@ -2,26 +2,28 @@ package com.jm.marketplace.telegram.util;
 
 
 import com.jm.marketplace.model.Advertisement;
+import com.jm.marketplace.model.User;
+import com.jm.marketplace.model.geoStructure.Point;
 import com.jm.marketplace.service.advertisement.AdvertisementService;
+import com.jm.marketplace.util.geo.GeoCoderService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Component
 public class AdvertisementUtils {
     private int ADVERTISEMENTS_IN_PAGE = 3;
     private final AdvertisementService advertisementService;
+    private final GeoCoderService geoCoderService;
 
     @Autowired
-    public AdvertisementUtils(AdvertisementService advertisementService) {
+    public AdvertisementUtils(AdvertisementService advertisementService, GeoCoderService geoCoderService) {
         this.advertisementService = advertisementService;
+        this.geoCoderService = geoCoderService;
     }
 
     public void setAdvertisementInPage(int count) {
@@ -84,6 +86,14 @@ public class AdvertisementUtils {
 
         return sb.toString();
 
+    }
+
+    public Point getInfoLocationByCoordinates(Integer advertisementId) {
+        return geoCoderService.getCoordinatesByAddress(Objects.requireNonNull(advertisementService.findById(advertisementId.longValue())
+                .orElse(null))
+                .getUser()
+                .getCity()
+                .getName());
     }
 
     public int getCountPages() {

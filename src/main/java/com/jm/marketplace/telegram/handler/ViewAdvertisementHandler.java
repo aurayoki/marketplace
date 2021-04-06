@@ -52,7 +52,7 @@ public class ViewAdvertisementHandler implements Handler {
                 botService.showAdvertisement(chatId);
                 messageBuilder.row();
                 messageBuilder.button("Назад", "back");
-                messageBuilder.button("Карта","MAP");
+                messageBuilder.button("Карта","MAP" + " " + currentAdv);
                 messageBuilder.line(advertisementUtils.getAdvertisemenTextById(currentAdv));
                 history.addMessage(update);
                 log.error(botService.getState(chatId));

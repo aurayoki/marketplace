@@ -30,12 +30,13 @@ public class MapHandler implements Handler{
             if(update.hasCallbackQuery()) {
                 String chatId = update.getCallbackQuery().getMessage().getChatId().toString();
                 Integer messageId = update.getCallbackQuery().getMessage().getMessageId();
+                Integer advId = Integer.valueOf(update.getCallbackQuery().getData().split(" ")[1]);
                 EditMessageBuilder messageBuilder = EditMessageBuilder.create(chatId, messageId);
-                messageBuilder.line("Тут текст");
                 messageBuilder.row();
                 messageBuilder.button("Назад","BACK");
 
-                return messageBuilder.build();
+                return messageBuilder.buildLocation(advertisementUtils.getInfoLocationByCoordinates(advId).getLatitude(),
+                                                  advertisementUtils.getInfoLocationByCoordinates(advId).getLongitude());
             } else {
                 String chatId = update.getMessage().getChatId().toString();
                 MessageBuilder messageBuilder = MessageBuilder.create(chatId);
